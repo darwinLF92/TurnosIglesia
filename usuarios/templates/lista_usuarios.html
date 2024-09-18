@@ -1,0 +1,30 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<!-- templates/lista_usuarios.html -->
+<h2>Lista de Usuarios</h2>
+<a href="{% url 'usuarios:crear_usuario' %}"><i class='bx bx-user'></i> Crear Usuario</a></li>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.email }}</td>
+            <td>{{ usuario.groups.first.name }}</td>
+            <td>
+                <a href="{% url 'usuarios:editar_usuario' usuario.id %}">Editar</a>
+                <a href="{% url 'usuarios:inactivar_usuario' usuario.id %}">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Lista de Inscripciones</h2>
+<a href="{% url 'gestion_turnos:crear_inscripcion' %}" class="btn btn-primary">Inscribir Devoto</a>
+<ul>
+    {% for inscripcion in object_list %}
+    <li>{{ inscripcion.devoto.nombre }} - Turno {{ inscripcion.turno.numero_turno }} - {{ inscripcion.fecha_inscripcion }} - {{ inscripcion.turno.procesion }}</li>
+    {% empty %}
+    <li>No hay inscripciones aún.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

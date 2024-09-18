@@ -1,0 +1,11 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Eliminar Procesión</h2>
+<p>¿Estás seguro de que deseas eliminar (desactivar) la procesión "{{ object.nombre }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <!-- Usamos un campo oculto para cambiar el estado a inactivo -->
+    <input type="hidden" name="activo" value="False">
+    <button type="submit">Confirmar Eliminación</button>
+</form>
+{% endblock %}

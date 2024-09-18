@@ -1,0 +1,11 @@
+<!-- inactivar_usuario.html -->
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Inactivar Usuario</h2>
+<form method="post">
+    {% csrf_token %}
+    <p>Estás seguro de que deseas inactivar a "{{ object.username }}"?</p>
+    <input type="hidden" name="is_active" value="False">
+    <button type="submit">Inactivar Usuario</button>
+</form>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Lista de Devotos</h2>
+<a href="{% url 'devotos:crear_devoto' %}" class="btn btn-primary">Agregar Devoto</a>
+<ul>
+    {% for devoto in object_list %}
+    <li>
+        {{ devoto.codigo }} - {{ devoto.nombre }} - {{ devoto.correo }} - {{ devoto.telefono }}
+        <a href="{% url 'devotos:editar_devoto' devoto.pk %}">Editar</a>
+        <a href="{% url 'devotos:eliminar_devoto' devoto.pk %}">Eliminar</a>
+    </li>
+    {% empty %}
+    <li>No hay devotos registrados.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

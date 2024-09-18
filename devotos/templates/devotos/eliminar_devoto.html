@@ -1,0 +1,10 @@
+{% extends 'eliminar/base.html' %}
+{% block content %}
+<h2>Eliminar Devoto</h2>
+<p>¿Estás seguro de que deseas eliminar a {{ object.nombre }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Eliminar" class="btn btn-danger" />
+    <a href="{% url 'devotos:lista_devotos' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

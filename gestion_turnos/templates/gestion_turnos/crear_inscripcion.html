@@ -1,0 +1,38 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<h2>Inscribir Devoto</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Inscribir</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('id_procesion').addEventListener('change', function() {
+        var url = "{% url 'gestion_turnos:ajax_load_turnos' %}";
+        var procesionId = this.value;
+
+        fetch(url + '?procesion_id=' + procesionId)
+            .then(response => response.json())
+            .then(data => {
+                var turnoSelect = document.getElementById("id_turno");
+                turnoSelect.innerHTML = '';  // Vaciar el select
+                data.forEach(function(item) {  // Iterar sobre la respuesta JSON
+                    var option = document.createElement('option');
+                    option.value = item.id;
+                    option.text = "Turno " + item.numero_turno;
+                    turnoSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("AJAX error:", error);
+                alert("Error en la carga de turnos: " + error);
+            });
+    });
+});
+
+    </script>
+    
+{% endblock %}

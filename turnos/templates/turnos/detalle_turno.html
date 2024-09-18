@@ -1,0 +1,19 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Detalles del Turno</h2>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Turno {{ turno.numero_turno }} - {{ turno.procesion.nombre }}</h5>
+        <p class="card-text">Capacidad: {{ turno.capacidad }}</p>
+        <p class="card-text">Valor: Q{{ turno.valor }}</p>
+        <p class="card-text">Referencia: {{ turno.referencia }}</p>
+        <p class="card-text">Marcha Fúnebre: {{ turno.marcha_funebre }}</p>
+        <p>Total de inscritos: {{ inscritos_count }}</p>
+        <p>Turnos disponibles: {{ turnos_disponibles }}</p>
+        
+
+        <a href="{% url 'turnos:editar_turno' turno.id %}" class="btn btn-primary">Editar</a>
+        <a href="{% url 'turnos:eliminar_turno' turno.id %}" class="btn btn-danger">Eliminar</a>
+    </div>
+</div>
+{% endblock %}

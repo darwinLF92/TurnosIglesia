@@ -1,0 +1,9 @@
+{% extends 'apliacacion/base.html' %}
+{% block content %}
+    <h2>Inactivar Rol</h2>
+    <form method="post">
+        {% csrf_token %}
+        ¿Estás seguro que deseas inactivar "{{ object.name }}"?
+        <button type="submit">Confirmar</button>
+    </form>
+{% endblock %}

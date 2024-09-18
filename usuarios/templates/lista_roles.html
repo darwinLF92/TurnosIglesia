@@ -1,0 +1,10 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+    <h2>Lista de Roles</h2>
+    <a href="{% url 'usuarios:crear_rol' %}">Crear Rol</a>
+    <ul>
+        {% for rol in roles %}
+            <li>{{ rol.name }} - <a href="{% url 'usuarios:editar_rol' rol.id %}">Editar</a> - <a href="{% url 'usuarios:inactivar_rol' rol.id %}">Inactivar</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

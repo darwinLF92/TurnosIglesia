@@ -1,0 +1,15 @@
+<!-- lista_procesiones.html -->
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+    <h2>Lista de Procesiones</h2>
+    <a href="{% url 'procesiones:crear_procesion' %}">Crear Procesión</a>
+    <ul>
+        {% for procesion in procesiones %}
+            <li>
+                {{ procesion.nombre }} - 
+                <a href="{% url 'procesiones:editar_procesion' procesion.id %}">Editar</a> |
+                <a href="{% url 'procesiones:eliminar_procesion' procesion.id %}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

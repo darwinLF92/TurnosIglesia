@@ -1,0 +1,24 @@
+# .gitignore
+
+# Python
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+*.sqlite3
+/media
+/staticfiles
+/static
+
+# Virtual environments
+venv/
+env/

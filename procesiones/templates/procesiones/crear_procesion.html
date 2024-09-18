@@ -1,0 +1,10 @@
+<!-- crear_procesion.html & editar_procesion.html & eliminar_procesion.html -->
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+    <h2>{{ view.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+{% endblock %}

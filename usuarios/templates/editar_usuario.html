@@ -1,0 +1,10 @@
+<!-- editar_usuario.html -->
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<h2>Editar Usuario</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Actualizar</button>
+</form>
+{% endblock %}

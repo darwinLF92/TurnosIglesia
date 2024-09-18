@@ -1,0 +1,56 @@
+{% extends 'aplicacion/base.html' %}
+{% block content %}
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);  /* Ajustado para mostrar 4 columnas */
+        grid-gap: 20px;
+        margin: 20px;
+    }
+    .card {
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    .card:hover {
+        transform: scale(1.05);
+        background-color: #0056b3;
+        color: aliceblue;
+    }
+</style>
+
+<h2>Lista de Turnos</h2>
+<a href="{% url 'turnos:crear_turno' %}" class="btn btn-primary">Crear Turno</a>
+
+<form method="get" action="{% url 'turnos:lista_turnos' %}">
+    <select name="procesion_id" onchange="this.form.submit()">
+        <option value="">Seleccione una Procesión</option>
+        {% for procesion in procesiones %}
+        <option value="{{ procesion.id }}" {% if request.GET.procesion_id == procesion.id|stringformat:"s" %}selected{% endif %}>
+            {{ procesion.nombre }}
+        </option>
+        {% endfor %}
+    </select>
+</form>
+
+<div class="grid-container">
+    {% for turno in turnos %}
+    <a href="{% url 'turnos:detalle_turno' turno.id %}" class="card">
+        <div>
+            Turno {{ turno.numero_turno }}
+        </div>
+    </a>
+    {% empty %}
+    <div>No hay turnos disponibles.</div>
+    {% endfor %}
+</div>
+
+{% endblock %}
