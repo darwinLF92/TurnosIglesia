@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anular Inscripción</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            max-width: 450px;
+            width: 100%;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            text-align: center;
+        }
+        .btn {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 class="mb-3 text-danger">Anular Inscripción</h2>
+        <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
+        <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }}</p>
+        <p class="text-muted">¿Está seguro de que desea anular esta inscripción?</p>
+
+        <form method="post" id="form-anular">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger mb-2">🗑 Anular</button>
+            <a href="#" onclick="window.parent.postMessage('closeModal', '*'); return false;" class="btn btn-secondary">❌ Cancelar</a>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("form-anular").onsubmit = function(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción anulará la inscripción de forma permanente.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sí, anular inscripción",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(this.action, {
+                        method: "POST",
+                        body: new FormData(this),
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.success) {
+                              Swal.fire({
+                                  icon: "success",
+                                  title: "¡Éxito!",
+                                  text: "La inscripción ha sido anulada correctamente.",
+                                  confirmButtonColor: "#3085d6"
+                              }).then(() => {
+                                  window.parent.postMessage('closeModal', '*'); 
+                              });
+                          } else {
+                              Swal.fire({
+                                  icon: "error",
+                                  title: "Error",
+                                  text: data.error,
+                                  confirmButtonColor: "#d33"
+                              });
+                          }
+                      });
+                }
+            });
+        };
+    </script>
+
+</body>
+</html>

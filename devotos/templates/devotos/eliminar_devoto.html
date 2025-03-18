@@ -1,10 +1,122 @@
-{% extends 'eliminar/base.html' %}
 {% block content %}
-<h2>Eliminar Devoto</h2>
-<p>¿Estás seguro de que deseas eliminar a {{ object.nombre }}?</p>
-<form method="post">
-    {% csrf_token %}
-    <input type="submit" value="Eliminar" class="btn btn-danger" />
-    <a href="{% url 'devotos:lista_devotos' %}" class="btn btn-secondary">Cancelar</a>
-</form>
+
+<style>
+    /* Estilo macOS */
+    .form-container {
+        max-width: 450px;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .form-container h2 {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .form-container p {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    /* Botones estilo macOS */
+    .btn-danger, .btn-secondary {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .btn-danger {
+        background: #ff3b30;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #d70015;
+        transform: scale(1.05);
+    }
+
+    .btn-secondary {
+        background: #e5e5ea;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #d1d1d6;
+        transform: scale(1.05);
+    }
+
+</style>
+
+<div class="form-container">
+    <h2>Eliminar Devoto</h2>
+    <p>¿Estás seguro de que deseas eliminar a <strong>{{ object.nombre }}</strong>?</p>
+
+    <div class="btn-container">
+        <button id="confirmDelete" class="btn-danger">Eliminar Devoto</button>
+        <button id="closeModal" class="btn-secondary">Cancelar</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById("confirmDelete").addEventListener("click", function() {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ff3b30",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(window.location.href, { method: "POST", body: new FormData() })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Eliminado",
+                            text: "El devoto ha sido eliminado correctamente",
+                        }).then(() => {
+                            window.parent.postMessage('closeModal', '*'); // Cerrar modal
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "No se pudo eliminar el devoto",
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    document.getElementById("closeModal").addEventListener("click", function() {
+        window.parent.postMessage('closeModal', '*'); // Cerrar modal correctamente
+    });
+
+</script>
+
 {% endblock %}

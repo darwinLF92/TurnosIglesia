@@ -1,0 +1,34 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Imágenes de Presentación</h2>
+    <a href="{% url 'aplicacion:imagen_presentacion_create' %}" class="btn btn-primary mb-3">Nueva Imagen</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Título</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for img in imagenes %}
+            <tr>
+                <td><img src="{{ img.imagen.url }}" width="100" height="80"></td>
+                <td>{{ img.titulo }}</td>
+                <td>{{ img.activo|yesno:"Sí,No" }}</td>
+                <td>
+                    <a href="{% url 'aplicacion:imagen_presentacion_edit' img.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'aplicacion:imagen_presentacion_delete' img.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No hay imágenes registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

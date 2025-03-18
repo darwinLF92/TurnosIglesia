@@ -1,10 +1,137 @@
 {% extends 'aplicacion/base.html' %}
+
 {% block content %}
-    <h2>Lista de Roles</h2>
-    <a href="{% url 'usuarios:crear_rol' %}">Crear Rol</a>
-    <ul>
-        {% for rol in roles %}
-            <li>{{ rol.name }} - <a href="{% url 'usuarios:editar_rol' rol.id %}">Editar</a> - <a href="{% url 'usuarios:inactivar_rol' rol.id %}">Inactivar</a></li>
-        {% endfor %}
-    </ul>
+<div class="container mt-5">
+    <!-- Título -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary">Lista de Roles</h2>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <button id="crearRol" class="btn btn-custom">
+            Crear Rol <i class='bx bx-user-plus'></i>
+        </button>
+    </div>
+
+    <!-- Tabla de Roles -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre del Rol</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rol in roles %}
+                <tr>
+                    <td>{{ rol.name }}</td>
+                    <td>
+                        <a href="#" class="editar-btn" title="Editar" data-rolid="{{ rol.id }}"><i class="fas fa-edit"></i></a>
+                        <a href="#" class="eliminar-btn" title="Inactivar" data-rolid="{{ rol.id }}"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">No hay roles registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#crearRol").click(function () {
+            var formularioSrc = "{% url 'usuarios:crear_rol' %}";
+
+            // SweetAlert para mostrar el modal
+            Swal.fire({
+                title: 'Crear Rol',
+                html: `<iframe src="${formularioSrc}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    container: 'swal-container',
+                    popup: 'swal-popup my-custom-modal-class',
+                },
+                didClose: () => {
+                    // Recargar la página completa después de cerrar la ventana flotante
+                    location.reload();
+                },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') {
+                    Swal.close(); // Cerrar el modal de SweetAlert
+                }
+            });
+
+            return false;
+        });
+
+        $(".editar-btn").click(function() {
+        var rolid = $(this).data('rolid');
+        var formulario = "{% url 'usuarios:editar_rol' 0 %}".replace('0', rolid);
+
+        // SweetAlert para mostrar el modal
+        Swal.fire({
+            title: 'Editar Rol',
+            html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                container: 'swal-container',
+                popup: 'swal-popup my-custom-modal-class',
+            },
+            didClose: () => {
+                // Recargar la página después de cerrar el modal
+                location.reload();
+            },
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data === 'closeModal') {
+                Swal.close(); // Cerrar el modal de SweetAlert
+            }
+        });
+
+        return false;
+    });
+
+    // Al hacer clic en "Eliminar"
+    $(".eliminar-btn").click(function() {
+    var rolid = $(this).data('rolid');
+    var formulario = "{% url 'usuarios:inactivar_rol' 0 %}".replace('0', rolid);
+
+    // SweetAlert para mostrar el modal
+    Swal.fire({
+        title: 'Eliminar Rol',
+        html: `<iframe src="${formulario}" width="100%" height="400px" frameborder="0" style="max-width: 100%;"></iframe>`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        width: '600px', // Aumenta el ancho del SweetAlert
+        customClass: {
+            container: 'swal-container',
+            popup: 'swal-popup my-custom-modal-class',
+        },
+        didClose: () => {
+            location.reload();
+        },
+    });
+
+    // Escuchar el mensaje del iframe para cerrar el modal
+    window.addEventListener('message', function(event) {
+        if (event.data === 'closeModal') {
+            Swal.close();  // Cerrar el modal de SweetAlert
+        }
+    });
+
+    return false;
+    });
+
+    });
+</script>
 {% endblock %}

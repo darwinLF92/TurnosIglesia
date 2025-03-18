@@ -1,19 +1,75 @@
-{% extends 'aplicacion/base.html' %}
 {% block content %}
-<h2>Detalles del Turno</h2>
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Turno {{ turno.numero_turno }} - {{ turno.procesion.nombre }}</h5>
-        <p class="card-text">Capacidad: {{ turno.capacidad }}</p>
-        <p class="card-text">Valor: Q{{ turno.valor }}</p>
-        <p class="card-text">Referencia: {{ turno.referencia }}</p>
-        <p class="card-text">Marcha Fúnebre: {{ turno.marcha_funebre }}</p>
-        <p>Total de inscritos: {{ inscritos_count }}</p>
-        <p>Turnos disponibles: {{ turnos_disponibles }}</p>
-        
 
-        <a href="{% url 'turnos:editar_turno' turno.id %}" class="btn btn-primary">Editar</a>
-        <a href="{% url 'turnos:eliminar_turno' turno.id %}" class="btn btn-danger">Eliminar</a>
+<style>
+    .detalle-container {
+        max-width: 500px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .detalle-container h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .detalle-item {
+        margin-bottom: 10px;
+        font-size: 22px;
+        color: #555;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .editar-btn, .btn-danger {
+        padding: 13px 18px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+
+    .editar-btn {
+        background: #8400ff;
+    }
+
+    .editar-btn:hover {
+        background: #0056b3;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background: #bd2130;
+    }
+</style>
+
+<div class="detalle-container">
+
+    <div class="detalle-item"><strong>Turno:</strong> {{ turno.numero_turno }} - {{ turno.procesion.nombre }}</div>
+    <div class="detalle-item"><strong>Capacidad:</strong> {{ turno.capacidad }}</div>
+    <div class="detalle-item"><strong>Valor:</strong> Q{{ turno.valor }}</div>
+    <div class="detalle-item"><strong>Referencia:</strong> {{ turno.referencia }}</div>
+    <div class="detalle-item"><strong>Marcha Fúnebre:</strong> {{ turno.marcha_funebre }}</div>
+    <div class="detalle-item"><strong>Total de inscritos:</strong> {{ inscritos_count }}</div>
+    <div class="detalle-item"><strong>Turnos disponibles:</strong> {{ turnos_disponibles }}</div>
+
+    <div class="btn-container">
+
     </div>
 </div>
+
+
 {% endblock %}

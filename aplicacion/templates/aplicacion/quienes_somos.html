@@ -1,0 +1,123 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-gap: 15px;
+    }
+
+    .zoom-img {
+        overflow: hidden;
+        position: relative;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .zoom-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .zoom-img:hover img {
+        transform: scale(1.1);
+    }
+
+    .modal-img-bg {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .modal-img-bg.show {
+        display: flex;
+    }
+
+    .modal-img-bg img {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-img-bg .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #ffffff;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1100;
+    }
+
+    .modal-img-bg .close-modal:hover {
+        color: #ccc;
+    }
+
+
+</style>
+
+<div class="container mt-6">
+
+    {% if info %}
+        <div class="mt-4">
+            <h2>{{ info.titulo }}</h2>
+            <p style="text-align: justify;">{{ info.contenido|linebreaks }}</p>
+        </div>
+
+        {% if info.imagenes.all %}
+            <div class="image-grid mt-4">
+                {% for img in info.imagenes.all %}
+                    <div class="zoom-img" onclick="mostrarModal('{{ img.imagen.url }}')">
+                        <img src="{{ img.imagen.url }}" alt="Imagen relacionada">
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Modal de imagen -->
+<div id="modalImagen" class="modal-img-bg">
+    <span class="close-modal" onclick="cerrarModal()">&times;</span>
+    <img id="modalImg" src="">
+</div>
+
+<script>
+    function mostrarModal(src) {
+        const modal = document.getElementById("modalImagen");
+        const img = document.getElementById("modalImg");
+        img.src = src;
+        modal.classList.add("show");
+    }
+
+    function cerrarModal() {
+        document.getElementById("modalImagen").classList.remove("show");
+    }
+
+    // Cerrar modal si se hace clic fuera de la imagen
+    window.onclick = function (event) {
+        const modal = document.getElementById("modalImagen");
+        const modalImg = document.getElementById("modalImg");
+        if (event.target === modal) {
+            cerrarModal();
+        }
+    }
+</script>
+
+{% endblock %}

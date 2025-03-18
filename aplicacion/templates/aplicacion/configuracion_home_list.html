@@ -1,0 +1,35 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<h1>Configuraciones del Home</h1>
+<a href="{% url 'aplicacion:configuracion_home_create' %}" class="btn btn-primary mb-3">Nueva Configuración</a>
+<a href="{% url 'aplicacion:crear_informacion' %}" class="btn btn-primary mb-3">informacion</a>
+<a href="{% url 'aplicacion:informacion_listar' %}" class="btn btn-primary">Información</a>
+<a href="{% url 'aplicacion:imagen_presentacion_list' %}" class="btn btn-primary">Presentación</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sección</th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Activo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for configuracion in configuraciones %}
+        <tr>
+            <td>{{ configuracion.get_seccion_display }}</td>
+            <td>{{ configuracion.titulo }}</td>
+            <td>{{ configuracion.descripcion }}</td>
+            <td>{{ configuracion.activo|yesno:"Sí,No" }}</td>
+            <td>
+                <a href="{% url 'aplicacion:configuracion_home_edit' configuracion.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'aplicacion:configuracion_home_delete' configuracion.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

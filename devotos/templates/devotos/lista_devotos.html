@@ -1,16 +1,267 @@
 {% extends 'aplicacion/base.html' %}
 {% block content %}
-<h2>Lista de Devotos</h2>
-<a href="{% url 'devotos:crear_devoto' %}" class="btn btn-primary">Agregar Devoto</a>
-<ul>
-    {% for devoto in object_list %}
-    <li>
-        {{ devoto.codigo }} - {{ devoto.nombre }} - {{ devoto.correo }} - {{ devoto.telefono }}
-        <a href="{% url 'devotos:editar_devoto' devoto.pk %}">Editar</a>
-        <a href="{% url 'devotos:eliminar_devoto' devoto.pk %}">Eliminar</a>
-    </li>
-    {% empty %}
-    <li>No hay devotos registrados.</li>
-    {% endfor %}
-</ul>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Estilo general con inspiración en macOS */
+
+    .table-container {
+        width: 100%;
+        margin: auto;
+        padding: 20px;
+
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .search-container {
+        margin-bottom: 15px;
+        text-align: right;
+    }
+
+    .search-container input {
+        width: 300px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-shadow: inset 0 1px 3px rgba(17, 17, 22, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: fixed;
+        margin-top: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .table th, .table td {
+        padding: 14px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        white-space: nowrap; /* Evita que se desborde el contenido */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .table th {
+        background: linear-gradient(135deg, #154980, #152535);
+        color: aliceblue;
+        text-align: center;
+    }
+
+
+    .btn-container {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007aff, #0056b3);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+        transform: scale(1.05);
+    }
+
+    .btn-edit, .btn-delete {
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    .btn-edit {
+        background: #504f4c;
+        color: rgb(247, 243, 243);
+    }
+
+    .btn-edit:hover {
+        background: #e6b800;
+        transform: scale(1.05);
+    }
+
+    .btn-delete {
+        background: #92130c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #d32f2f;
+        transform: scale(1.05);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        padding: 10px 14px;
+        margin: 0 5px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #007aff;
+        transition: all 0.3s;
+    }
+
+    .pagination a:hover {
+        background: #007aff;
+        color: white;
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="table-container">
+    <h2>Lista de Devotos</h2>
+
+    <button id="crearDevoto" class="btn-primary">
+        Crear Devoto <i class='bx bx-plus'></i>
+    </button>
+    
+    <div class="search-container">
+        <form method="get">
+            <input type="text" name="q" placeholder="Buscar por Código, CUI/NIT o Nombre" value="{{ request.GET.q }}">
+            <button type="submit" class="btn-primary">Buscar</button>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>Código</th>
+                <th>CUI / NIT</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for devoto in object_list %}
+            <tr>
+                <td>{{ devoto.codigo }}</td>
+                <td>{{ devoto.cui_o_nit }}</td>
+                <td>{{ devoto.nombre }}</td>
+                <td>{{ devoto.correo }}</td>
+                <td>{{ devoto.telefono }}</td>
+                <td class="btn-container">
+                    <a href="#" class="btn-edit" title="Editar" data-devotoid="{{ devoto.id }}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="#" class="btn-delete" title="Eliminar" data-devotoid="{{ devoto.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No hay devotos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $("#crearDevoto").click(function () {
+            var formularioSrc = "{% url 'devotos:crear_devoto' %}";
+
+            Swal.fire({
+                title: 'Registro Nuevo Devoto',
+                html: `<iframe src="${formularioSrc}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+
+        $(".btn-edit").click(function() {
+            var devotoID = $(this).data("devotoid");
+            if (!devotoID) { console.error("Error: ID del Devoto no definido."); return; }
+            var formulario = "{% url 'devotos:editar_devoto' 0 %}".replace("0", devotoID);
+
+            Swal.fire({
+                title: 'Editar Información',
+                html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+
+        $(".btn-delete").click(function() {
+            var devotoID = $(this).data("devotoid");
+            if (!devotoID) { console.error("Error: ID del Devoto no definido."); return; }
+            var formulario = "{% url 'devotos:eliminar_devoto' 0 %}".replace("0", devotoID);
+
+            Swal.fire({
+                title: 'Eliminar Devoto',
+                html: `<iframe src="${formulario}" width="100%" height="400px" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                width: '600px',
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function(event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+    });
+</script>
+
+
 {% endblock %}

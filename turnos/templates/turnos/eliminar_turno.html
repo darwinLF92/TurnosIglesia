@@ -1,10 +1,79 @@
-{% extends 'aplicacion/base.html' %}
+
 {% block content %}
-<h2>Eliminar Turno</h2>
-<p>¿Estás seguro de que deseas eliminar el turno "{{ turno }}"?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Eliminar Turno</button>
-    <a href="{% url 'turnos:detalle_turno' turno.id %}" class="btn btn-secondary">Cancelar</a>
-</form>
+
+<style>
+    .form-container {
+        max-width: 500px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .form-container h2 {
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+
+    .form-container p {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-danger, .btn-secondary {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+</style>
+
+<div class="form-container">
+    <h2>Eliminar Turno</h2>
+    <p>¿Estás seguro de que deseas eliminar el turno "{{ turno }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="btn-container">
+            <button type="submit" class="btn-danger">Eliminar Turno</button>
+            <button type="button" class="btn-secondary" id="closeModal">Cancelar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("closeModal").addEventListener("click", function() {
+        window.parent.postMessage('closeModal', '*');
+    });
+</script>
+
 {% endblock %}

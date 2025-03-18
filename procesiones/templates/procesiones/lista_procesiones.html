@@ -1,15 +1,151 @@
-<!-- lista_procesiones.html -->
 {% extends 'aplicacion/base.html' %}
 {% block content %}
+<div class="container mt-5">
     <h2>Lista de Procesiones</h2>
-    <a href="{% url 'procesiones:crear_procesion' %}">Crear Procesión</a>
-    <ul>
-        {% for procesion in procesiones %}
-            <li>
-                {{ procesion.nombre }} - 
-                <a href="{% url 'procesiones:editar_procesion' procesion.id %}">Editar</a> |
-                <a href="{% url 'procesiones:eliminar_procesion' procesion.id %}">Eliminar</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <div class="d-flex justify-content-between mb-3">
+        <button id="crearProcesion" class="btn btn-custom">
+            Crear Procesión <i class='bx bx-plus'></i>
+        </button>
+        <!-- Input de búsqueda -->
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="Buscar procesión...">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre Procesión</th>
+                    <th>Fecha Recorrido</th>
+                    <th>Descripción</th>
+                    <th>Total de Turnos</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="procesionTable">
+                {% for procesion in procesiones %}
+                <tr class="procesion-row">
+                    <td class="procesion-nombre">{{ procesion.nombre }}</td>
+                    <td>{{ procesion.fecha }}</td>
+                    <td class="procesion-descripcion">{{ procesion.descripcion }}</td>
+                    <td>{{ procesion.nombre }}</td>
+                    <td>
+                        <a href="#" class="editar-btn" title="Editar" data-procesionid="{{ procesion.id }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        
+                        <a href="#" class="eliminar-btn" title="Eliminar" data-procesionid="{{ procesion.id }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay procesiones registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#searchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $(".procesion-row").filter(function() {
+                $(this).toggle($(this).find(".procesion-nombre").text().toLowerCase().indexOf(value) > -1 || 
+                               $(this).find(".procesion-descripcion").text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        $("#crearProcesion").click(function () {
+            var formularioSrc = "{% url 'procesiones:crear_procesion' %}";
+
+            Swal.fire({
+                title: 'Crear Procesión',
+                html: `<iframe src="${formularioSrc}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+
+        $(".editar-btn").click(function() {
+            var procesionID = $(this).data("procesionid");
+            if (!procesionID) { console.error("Error: procesionID no definido."); return; }
+            var formulario = "{% url 'procesiones:editar_procesion' 0 %}".replace("0", procesionID);
+
+            Swal.fire({
+                title: 'Editar Procesión',
+                html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+
+        $(".eliminar-btn").click(function() {
+            var procesionID = $(this).data("procesionid");
+            if (!procesionID) { console.error("Error: procesionID no definido."); return; }
+            var formulario = "{% url 'procesiones:eliminar_procesion' 0 %}".replace("0", procesionID);
+
+            Swal.fire({
+                title: 'Eliminar Procesión',
+                html: `<iframe src="${formulario}" width="100%" height="400px" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                width: '600px',
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function(event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+    });
+</script>
+
+<style>
+    .btn-custom {
+        background-color: #343a40;
+        color: #fff;
+        border-color: #343a40;
+    }
+
+    #searchInput {
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        font-size: 16px;
+        background: #f8f9fa;
+        transition: all 0.3s ease-in-out;
+    }
+
+    #searchInput:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+    }
+</style>
 {% endblock %}

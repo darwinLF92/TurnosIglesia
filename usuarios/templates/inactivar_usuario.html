@@ -1,11 +1,107 @@
-<!-- inactivar_usuario.html -->
-{% extends 'aplicacion/base.html' %}
-{% block content %}
-<h2>Inactivar Usuario</h2>
-<form method="post">
-    {% csrf_token %}
-    <p>Estás seguro de que deseas inactivar a "{{ object.username }}"?</p>
-    <input type="hidden" name="is_active" value="False">
-    <button type="submit">Inactivar Usuario</button>
-</form>
-{% endblock %}
+{% load static %}
+<head>
+  <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <title>Confirmar Eliminación de Usuario</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #E4E9F7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden; /* Evita scroll dentro del iframe */
+    }
+
+    .container {
+      background-color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      max-width: none; /* Elimina la restricción de ancho máximo */
+      margin: 0 auto; /* Centra el contenedor */
+    }
+
+    .confirm-title {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px; /* Aumenta el tamaño del título */
+    }
+
+    .confirm-button {
+      margin-top: 30px; /* Añadir más espacio superior al botón */
+    }
+
+    button {
+      background-color: #970e09; /* Color del botón más suave */
+      color: #fff;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease; /* Transición suave para hover */
+    }
+
+    button:hover {
+      background-color: #c9302c; /* Cambiar color en hover */
+    }
+
+    .container hr {
+      border: 0;
+      height: 1px;
+      background: #ddd;
+      margin: 20px 0; /* Añadir espacio antes y después de la línea */
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1 class="confirm-title">¿Estás seguro de que deseas eliminar al usuario <strong>{{ user.username }}</strong>?</h1>
+
+    <hr> <!-- Línea divisoria para separar el contenido -->
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="confirm-button">
+        <button type="submit">Eliminar</button>
+      </div>
+    </form>
+  </div>
+
+  {% if success %}
+  <script>
+      Swal.fire({
+          icon: 'success',
+          title: '¡Usuario eliminado!',
+          text: '{{ message }}',
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.parent.postMessage('closeModal', '*');
+          }
+      });
+  </script>
+  {% elif error_message %}
+  <script>
+      Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: '{{ error_message }}',
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.parent.postMessage('closeModal', '*');
+          }
+      });
+  </script>
+  {% endif %}
+
+</body>

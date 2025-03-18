@@ -1,11 +1,93 @@
-{% extends 'aplicacion/base.html' %}
+
 {% block content %}
-<h2>Eliminar Procesión</h2>
-<p>¿Estás seguro de que deseas eliminar (desactivar) la procesión "{{ object.nombre }}"?</p>
-<form method="post">
-    {% csrf_token %}
-    <!-- Usamos un campo oculto para cambiar el estado a inactivo -->
-    <input type="hidden" name="activo" value="False">
-    <button type="submit">Confirmar Eliminación</button>
-</form>
+<div class="container-fluid p-4">
+    <div class="card shadow-lg border-0 rounded">
+        <div class="card-header bg-gradient-danger text-white text-center py-3">
+          
+        </div>
+        <div class="card-body text-center">
+            <p class="text-danger fw-bold">
+                ¿Estás seguro de que deseas eliminar (desactivar) la procesión <strong>"{{ procesion.nombre }}"</strong>?
+            </p>
+
+            <form method="post" id="delete-form">
+                {% csrf_token %}
+                <input type="hidden" name="activo" value="False">
+                <button type="submit" class="btn btn-danger btn-lg shadow">
+                    <i class="fas fa-trash"></i> Confirmar Eliminación
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById("delete-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción desactivará la procesión y no podrá ser utilizada.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("", {
+                    method: "POST",
+                    body: new FormData(event.target),
+                })
+                .then(response => response.text())
+                .then(data => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Procesión Eliminada",
+                        text: "La procesión ha sido desactivada correctamente.",
+                        confirmButtonColor: "#3085d6"
+                    }).then(() => {
+                        window.parent.postMessage('closeModal', '*'); // Cierra el modal
+                    });
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+</script>
+
+<style>
+    /* Mejoras visuales */
+    .container-fluid {
+        max-width: 500px;
+    }
+
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Fondo degradado del encabezado */
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545, #8b0000);
+    }
+
+    /* Estilo del botón */
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        font-size: 16px;
+        padding: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-danger:hover {
+        background-color: #8b0000;
+        transform: scale(1.05);
+    }
+</style>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form_info.as_p }}
+
+    <label for="id_imagenes">Imágenes:</label>
+    <input type="file" name="imagenes" multiple accept="image/png, image/jpeg" class="form-control mb-3">
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+{% endblock %}

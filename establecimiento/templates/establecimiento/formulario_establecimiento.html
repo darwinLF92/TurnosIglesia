@@ -1,0 +1,72 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<h2>{% if object %}Editar{% else %}Crear{% endif %} Establecimiento</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    
+    <div class="form-group">
+        {{ form.nombre.label_tag }}
+        {{ form.nombre }}
+    </div>
+
+    <div class="form-group">
+        {{ form.hermandad.label_tag }}
+        {{ form.hermandad }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.direccion.label_tag }}
+        {{ form.direccion }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.telefono.label_tag }}
+        {{ form.telefono }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.sitio_web.label_tag }}
+        {{ form.sitio_web }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.logo.label_tag }}
+        {{ form.logo }}
+        {% if form.logo.help_text %}
+        <div>
+            {{ form.logo.help_text|safe }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="form-group">
+        {{ form.estado.label_tag }}
+        {{ form.estado }}
+    </div>
+    
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{% url 'establecimiento:lista_establecimientos' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<style>
+    .btn-info {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.btn-info:hover {
+    background-color: #138496;
+}
+
+</style>
+{% endblock %}

@@ -1,21 +1,155 @@
 {% extends 'aplicacion/base.html' %}
 
+{% block carrusel_fullscreen %}
+<div class="carousel-wrapper">
+    <div id="carouselExample" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
+        <div class="carousel-inner">
+            {% for img in imagenes_presentacion %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="carousel-background" style="background-image: url('{{ img.imagen.url|urlencode }}');"></div>
+                <img src="{{ img.imagen.url|urlencode }}" class="main-carousel-image" alt="{{ img.titulo }}">
+                {% if img.titulo %}
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>{{ img.titulo }}</h5>
+                    </div>
+                {% endif %}
+            </div>
+            
+            
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<div class="full-container">
-    <h1>Iglesia Nuestra Señora de Guadalupe</h1>
+<!-- Sección de tarjetas -->
+<div class="row row-cols-1 row-cols-md-3 g-4 seccion-tarjetas">
+    <!-- Tarjeta 1 -->
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">¿Quiénes somos?</h5>
+                <p class="card-text">Información sobre nuestra iglesia y comunidad.</p>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{% url 'aplicacion:quienes_somos' %}" class="btn btn-primary">Ver más</a>
+            </div>
+        </div>
+    </div>
+    <!-- Tarjetas 2 a 6 (mismo formato) -->
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Historia de nuestras imágenes</h5>
+                <p class="card-text">Descubre la historia detrás de nuestras imágenes religiosas.</p>
+            </div>
+            <div class="card-footer text-center"></div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Multimedia</h5>
+                <p class="card-text">Pentagrama Fúnebre Guatemalteco.</p>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{% url 'aplicacion:lista_marchas' %}" class="btn btn-primary">Explorar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Foteteca y Video</h5>
+                <p class="card-text">Documentacion fotográfica y videoclips de nuestras actividades.</p>
+            </div>
+            <div class="card-footer text-center"></div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Recorridos Procesionales</h5>
+                <p class="card-text">Imágenes e información de los recorridos procesionales.</p>
+            </div>
+            <div class="card-footer text-center"></div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Oraciones</h5>
+                <p class="card-text">Imágenes y contenido de oraciones importantes.</p>
+            </div>
+            <div class="card-footer text-center"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-</div>    
+{% block extra_js %}
+<script>
+    function mostrarInformacion() {
+        Swal.fire({
+            title: "¿Quiénes somos?",
+            text: "Información sobre nuestra iglesia y comunidad. Nuestra misión es promover la fe y la unión espiritual.",
+            icon: "info",
+            confirmButtonText: "Cerrar"
+        });
+    }
+</script>
+{% endblock %}
 
-
+{% block extra_css %}
 <style>
-    .full-container {
-    height: 100%;
+carousel-wrapper {
     width: 100%;
-    margin-top: 10px;
+    height: 600px; /* ajustable: puedes usar 100vh también */
     position: relative;
     overflow: hidden;
-    background-color: rgba(147, 140, 140, 0.219);
-    backdrop-filter: blur(10px);
+    background: #000;
+}
+
+.carousel-inner {
+    height: 100%;
+}
+
+.carousel-item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.carousel-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-size: cover;
+    filter: blur(20px) brightness(0.7);
+    transform: scale(1.1); /* para evitar bordes negros al hacer blur */
+    z-index: 1;
+}
+
+.main-carousel-image {
+    position: relative;
+    z-index: 2;
+    max-height: 500px;
+    max-width: 70%;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 </style>

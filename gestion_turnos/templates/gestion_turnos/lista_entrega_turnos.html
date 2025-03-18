@@ -1,0 +1,185 @@
+{% extends "aplicacion/base.html" %}
+
+{% block content %}
+<h2 class="text-center">Gestión de Entrega de Turnos</h2>
+
+<form method="GET" class="mb-4">
+    <div class="row">
+        <div class="col-md-3 mt-2">
+            <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre" value="{{ request.GET.nombre }}">
+        </div>
+        <div class="col-md-3 mt-2">
+            <select name="entregados" class="form-select filtro-automatico">
+                <option value="false" {% if not filtro_entregados %}selected{% endif %}>Pendientes</option>
+                <option value="true" {% if filtro_entregados %}selected{% endif %}>Entregados</option>
+            </select>
+        </div>
+        <div class="col-md-3 mt-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>Devoto</th>
+            <th>Turno</th>
+            <th>Procesión</th>
+            <th>Fecha Inscripción</th>
+            <th>Fecha Entrega</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inscripcion in inscripciones %}
+        <tr>
+            <td class="text-start">{{ inscripcion.devoto.nombre }}</td>
+            <td>Turno {{ inscripcion.turno.numero_turno }}</td>
+            <td class="text-start">{{ inscripcion.turno.procesion.nombre }}</td>
+            <td>{{ inscripcion.fecha_inscripcion|date:"d-m-Y" }}</td>
+            <td>{{ inscripcion.fecha_entrega|date:"d-m-Y" }}</td>
+            <td>
+                {% if not inscripcion.entregado %}
+                <button class="btn btn-success btn-entregar" data-id="{{ inscripcion.id }}">✅ Entregar</button>
+                {% else %}
+                <a href="#" class="btn btn-imprimir" title="Imprimir" data-inscripcionid="{{ inscripcion.id }}">
+                    <i class="fa-solid fa-print"></i> Imprimir
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No hay turnos pendientes de entrega.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if inscripciones.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{{ query_params }}">Primero</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ inscripciones.previous_page_number }}{{ query_params }}">Anterior</a>
+            </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">{{ inscripciones.number }} de {{ inscripciones.paginator.num_pages }}</span>
+        </li>
+
+        {% if inscripciones.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ inscripciones.next_page_number }}{{ query_params }}">Siguiente</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ inscripciones.paginator.num_pages }}{{ query_params }}">Último</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Envío automático del filtro por select
+    document.querySelector(".filtro-automatico").addEventListener("change", function () {
+        this.form.submit();
+    });
+
+    // Evento imprimir comprobante
+    document.querySelectorAll(".btn-imprimir").forEach(button => {
+        button.addEventListener("click", function () {
+            const inscripcionID = this.getAttribute("data-inscripcionid");
+            const url = "{% url 'gestion_turnos:comprobante_recepcion' 0 %}".replace("0", inscripcionID);
+
+            Swal.fire({
+                title: 'Comprobante',
+                html: `<iframe src="${url}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    container: 'swal-container',
+                    popup: 'swal-popup my-custom-modal-class'
+                },
+                didClose: () => { location.reload(); },
+            });
+        });
+    });
+
+    // Evento entregar turno
+    document.querySelectorAll(".btn-entregar").forEach(button => {
+        button.addEventListener("click", function () {
+            const inscripcionId = this.getAttribute("data-id");
+
+            Swal.fire({
+                title: "Ingrese el ID de inscripción",
+                input: "text",
+                inputPlaceholder: "Ingrese el número de inscripción",
+                showCancelButton: true,
+                confirmButtonText: "Validar",
+                cancelButtonText: "Cancelar",
+                inputValidator: (value) => {
+                    if (!value) return "Debe ingresar un ID válido";
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const idIngresado = result.value;
+
+                    fetch(`/gestion_turnos/validar_entrega/${inscripcionId}/`, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ id_inscripcion: idIngresado })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: "¡Éxito!",
+                                text: "Turno entregado correctamente.",
+                                icon: "success",
+                                confirmButtonText: "Imprimir Comprobante"
+                            }).then(() => {
+                                window.open(`/recepcion/${inscripcionId}/recepcionpdf/`, "_blank");
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire("Error", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire("Error", "Hubo un problema con la validación.", "error");
+                    });
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.btn-entregar, .btn-imprimir {
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin: 5px;
+}
+
+.btn-imprimir {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-imprimir:hover {
+    background-color: #0056b3;
+}
+</style>
+{% endblock %}

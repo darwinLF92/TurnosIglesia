@@ -1,0 +1,113 @@
+{% block content %}
+<div class="macos-container">
+    <h2 class="macos-title">Comprobante de Inscripción</h2>
+
+    <div class="macos-content">
+        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion }}</p>
+        <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
+        <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }}</p>
+        <p><strong>Valor del Turno:</strong> Q{{ inscripcion.valor_turno }}</p>
+        <p><strong>Monto Pagado:</strong> Q{{ inscripcion.monto_pagado }}</p>
+        <p><strong>Cambio:</strong> Q{{ inscripcion.cambio }}</p>
+    </div>
+
+
+    <div class="macos-content">
+        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega_estimada }}</p>
+        <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
+    </div>
+
+    <!-- Botones -->
+    <div class="macos-buttons">
+        <a href="{% url 'gestion_turnos:comprobante_inscripcion_pdf' inscripcion.id %}" class="btn-macos btn-primary">Descargar PDF</a>
+        <a href="{% url 'gestion_turnos:lista_inscripciones' %}" class="btn-macos btn-secondary">Regresar</a>
+
+        {% if inscripcion.devoto.telefono %}
+            <button id="btnEnviarWhatsApp" class="btn-macos btn-success">Enviar por WhatsApp</button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Estilos -->
+<style>
+    /* Contenedor Principal */
+    .macos-container {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #333;
+        text-align: center;
+    }
+
+    .macos-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .macos-content p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #555;
+        text-align: left;
+    }
+
+    /* Botones */
+    .macos-buttons {
+        margin-top: 15px;
+    }
+
+    .btn-macos {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s ease-in-out, transform 0.1s;
+        border: none;
+    }
+
+    .btn-macos:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-primary {
+        background-color: #007aff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #8e8e93;
+        color: white;
+    }
+
+    .btn-success {
+        background-color: #34c759;
+        color: white;
+    }
+</style>
+
+<!-- Script para enviar por WhatsApp -->
+{% if inscripcion.devoto.telefono %}
+<script>
+    document.getElementById("btnEnviarWhatsApp").addEventListener("click", function() {
+        fetch("{% url 'gestion_turnos:enviar_comprobante_whatsapp' inscripcion.id %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.whatsapp_url) {
+                    window.open(data.whatsapp_url, "_blank");
+                } else {
+                    alert("No se pudo generar el enlace de WhatsApp.");
+                }
+            })
+            .catch(error => alert("Error al enviar el comprobante."));
+    });
+</script>
+{% endif %}
+{% endblock %}

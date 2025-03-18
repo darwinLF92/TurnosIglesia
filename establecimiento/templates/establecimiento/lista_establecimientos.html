@@ -1,0 +1,35 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<h2>Lista de Establecimientos</h2>
+<a href="{% url 'establecimiento:crear_establecimiento' %}" class="btn btn-primary">Crear Nuevo Establecimiento</a>
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>Iglesia</th>
+            <th>Nombre Hermandad</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for establecimiento in establecimientos %}
+        <tr>
+            <td>{{ establecimiento.nombre }}</td>
+            <td>{{ establecimiento.hermandad}}</td>
+            <td>{{ establecimiento.direccion }}</td>
+            <td>{{ establecimiento.telefono }}</td>
+            <td>{{ establecimiento.email }}</td>
+            <td>{{ establecimiento.get_estado_display }}</td>
+            <td>
+                <a href="{% url 'establecimiento:editar_establecimiento' establecimiento.id %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'establecimiento:eliminar_establecimiento' establecimiento.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

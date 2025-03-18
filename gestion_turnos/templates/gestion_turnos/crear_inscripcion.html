@@ -1,38 +1,320 @@
 {% extends 'aplicacion/base.html' %}
 {% block content %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<h2>Inscribir Devoto</h2>
+
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: #f5f5f7;
+        color: #333;
+    }
+    h2 {
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    form {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        max-width: 600px;
+        margin: auto;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #d1d1d6;
+        font-size: 16px;
+    }
+    #devoto-nombre, #procesion-nombre{
+        text-align: left;
+        padding: 10px;
+    }
+    #id_turno{
+        text-align: left;
+        padding: 5px;
+    }
+    #id_valor_turno, #id_monto_pagado, #id_cambio {
+        text-align: right;
+        font-weight: bold;
+        background-color: #f0f0f5;
+        padding: 10px;
+    }
+    button {
+        border-radius: 10px;
+        padding: 12px 18px;
+        border: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-primary {
+        background: linear-gradient(to bottom, #007aff, #005ecb);
+        color: white;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(to bottom, #005ecb, #004bb7);
+    }
+    .btn-secondary {
+        background: #d1d1d6;
+        color: #333;
+    }
+    .btn-secondary:hover {
+        background: #a1a1a6;
+    }
+    .alert-danger {
+        background: #ff3b30;
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+    }
+    .modal-content {
+        border-radius: 14px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+        background: #007AFF;
+        color: white;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        font-size: 18px;
+    }
+    .modal-footer {
+        background: #E5E5EA;
+        border-bottom-left-radius: 14px;
+        border-bottom-right-radius: 14px;
+    }
+    .btn-seleccionar:hover {
+        background-color: #4eaefd;
+        color: #333;
+    }
+</style>
+
+<h2>INSCRIPCIÓN DE DEVOTOS</h2>
+
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Inscribir</button>
+    <label for="devoto-nombre">Nombre del Devoto:</label>
+    <div class="input-group mb-3">
+        <input type="hidden" name="devoto" id="id_devoto" readonly>
+        <input type="text" class="form-control" placeholder="NOMBRE DEVOTO" id="devoto-nombre" name="devoto_nombre" readonly>
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#devotosModal">Buscar</button>
+    </div>
+
+    <label for="procesion-nombre">Procesión a Participar:</label>
+    <div class="input-group mb-3">
+        <input type="hidden" name="procesion" id="id_procesion" readonly>
+        <input type="text" class="form-control" placeholder="NOMBRE PROCESION" id="procesion-nombre" name="procesion_nombre" readonly>
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#procesionesModal">Buscar</button>
+    </div>
+
+    <label for="id_turno">Seleccione un Turno:</label>
+    <select name="turno" id="id_turno" class="form-control mb-3">
+        <option value="">Seleccionar</option>
+    </select>
+
+    <label for="id_fecha_entrega_estimada">Fecha Estimada de Entrega:</label>
+    <input type="datetime-local" id="id_fecha_entrega_estimada" name="fecha_entrega_estimada" class="form-control mb-3">
+
+    <label for="id_lugar_entrega">Lugar de Entrega:</label>
+    <input type="text" id="id_lugar_entrega" name="lugar_entrega" class="form-control mb-3" placeholder="Ingrese el lugar de entrega">
+
+    <label for="id_valor_turno">Valor del Turno:</label>
+    <input type="text" id="id_valor_turno" class="form-control mb-3" value="0.00" disabled>
+    <input type="hidden" name="valor_turno" id="id_valor_turno_hidden" value="0.00">
+
+    <label for="id_monto_pagado">Monto Pagado:</label>
+    <input type="number" id="id_monto_pagado" name="monto_pagado" class="form-control mb-3" value="0.00" step="0.01">
+
+    <label for="id_cambio">Cambio:</label>
+    <input type="text" id="id_cambio" class="form-control mb-3" value="0.00" disabled>
+
+    <div class="text-center">
+        <a href="{% url 'gestion_turnos:lista_inscripciones' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Registrar</button>
+    </div>
 </form>
 
+<!-- Modal Devotos -->
+<div id="devotosModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Seleccionar Devoto</h3>
+            </div>
+            <input type="text" id="searchDevotos" placeholder="Buscar Devoto..." class="m-2" oninput="filterTableDevotos(this.value)">
+            <div class="modal-body" style="overflow:scroll; max-height: 450px;">
+                <table class="table table-hover" id="table2">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th>Nit</th>
+                            <th>Nombre</th>
+                            <th>Telefono</th>
+                            <th>Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-black">
+                        {% for i in devotos_activos %}
+                        <tr>
+                            <td>{{ i.id }}</td>
+                            <td>{{ i.cui_o_nit }}</td>
+                            <td>{{ i.nombre }}</td>
+                            <td>{{ i.telefono }}</td>
+                            <td>
+                                <button onclick="seleccionarDevoto('{{ i.id }}', '{{ i.nombre }}')" class="btn-seleccionar btn btn-sm btn-outline-primary" data-bs-dismiss="modal" type="button">
+                                    <i class="fas fa-share-square"></i> Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    Cerrar <i class="fas fa-window-close"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Procesiones -->
+<div id="procesionesModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Seleccionar Procesión</h3>
+            </div>
+            <input type="text" id="searchProcesiones" placeholder="Buscar Procesion..." class="m-2" oninput="filterTableProcesiones(this.value)">
+            <div class="modal-body" style="overflow:scroll; max-height: 450px;">
+                <table class="table table-hover" id="table2">
+                    <thead>
+                        <tr>
+                            <th># ID</th>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Fecha de Recorrido</th>
+                            <th>Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-black">
+                        {% for i in procesiones %}
+                        <tr>
+                            <td>{{ i.id }}</td>
+                            <td>{{ i.nombre }}</td>
+                            <td>{{ i.descripcion }}</td>
+                            <td>{{ i.fecha }}</td>
+                            <td>
+                                <button onclick="seleccionarProcesion('{{ i.id }}', '{{ i.nombre }}')" class="btn-seleccionar btn btn-sm btn-outline-primary" data-bs-dismiss="modal" type="button">
+                                    <i class="fas fa-share-square"></i> Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    Cerrar <i class="fas fa-window-close"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (si no está en base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('id_procesion').addEventListener('change', function() {
-        var url = "{% url 'gestion_turnos:ajax_load_turnos' %}";
-        var procesionId = this.value;
+    function seleccionarDevoto(id, nombre) {
+        document.getElementById('devoto-nombre').value = nombre;
+        document.getElementById('id_devoto').value = id;
+    }
 
-        fetch(url + '?procesion_id=' + procesionId)
-            .then(response => response.json())
-            .then(data => {
-                var turnoSelect = document.getElementById("id_turno");
-                turnoSelect.innerHTML = '';  // Vaciar el select
-                data.forEach(function(item) {  // Iterar sobre la respuesta JSON
-                    var option = document.createElement('option');
-                    option.value = item.id;
-                    option.text = "Turno " + item.numero_turno;
-                    turnoSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error("AJAX error:", error);
-                alert("Error en la carga de turnos: " + error);
-            });
+    function seleccionarProcesion(id, nombre) {
+        document.getElementById('procesion-nombre').value = nombre;
+        document.getElementById('id_procesion').value = id;
+        document.getElementById('id_procesion').dispatchEvent(new Event('change'));
+    }
+
+    function filterTableDevotos(query) {
+        var rows = document.querySelectorAll("#table2 tbody tr");
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query.toLowerCase()) ? "" : "none";
+        });
+    }
+
+    function filterTableProcesiones(query) {
+        var rows = document.querySelectorAll("#table2 tbody tr");
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query.toLowerCase()) ? "" : "none";
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById("searchDevotos").addEventListener("input", function () {
+            filterTableDevotos(this.value);
+        });
+
+        document.getElementById("searchProcesiones").addEventListener("input", function () {
+            filterTableProcesiones(this.value);
+        });
+
+        document.getElementById('id_procesion').addEventListener('change', function () {
+            var procesionId = this.value;
+            var url = "{% url 'gestion_turnos:load_turnos' %}";
+
+            if (procesionId) {
+                fetch(url + '?procesion_id=' + procesionId)
+                    .then(response => response.json())
+                    .then(data => {
+                        var turnoSelect = document.getElementById("id_turno");
+                        turnoSelect.innerHTML = '<option value="">Seleccionar</option>';
+
+                        data.forEach(function (item) {
+                            var option = document.createElement('option');
+                            option.value = item.id;
+                            option.text = "Turno " + item.numero_turno;
+                            turnoSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar los turnos:", error);
+                        alert("Error al cargar los turnos.");
+                    });
+            }
+        });
+
+        document.getElementById('id_turno').addEventListener('change', function () {
+            var url = "{% url 'gestion_turnos:obtener_precio_turno' %}";
+            var turnoId = this.value;
+
+            if (turnoId) {
+                fetch(url + '?turno_id=' + turnoId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.precio) {
+                            document.getElementById('id_valor_turno').value = data.precio;
+                            document.getElementById('id_valor_turno_hidden').value = data.precio;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al obtener el precio del turno:", error);
+                    });
+            }
+        });
+
+        document.getElementById('id_monto_pagado').addEventListener('input', function () {
+            var valorTurno = parseFloat(document.getElementById('id_valor_turno_hidden').value) || 0;
+            var montoPagado = parseFloat(this.value) || 0;
+            var cambio = Math.max(montoPagado - valorTurno, 0);
+            document.getElementById('id_cambio').value = cambio.toFixed(2);
+        });
     });
-});
+</script>
 
-    </script>
-    
 {% endblock %}

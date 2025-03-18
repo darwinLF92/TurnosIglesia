@@ -9,6 +9,8 @@ class Devoto(models.Model):
     direccion = models.CharField(max_length=50)
     codigo = models.CharField(max_length=10, editable=False, unique=True, null=True)  # Temporarily allow null
     edad = models.PositiveIntegerField()
+    cui_o_nit = models.CharField(max_length=15, unique=True, blank=True, null=True)  # Nuevo campo CUI/NIT
+    activo = models.BooleanField(default=True)  # Nuevo campo Activo
 
     def save(self, *args, **kwargs):
         if not self.codigo:  # Si el código no está establecido

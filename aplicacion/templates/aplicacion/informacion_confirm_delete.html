@@ -1,0 +1,15 @@
+{% extends "aplicacion/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>¿Estás seguro que deseas eliminar esta información?</h2>
+    <p><strong>Título:</strong> {{ object.titulo }}</p>
+    <p><strong>Contenido:</strong> {{ object.contenido }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'aplicacion:informacion_listar' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    </form>
+</div>
+{% endblock %}

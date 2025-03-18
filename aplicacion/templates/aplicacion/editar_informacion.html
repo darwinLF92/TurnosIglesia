@@ -1,0 +1,34 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Información</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <label for="imagenes">Agregar nuevas imágenes:</label>
+        <input type="file" name="imagenes" multiple class="form-control mb-3">
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+
+    <hr>
+    <h4>Imágenes actuales:</h4>
+    <div class="row">
+        {% for img in imagenes %}
+        <div class="col-md-3 text-center">
+            <img src="{{ img.imagen.url }}" class="img-thumbnail mb-2" style="height: 150px; object-fit: cover;">
+            <form method="post" action="{% url 'aplicacion:eliminar_imagen' img.id %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta imagen?')">Eliminar</button>
+            </form>
+        </div>
+        {% empty %}
+        <p>No hay imágenes asociadas.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

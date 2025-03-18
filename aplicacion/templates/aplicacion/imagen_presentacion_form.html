@@ -1,0 +1,40 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{% if object %}Editar{% else %}Nueva{% endif %} Imagen de Presentación</h2>
+
+    <form method="post" enctype="multipart/form-data" class="border p-4 rounded shadow bg-light">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_titulo" class="form-label">Título (opcional)</label>
+            {{ form.titulo }}
+            {% if form.titulo.errors %}
+                <div class="text-danger small">{{ form.titulo.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_imagen" class="form-label">Imagen</label>
+            {{ form.imagen }}
+            {% if form.imagen.errors %}
+                <div class="text-danger small">{{ form.imagen.errors }}</div>
+            {% endif %}
+            {% if object and object.imagen %}
+                <p class="mt-2"><strong>Imagen actual:</strong><br>
+                    <img src="{{ object.imagen.url }}" alt="Imagen actual" class="img-thumbnail" width="300">
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.activo }}
+            <label class="form-check-label" for="id_activo">Activo</label>
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{% url 'aplicacion:imagen_presentacion_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

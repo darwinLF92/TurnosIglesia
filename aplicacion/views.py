@@ -1,16 +1,37 @@
 # aplicacion/views.py
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-
+from establecimiento.models import Establecimiento
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Informacion, ConfiguracionHome, ImagenInformacion
+from .forms import InformacionForm, ConfiguracionHomeForm
+from django.views.decorators.http import require_POST
+from .models import ImagenPresentacion
+from .forms import ImagenPresentacionForm
+from .models import MarchaFunebre, Favorito
+from .forms import MarchaFunebreForm
+from django.contrib import messages
+from django.http import JsonResponse
 
 @login_required(login_url='/login/')
 def home_view(request):
-    return render(request, 'aplicacion/home.html')
+    imagenes = ImagenPresentacion.objects.filter(activo=True).order_by('-fecha_creacion')
+    return render(request, 'aplicacion/home.html', {
+        'imagenes_presentacion': imagenes,
+    })
 
 def login_view(request):
     error_message = None
+    logo_url = None
+
+    # Verifica si hay un establecimiento
+    establecimiento = Establecimiento.objects.first()
+    if establecimiento and establecimiento.logo:
+        logo_url = establecimiento.logo.url  # Obtén la URL del logo
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -20,9 +41,213 @@ def login_view(request):
             return redirect('aplicacion:home')
         else:
             error_message = 'Usuario o contraseña inválidos'
-    return render(request, 'aplicacion/login.html', {'error_message': error_message})
+
+    # Pasa logo_url al contexto
+    return render(request, 'aplicacion/login.html', {'error_message': error_message, 'logo_url': logo_url})
 
 
 def logout_view(request):
     logout(request)
-    return redirect('aplicacion:login')  # Redirige al usuario a la página de inicio de sesión después de cerrar sesión
+    return redirect('aplicacion:login')  
+
+# Vista para listar configuraciones
+class ConfiguracionHomeListView(ListView):
+    model = ConfiguracionHome
+    template_name = 'aplicacion/configuracion_home_list.html'
+    context_object_name = 'configuraciones'  # <- Nombre simple y válido
+
+
+# Vista para crear una nueva configuración
+class ConfiguracionHomeCreateView(CreateView):
+    model = ConfiguracionHome
+    form_class = ConfiguracionHomeForm
+    template_name = 'aplicacion/configuracion_home_form.html'
+    success_url = reverse_lazy('aplicacion:configuracion_home_list')
+
+# Vista para editar una configuración existente
+class ConfiguracionHomeUpdateView(UpdateView):
+    model = ConfiguracionHome
+    form_class = ConfiguracionHomeForm
+    template_name = 'aplicacion/configuracion_home_form.html'
+    success_url = reverse_lazy('aplicacion:configuracion_home_list')
+
+# Vista para eliminar una configuración
+class ConfiguracionHomeDeleteView(DeleteView):
+    model = ConfiguracionHome
+    template_name = 'aplicacion/configuracion_home_confirm_delete.html'
+    success_url = reverse_lazy('aplicacion:configuracion_home_list')
+class InformacionListView(ListView):
+    model = Informacion
+    template_name = 'informacion_list.html'
+    context_object_name = 'informacion'
+
+class InformacionCreateView(CreateView):
+    model = Informacion
+    form_class = InformacionForm
+    template_name = 'informacion_form.html'
+    success_url = reverse_lazy('inicio')
+
+class InformacionUpdateView(UpdateView):
+    model = Informacion
+    form_class = InformacionForm
+    template_name = 'informacion_form.html'
+    success_url = reverse_lazy('inicio')
+
+class InformacionDeleteView(DeleteView):
+    model = Informacion
+    template_name = 'informacion_confirm_delete.html'
+    success_url = reverse_lazy('inicio')
+
+def quienes_somos_view(request):
+    info = Informacion.objects.last()  # O puedes usar .first() si solo habrá un registro
+    config = ConfiguracionHome.objects.filter(seccion='quienes_somos', activo=True).first()
+    return render(request, 'aplicacion/quienes_somos.html', {
+        'info': info,
+        'config': config,
+    })
+
+def crear_informacion(request):
+    if request.method == 'POST':
+        form_info = InformacionForm(request.POST)
+        if form_info.is_valid():
+            info = form_info.save()
+
+            # Guardar imágenes múltiples
+            for img in request.FILES.getlist('imagenes'):
+                ImagenInformacion.objects.create(informacion=info, imagen=img)
+
+            return redirect('aplicacion:quienes_somos')  # o donde necesites redirigir
+    else:
+        form_info = InformacionForm()
+
+    return render(request, 'aplicacion/informacion_form.html', {
+        'form_info': form_info
+    })
+
+class InformacionListView(ListView):
+    model = Informacion
+    template_name = 'aplicacion/informacion_list.html'
+    context_object_name = 'informaciones'
+
+
+def editar_informacion(request, pk):
+    info = get_object_or_404(Informacion, pk=pk)
+
+    if request.method == 'POST':
+        form = InformacionForm(request.POST, instance=info)
+
+        if form.is_valid():
+            form.save()
+
+            # Agregar nuevas imágenes
+            for f in request.FILES.getlist('imagenes'):
+                ImagenInformacion.objects.create(informacion=info, imagen=f)
+
+            return redirect('aplicacion:informacion_listar')  # Ajusta al nombre de tu vista de lista
+
+    else:
+        form = InformacionForm(instance=info)
+
+    imagenes = info.imagenes.all()
+
+    return render(request, 'aplicacion/editar_informacion.html', {
+        'form': form,
+        'imagenes': imagenes,
+        'info': info
+    })
+
+class InformacionDeleteView(DeleteView):
+    model = Informacion
+    template_name = 'aplicacion/informacion_confirm_delete.html'
+    success_url = reverse_lazy('aplicacion:informacion_listar')
+
+
+@require_POST
+def eliminar_imagen(request, pk):
+    imagen = get_object_or_404(ImagenInformacion, pk=pk)
+    imagen.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'informacion_list'))
+
+
+class ImagenPresentacionCreateView(CreateView):
+    model = ImagenPresentacion
+    form_class = ImagenPresentacionForm
+    template_name = 'aplicacion/imagen_presentacion_form.html'
+    success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
+
+class ImagenPresentacionListView(ListView):
+    model = ImagenPresentacion
+    template_name = 'aplicacion/imagen_presentacion_list.html'
+    context_object_name = 'imagenes'
+
+class ImagenPresentacionUpdateView(UpdateView):
+    model = ImagenPresentacion
+    form_class = ImagenPresentacionForm
+    template_name = 'aplicacion/imagen_presentacion_form.html'
+    success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
+
+
+class ImagenPresentacionDeleteView(DeleteView):
+    model = ImagenPresentacion
+    template_name = 'aplicacion/imagen_presentacion_confirm_delete.html'
+    success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
+
+
+def lista_marchas(request):
+    query = request.GET.get('q', '')
+    filtro = request.GET.get('filtro', 'todas')
+
+    if query:
+        marchas = MarchaFunebre.objects.filter(titulo__icontains=query)
+    else:
+        marchas = MarchaFunebre.objects.all()
+
+    favoritas_usuario = []
+    if request.user.is_authenticated:
+        favoritas_usuario = Favorito.objects.filter(usuario=request.user).values_list('marcha_id', flat=True)
+
+    if filtro == 'favoritas':
+        marchas = marchas.filter(id__in=favoritas_usuario)
+
+    return render(request, 'aplicacion/lista_marchas.html', {
+        'marchas': marchas,
+        'query': query,
+        'filtro': filtro,
+        'favoritas_usuario': favoritas_usuario,
+    })
+
+def subir_marcha(request):
+    if request.method == 'POST':
+        form = MarchaFunebreForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('aplicacion:lista_marchas')
+    else:
+        form = MarchaFunebreForm()
+    
+    return render(request, 'aplicacion/subir_marcha.html', {'form': form})
+
+def aumentar_favorito(request, marcha_id):
+    marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
+    marcha.favoritos += 1
+    marcha.save()
+    return JsonResponse({'favoritos': marcha.favoritos})
+
+
+@login_required
+def toggle_favorito(request, marcha_id):
+    marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
+    favorito, creado = Favorito.objects.get_or_create(usuario=request.user, marcha=marcha)
+
+    if not creado:
+        favorito.delete()
+        estado = 'eliminado'
+    else:
+        estado = 'agregado'
+
+    return JsonResponse({'estado': estado})
+
+@login_required
+def es_favorita(request, marcha_id):
+    es_fav = Favorito.objects.filter(usuario=request.user, marcha_id=marcha_id).exists()
+    return JsonResponse({'favorita': es_fav})

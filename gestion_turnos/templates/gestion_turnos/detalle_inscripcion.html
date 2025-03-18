@@ -1,0 +1,88 @@
+{% block content %}
+<div class="macos-container">
+    <h2 class="macos-title">Detalle de Inscripción</h2>
+
+    <div class="macos-content">
+        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion }}</p>
+        <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
+        <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }} - {{inscripcion.turno.referencia}}</p>
+
+        <p><strong>Entregado:</strong> 
+            <span class="badge {% if inscripcion.entregado %}badge-success{% else %}badge-danger{% endif %}">
+                {% if inscripcion.entregado %}Sí{% else %}No{% endif %}
+            </span>
+        </p>
+        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega|default:"No entregado" }}</p>
+        <p><strong>Valor del Turno:</strong> Q{{ inscripcion.valor_turno }}</p>
+        <p><strong>Fecha de Entrega Estimada:</strong> {{ inscripcion.fecha_entrega_estimada }}</p>
+        <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
+        <p><strong>Monto Pagado:</strong> Q{{ inscripcion.monto_pagado }}</p>
+        <p><strong>Cambio:</strong> Q{{ inscripcion.cambio }}</p>
+        <p><strong>Estado:</strong> 
+            <span class="status {% if inscripcion.inscrito %}status-success{% else %}status-danger{% endif %}">
+                {% if inscripcion.inscrito %}INSCRITO{% else %}NO INSCRITO{% endif %}
+            </span>
+        </p>
+        <p><strong>Contraseña de Inscripción: </strong>{{inscripcion.id}}</p>
+    </div>
+</div>
+
+<style>
+    /* Estilos inspirados en macOS */
+    .macos-container {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #333;
+    }
+
+    .macos-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .macos-content p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Estilos para etiquetas de estado */
+    .badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .badge-success {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .badge-danger {
+        background-color: #E53935;
+        color: white;
+    }
+
+    /* Estado de inscripción */
+    .status {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+    .status-success {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .status-danger {
+        background-color: #E53935;
+        color: white;
+    }
+</style>
+{% endblock %}

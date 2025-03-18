@@ -1,11 +1,338 @@
-{% extends 'aplicacion/base.html' %}
+<head>
+    {% load static %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/Success.js' %}"></script>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+</head>
 
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="post" id="userForm">
+                {% csrf_token %}
+            
+                <!-- Campo Nombre de Usuario -->
+                <div class="mb-3">
+                    <label for="username">Nombre de usuario</label>
+                    <input type="text" id="username" name="username" class="form-control" value="{{ form.username.value|default:'' }}">
+                    <span id="usernameValidation" class="validation-message">
+                        {{ form.username.errors|join:", " }}
+                    </span>
+                </div>
+            
+                <!-- Campo Correo Electrónico -->
+                <div class="mb-3">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}">
+                    <span id="emailValidation" class="validation-message">
+                        {{ form.email.errors|join:", " }}
+                    </span>
+                </div>
+            
+                <!-- Campo Nombre -->
+                <div class="mb-3">
+                    <label for="first_name">Nombre</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control" value="{{ form.first_name.value|default:'' }}">
+                    <span id="firstNameValidation" class="validation-message">
+                        {{ form.first_name.errors|join:", " }}
+                    </span>
+                </div>
+            
+                <!-- Campo Apellido -->
+                <div class="mb-3">
+                    <label for="last_name">Apellido</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control" value="{{ form.last_name.value|default:'' }}">
+                    <span id="lastNameValidation" class="validation-message">
+                        {{ form.last_name.errors|join:", " }}
+                    </span>
+                </div>
+            
+                <!-- Campo Grupo (Rol) -->
+               <!-- Campo Grupo (Rol) -->
+               <div class="mb-3">
+                <label for="grupo">Rol</label>
+                <select id="grupo" name="grupo" class="form-control">
+                    <option value="">Seleccione un rol</option>
+                    {% for group in grupos %}
+                    <option value="{{ group.id }}" {% if group.id|stringformat:"s" == form.grupo.value|stringformat:"s" %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <span id="grupoValidation" class="validation-message">
+                    {{ form.grupo.errors|join:", " }}
+                </span>
+            </div>
+        
+            <!-- Campo Contraseña -->
+            <div class="mb-3">
+                <label for="password1">Contraseña</label>
+                <div class="input-group">
+                    <input type="password" id="password1" name="password1" class="form-control" value="{{ form.password1.value|default:'' }}">
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="password1">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+                <span id="passwordValidation" class="validation-message">
+                    {{ form.password1.errors|join:", " }}
+                </span>
+                <ul id="passwordHints" class="form-text">
+                    <li class="hint">Al menos 8 caracteres</li>
+                    <li class="hint">No completamente numérica</li>
+                    <li class="hint">No demasiado similar a la información personal</li>
+                </ul>
+            </div>
+        
+            <!-- Confirmación de Contraseña -->
+            <div class="mb-3">
+                <label for="password2">Confirmar contraseña</label>
+                <div class="input-group">
+                    <input type="password" id="password2" name="password2" class="form-control" value="{{ form.password2.value|default:'' }}">
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="password2">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+                <span id="passwordMatchValidation" class="validation-message">
+                    {{ form.password2.errors|join:", " }}
+                </span>
+            </div>
+            
+                <!-- Botón de Enviar -->
+                <button type="submit" id="submitBtn" class="btn btn-primary">Crear Usuario</button>
+            </form>
+            
+            
+            
+        </div>
+    </div>
+</div>
 
-<h2>Crear Usuario</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Crear Usuario</button>
-</form>
+{% if success %}
+<script>
+if (Swal) {
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: '{{ message }}',
+        confirmButtonText: 'Cerrar'
+    }).then((result) => {
+        if (result.value) {
+            if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage('closeModal', '*');
+            }
+        }
+    });
+}
+</script>
+{% endif %}
+
+{% if errors %}
+<script>
+if (Swal) {
+    let errorMessage = "Se encontraron errores en el formulario. Por favor revise y corrija los siguientes errores: \n\n";
+    {% for field, field_errors in errors.items %}
+        errorMessage += "{{ field }}:\n";
+        {% for error in field_errors %}
+            errorMessage += " - {{ error.message }}\n";
+        {% endfor %}
+    {% endfor %}
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Error al crear el usuario',
+        text: errorMessage,
+        confirmButtonText: 'Cerrar'
+    });
+}
+</script>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const usernameInput = document.getElementById("username");
+        const emailInput = document.getElementById("email");
+        const firstNameInput = document.getElementById("first_name");
+        const lastNameInput = document.getElementById("last_name");
+        const grupoInput = document.getElementById("grupo");
+        const passwordInput = document.getElementById("password1");
+        const confirmPasswordInput = document.getElementById("password2");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Validación de Nombre de Usuario
+        usernameInput.addEventListener("input", function () {
+            const value = usernameInput.value;
+            const validationMessage = document.getElementById("usernameValidation");
+            if (value.length >= 5) {
+                validationMessage.textContent = "Nombre de usuario válido";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "Debe tener al menos 5 caracteres";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        });
+
+        // Validación de Correo Electrónico
+        emailInput.addEventListener("input", function () {
+            const value = emailInput.value;
+            const validationMessage = document.getElementById("emailValidation");
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(value)) {
+                validationMessage.textContent = "Correo electrónico válido";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "Debe ser un correo electrónico válido";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        });
+
+        // Validación de Nombre
+        firstNameInput.addEventListener("input", function () {
+            const value = firstNameInput.value;
+            const validationMessage = document.getElementById("firstNameValidation");
+            if (value.trim() !== "") {
+                validationMessage.textContent = "Nombre válido";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "El nombre no puede estar vacío";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        });
+
+        // Validación de Apellido
+        lastNameInput.addEventListener("input", function () {
+            const value = lastNameInput.value;
+            const validationMessage = document.getElementById("lastNameValidation");
+            if (value.trim() !== "") {
+                validationMessage.textContent = "Apellido válido";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "El apellido no puede estar vacío";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        });
+
+        // Validación de Grupo (Rol)
+        grupoInput.addEventListener("change", function () {
+            const value = grupoInput.value;
+            const validationMessage = document.getElementById("grupoValidation");
+            if (value !== "") {
+                validationMessage.textContent = "Rol seleccionado";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "Debes seleccionar un rol";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        });
+
+        // Validación de Contraseñas en ambas direcciones
+        const validatePasswords = () => {
+            const validationMessage = document.getElementById("passwordMatchValidation");
+            if (passwordInput.value === confirmPasswordInput.value && passwordInput.value.length >= 8) {
+                validationMessage.textContent = "Las contraseñas coinciden";
+                validationMessage.className = "validation-message valid";
+            } else {
+                validationMessage.textContent = "Las contraseñas no coinciden";
+                validationMessage.className = "validation-message invalid";
+            }
+            toggleSubmitButton();
+        };
+
+        passwordInput.addEventListener("input", function () {
+            const value = passwordInput.value;
+            const hints = document.querySelectorAll("#passwordHints .hint");
+            hints[0].className = value.length >= 8 ? "hint valid" : "hint invalid";
+            hints[1].className = /\D/.test(value) ? "hint valid" : "hint invalid";
+            hints[2].className = value && !usernameInput.value.includes(value) ? "hint valid" : "hint invalid";
+
+            validatePasswords(); // Valida también al modificar password1
+        });
+
+        confirmPasswordInput.addEventListener("input", validatePasswords);
+
+        // Mostrar/ocultar contraseñas
+        document.querySelectorAll(".toggle-password").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const target = document.getElementById(this.getAttribute("data-target"));
+                const icon = this.querySelector("i");
+                if (target.type === "password") {
+                    target.type = "text";
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                } else {
+                    target.type = "password";
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+            });
+        });
+
+        // Habilitar o deshabilitar botón de envío
+        function toggleSubmitButton() {
+            const validUsername = usernameInput.value.length >= 5;
+            const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+            const validFirstName = firstNameInput.value.trim() !== "";
+            const validLastName = lastNameInput.value.trim() !== "";
+            const validGrupo = grupoInput.value !== "";
+            const validPassword = passwordInput.value.length >= 8 && /\D/.test(passwordInput.value);
+            const passwordsMatch = passwordInput.value === confirmPasswordInput.value;
+
+            submitBtn.disabled = !(
+                validUsername &&
+                validEmail &&
+                validFirstName &&
+                validLastName &&
+                validGrupo &&
+                validPassword &&
+                passwordsMatch
+            );
+        }
+    });
+</script>
+
+
+
+
+<style>
+    .input-group .toggle-password {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+    .validation-message {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+
+    .validation-message.valid {
+        color: green;
+    }
+
+    .validation-message.invalid {
+        color: red;
+    }
+
+    .hint {
+        font-size: 0.85rem;
+        color: gray;
+    }
+
+    .hint.valid {
+        color: green;
+        text-decoration: line-through;
+    }
+
+    .hint.invalid {
+        color: red;
+    }
+</style>
 {% endblock %}

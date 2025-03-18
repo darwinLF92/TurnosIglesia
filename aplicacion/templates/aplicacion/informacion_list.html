@@ -1,0 +1,42 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Lista de Información - ¿Quiénes somos?</h2>
+    <a href="{% url 'aplicacion:crear_informacion' %}" class="btn btn-primary mb-3">Nueva Información</a>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Contenido</th>
+                <th>Imágenes</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in informaciones %}
+                <tr>
+                    <td>{{ info.titulo }}</td>
+                    <td>{{ info.contenido|truncatewords:20 }}</td>
+                    <td>
+                        {% for img in info.imagenes.all %}
+                            <img src="{{ img.imagen.url }}" width="80" height="60" class="img-thumbnail">
+                        {% empty %}
+                            <small>No hay imágenes</small>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="{% url 'aplicacion:editar_informacion' info.id %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'aplicacion:eliminar_informacion' info.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro que deseas eliminar este registro?')">Eliminar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No hay registros.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

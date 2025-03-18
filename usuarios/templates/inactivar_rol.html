@@ -1,9 +1,108 @@
-{% extends 'apliacacion/base.html' %}
 {% block content %}
-    <h2>Inactivar Rol</h2>
-    <form method="post">
-        {% csrf_token %}
-        ¿Estás seguro que deseas inactivar "{{ object.name }}"?
-        <button type="submit">Confirmar</button>
-    </form>
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded">
+                <div class="card-header bg-danger text-white text-center py-3 rounded-top">
+                    <h3 class="mb-0 fw-bold"><i class="fas fa-user-slash"></i> Inactivar Rol</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="alert alert-warning text-center fw-bold p-2 rounded">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ¿Estás seguro de que deseas inactivar este rol?
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre del Rol</label>
+                            <input type="text" class="form-control bg-light border-0 shadow-sm" value="{{ object.name }}" readonly>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg shadow">
+                                <i class="fas fa-user-times"></i> Confirmar Inactivación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if success %}
+            Swal.fire({
+                icon: 'success',
+                title: 'Rol Inactivado',
+                text: '{{ message }}',
+                confirmButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.parent.postMessage('closeModal', '*');
+                }
+            });
+        {% endif %}
+    });
+</script>
+
+<style>
+    /* Diseño del contenedor */
+    .container-fluid {
+        max-width: 450px;
+    }
+
+    /* Estilo del card */
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Fondo degradado para el encabezado */
+    .bg-danger {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+    }
+
+    /* Caja de alerta más llamativa */
+    .alert-warning {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        font-size: 16px;
+    }
+
+    /* Botón con mejor diseño */
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        font-size: 16px;
+        padding: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-danger:hover {
+        background-color: #b02a37;
+        transform: scale(1.05);
+    }
+
+    /* Estilo de los inputs */
+    .form-control {
+        font-size: 16px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        background: #f8f9fa;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: #dc3545;
+        box-shadow: 0px 0px 8px rgba(220, 53, 69, 0.3);
+    }
+</style>
 {% endblock %}

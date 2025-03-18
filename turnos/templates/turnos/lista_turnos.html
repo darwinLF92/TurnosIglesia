@@ -1,56 +1,302 @@
 {% extends 'aplicacion/base.html' %}
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    /* Contenedor principal en dos columnas */
+    .container-flex {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    /* Sección izquierda (Lista de Procesiones) */
+    .procesiones-container {
+        width: 35%;
+        min-width: 300px;
+        padding: 15px;
+        border-right: 2px solid #ddd;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .table th, .table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .table th {
+        background: #5a09b6;
+        color: white;
+    }
+
+    .btn-detalle {
+        background: #28a745;
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-detalle:hover {
+        background: #218838;
+    }
+
+    /* Sección derecha (Turnos Disponibles) */
+    .turnos-container {
+        width: 65%;
+        padding: 15px;
+    }
+
     .grid-container {
         display: grid;
-        grid-template-columns: repeat(10, 1fr);  /* Ajustado para mostrar 4 columnas */
-        grid-gap: 20px;
-        margin: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-gap: 15px;
+        margin: 20px 0;
+        padding: 10px;
+        justify-content: center;
     }
-    .card {
-        background-color: #007bff;
+
+    .card-turno {
+        background: linear-gradient(135deg, #9578da, #5707c0);
         color: white;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        height: 100px;
+        justify-content: center;
+        text-align: center;
+        height: 150px;
         border-radius: 10px;
         padding: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: bold;
+        position: relative;
     }
-    .card:hover {
-        transform: scale(1.05);
-        background-color: #0056b3;
-        color: aliceblue;
+
+    .card-turno:hover {
+        color: black;
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #a00cc5, #e4e7eb);
     }
+
+    .turno-actions {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .editar-btn, .eliminar-btn {
+        background: white;
+        color: #007bff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .editar-btn:hover {
+        background: #f8f9fa;
+        color: #0056b3;
+    }
+
+    .eliminar-btn {
+        color: #dc3545;
+    }
+
+    .eliminar-btn:hover {
+        background: #f8f9fa;
+        color: #bd2130;
+    }
+
 </style>
 
-<h2>Lista de Turnos</h2>
-<a href="{% url 'turnos:crear_turno' %}" class="btn btn-primary">Crear Turno</a>
+<div class="container-flex">
+    <!-- Lista de Procesiones -->
+    <div class="procesiones-container">
+        <h2 class="text-primary">Lista de Procesiones</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Procesión</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procesion in procesiones %}
+                    <tr>
+                        <td>{{ procesion.nombre }}</td>
+                        <td>
+                            <a href="?procesion_id={{ procesion.id }}" class="btn-detalle">
+                                Detalle
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">No hay procesiones registradas.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<form method="get" action="{% url 'turnos:lista_turnos' %}">
-    <select name="procesion_id" onchange="this.form.submit()">
-        <option value="">Seleccione una Procesión</option>
+    <!-- Turnos Disponibles -->
+    <div class="turnos-container">
+        {% if request.GET.procesion_id %}
         {% for procesion in procesiones %}
-        <option value="{{ procesion.id }}" {% if request.GET.procesion_id == procesion.id|stringformat:"s" %}selected{% endif %}>
-            {{ procesion.nombre }}
-        </option>
+            {% if procesion.id|stringformat:"s" == request.GET.procesion_id %}
+                <h3 class="text-primary">Listado de turnos para la procesión: {{ procesion.nombre }}</h3>
+            {% endif %}
         {% endfor %}
-    </select>
-</form>
-
-<div class="grid-container">
-    {% for turno in turnos %}
-    <a href="{% url 'turnos:detalle_turno' turno.id %}" class="card">
-        <div>
-            Turno {{ turno.numero_turno }}
-        </div>
-    </a>
-    {% empty %}
-    <div>No hay turnos disponibles.</div>
-    {% endfor %}
+        <a href="#" id="crearTurno" class="btn btn-primary mb-3" data-turno-id="{{ request.GET.procesion_id }}">
+            <i class="fas fa-plus"></i> Crear Turno
+        </a>
+        <div class="grid-container">
+        {% if turnos %}
+            {% for turno in turnos %}
+            <div class="card-turno" data-turnoid="{{ turno.id }}" title="Ver Detalles">
+                    <span>Turno {{ turno.numero_turno }}</span>
+                    <div class="turno-actions">
+                        <a href="#" class="editar-btn" data-turnoid="{{ turno.id }}" onclick="event.stopPropagation();"><i class="fas fa-edit"></i></a>
+                        <a href="#" class="eliminar-btn" data-turnoid="{{ turno.id }}" onclick="event.stopPropagation();"><i class="fas fa-trash-alt"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-muted text-center">No hay turnos disponibles.</div>
+        {% endif %}
+    </div>
+    {% else %}
+        <h4 class="text-muted">Seleccione una procesión para ver los turnos.</h4>
+    {% endif %}
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#searchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $(".procesion-row").filter(function() {
+                $(this).toggle($(this).find(".procesion-nombre").text().toLowerCase().indexOf(value) > -1 || 
+                               $(this).find(".procesion-descripcion").text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        // Abrir modal para crear turno con el procesion_id correcto
+    $("#crearTurno").click(function () {
+        var procesionId = $(this).attr("data-turno-id"); // Obtiene el ID de la procesión desde el atributo del botón
+        
+        if (!procesionId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Seleccione una procesión primero',
+                text: 'Debe seleccionar una procesión antes de crear un turno.',
+            });
+            return false;
+        }
+
+        var formularioSrc = "{% url 'turnos:crear_turno' %}?procesion_id=" + procesionId;
+
+        Swal.fire({
+                title: 'Crear Turno',
+                html: `<iframe src="${formularioSrc}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            
+        return false;
+    });
+
+    $(".card-turno").click(function() {
+            var turnoID = $(this).data("turnoid");
+            if (!turnoID) { console.error("Error: Turno ID no definido."); return; }
+            var formulario = "{% url 'turnos:detalle_turno' 0 %}".replace("0", turnoID);
+
+            Swal.fire({
+                title: 'Detalle del Turno',
+                html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+                didClose: () => { location.reload(); },
+            });
+
+            window.addEventListener('message', function (event) {
+                if (event.data === 'closeModal') { Swal.close(); }
+            });
+
+            return false;
+        });
+
+        $(".editar-btn").click(function() {
+        var turnoID = $(this).data("turnoid");
+        if (!turnoID) { console.error("Error: Turno ID no definido."); return; }
+        var formulario = "{% url 'turnos:editar_turno' 0 %}".replace("0", turnoID);
+
+        Swal.fire({
+            title: 'Editar Turno',
+            html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+            didClose: () => { location.reload(); },
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data === 'closeModal') { Swal.close(); }
+        });
+
+        return false;
+    });
+
+    $(".eliminar-btn").click(function() {
+        var turnoID = $(this).data("turnoid");
+        if (!turnoID) { console.error("Error: Turno ID no definido."); return; }
+        var formulario = "{% url 'turnos:eliminar_turno' 0 %}".replace("0", turnoID);
+
+        Swal.fire({
+            title: 'Eliminar Turno',
+            html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+            didClose: () => { location.reload(); },
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data === 'closeModal') { Swal.close(); }
+        });
+
+        return false;
+    });
+
+    });
+</script>
+
 
 {% endblock %}

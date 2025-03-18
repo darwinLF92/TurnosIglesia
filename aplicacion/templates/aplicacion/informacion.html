@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>¿Quiénes somos?</h1>
+    <a href="{% url 'informacion_create' %}" class="btn btn-primary">Crear nueva información</a>
+    <ul>
+        {% for item in informacion %}
+            <li>
+                <strong>{{ item.titulo }}</strong>: {{ item.contenido }}
+                <a href="{% url 'informacion_edit' item.id %}">Editar</a>
+                <a href="{% url 'informacion_delete' item.id %}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

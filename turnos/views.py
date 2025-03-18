@@ -7,17 +7,54 @@ from django.views.generic import UpdateView
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.contrib import messages
 
 class CrearTurnoView(CreateView):
     model = Turno
     form_class = TurnoForm
     template_name = 'turnos/crear_turno.html'
-    success_url = reverse_lazy('turnos:lista_turnos')  # Asegúrate de definir esta URL
+
+    def get_initial(self):
+        """
+        Inicializa el formulario con la procesión seleccionada en la vista de detalles.
+        """
+        initial = super().get_initial()
+        procesion_id = self.request.GET.get('procesion_id')
+        if procesion_id:
+            initial['procesion'] = get_object_or_404(Procesion, id=procesion_id)
+        return initial
 
     def get_context_data(self, **kwargs):
+        """
+        Agrega la procesión seleccionada al contexto de la plantilla.
+        """
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Crear Turno'
+        procesion_id = self.request.GET.get('procesion_id')
+        if procesion_id:
+            context['procesion_seleccionada'] = get_object_or_404(Procesion, id=procesion_id)
         return context
+
+    def form_valid(self, form):
+        """
+        Si el formulario es válido, guarda el turno y muestra un mensaje de éxito.
+        """
+        messages.success(self.request, "¡Turno creado exitosamente!")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        """
+        Si el formulario tiene errores, muestra un mensaje de error.
+        """
+        messages.error(self.request, "Hubo un error al crear el turno. Verifique los datos ingresados.")
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        """
+        Redirige nuevamente al formulario de creación manteniendo la procesión seleccionada.
+        """
+        return reverse('turnos:crear_turno') + f"?procesion_id={self.request.GET.get('procesion_id', '')}"
     
 def lista_turnos(request):
     procesion_id = request.GET.get('procesion_id')  # Obtiene el ID de la procesión desde la URL
@@ -45,18 +82,18 @@ def eliminar_turno(request, pk):
 def detalle_turno(request, pk):
     turno = get_object_or_404(Turno, pk=pk)
     
-    # Obtener los devotos inscritos
-    inscripciones = turno.inscripciones.all()  # Usamos related_name para acceder a las inscripciones
+    # Filtrar solo inscripciones activas
+    inscripciones_activas = turno.inscripciones.filter(inscrito=True)
     
-    # Contar cuántos devotos están inscritos
-    inscritos_count = inscripciones.count()
+    # Contar solo las inscripciones activas
+    inscritos_count = inscripciones_activas.count()
     
-    # Calcular los turnos disponibles
-    turnos_disponibles = turno.capacidad - inscritos_count  # Suponiendo que el modelo Turno tiene un campo capacidad
+    # Calcular los turnos disponibles correctamente
+    turnos_disponibles = turno.capacidad - inscritos_count  
 
     return render(request, 'turnos/detalle_turno.html', {
         'turno': turno,
-        'inscripciones': inscripciones,
+        'inscripciones': inscripciones_activas,  # Solo inscripciones activas
         'inscritos_count': inscritos_count,
         'turnos_disponibles': turnos_disponibles
     })

@@ -9,3 +9,4 @@ urlpatterns = [
     path('procesiones/editar/<int:pk>/', views.EditarProcesionView.as_view(), name='editar_procesion'),
     path('procesiones/eliminar/<int:pk>/', views.EliminarProcesionView, name='eliminar_procesion'),
 ]
+
