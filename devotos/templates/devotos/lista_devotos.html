@@ -121,6 +121,15 @@
         color: white;
         transform: scale(1.05);
     }
+    .foto-miniatura {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+}
+
 </style>
 
 <div class="table-container">
@@ -141,6 +150,7 @@
         <table class="table table-striped table-hover">
             <thead class="thead-dark">
             <tr>
+                <th>Fotografía</th>
                 <th>Código</th>
                 <th>CUI / NIT</th>
                 <th>Nombre</th>
@@ -152,6 +162,18 @@
         <tbody>
             {% for devoto in object_list %}
             <tr>
+                <td>
+                    {% if devoto.fotografia %}
+                    <img src="{{ devoto.fotografia.url }}" 
+                    alt="Foto de {{ devoto.nombre }}" 
+                    class="foto-miniatura" 
+                    data-nombre="{{ devoto.nombre }}" 
+                    data-src="{{ devoto.fotografia.url }}">
+               
+                    {% else %}
+                        <span class="text-muted">Sin foto</span>
+                    {% endif %}
+                </td>
                 <td>{{ devoto.codigo }}</td>
                 <td>{{ devoto.cui_o_nit }}</td>
                 <td>{{ devoto.nombre }}</td>
@@ -261,6 +283,27 @@
             return false;
         });
     });
+
+    // Zoom de imagen al hacer clic
+$(".foto-miniatura").click(function () {
+    const imagenUrl = $(this).data("src");
+    const nombre = $(this).data("nombre");
+
+    Swal.fire({
+        title: `Fotografía de ${nombre}`,
+        imageUrl: imagenUrl,
+        imageAlt: `Foto de ${nombre}`,
+        imageWidth: 400,
+        imageHeight: 400,
+        showCloseButton: true,
+        showConfirmButton: false,
+        background: '#f9f9f9',
+        customClass: {
+            popup: 'rounded'
+        }
+    });
+});
+
 </script>
 
 

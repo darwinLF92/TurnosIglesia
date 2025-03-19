@@ -6,7 +6,10 @@ from django.urls import reverse_lazy
 from .models import Procesion
 from .forms import ProcesionForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
+@method_decorator(login_required, name='dispatch')
 class ListaProcesionesView(ListView):
     model = Procesion
     template_name = 'procesiones/lista_procesiones.html'
@@ -16,7 +19,7 @@ class ListaProcesionesView(ListView):
     def get_queryset(self):
         return Procesion.objects.filter(activo=True)
 
-
+@method_decorator(login_required, name='dispatch')
 class CrearProcesionView(CreateView):
     model = Procesion
     form_class = ProcesionForm
@@ -37,6 +40,7 @@ class CrearProcesionView(CreateView):
         messages.error(self.request, "Hubo un error al crear la procesión. Inténtelo de nuevo.")
         return self.render_to_response(self.get_context_data(form=form, success=False))
 
+@method_decorator(login_required, name='dispatch')
 class EditarProcesionView(UpdateView):
     model = Procesion
     form_class = ProcesionForm
@@ -57,6 +61,7 @@ class EditarProcesionView(UpdateView):
         messages.error(self.request, "Hubo un error al actualizar la procesión. Inténtelo de nuevo.")
         return self.render_to_response(self.get_context_data(form=form, success=False))
 
+@login_required
 def EliminarProcesionView(request, pk):
     procesion = get_object_or_404(Procesion, pk=pk)
     if request.method == 'POST':

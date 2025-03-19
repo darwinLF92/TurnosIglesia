@@ -1,8 +1,6 @@
-
 {% block content %}
 
 <style>
-    /* Estilo general con inspiración en macOS */
     body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         background: #f5f5f7;
@@ -63,17 +61,121 @@
 
 <div class="form-container">
     <h2>{{ view.title }}</h2>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
         <div class="form-group">
-            {{ form.as_p }}
+            {{ form.cui_o_nit.label_tag }} {{ form.cui_o_nit }}
+            {{ form.nombre.label_tag }} {{ form.nombre }}
+            {{ form.correo.label_tag }} {{ form.correo }}
+            {{ form.telefono.label_tag }} {{ form.telefono }}
+            {{ form.direccion.label_tag }} {{ form.direccion }}
+            {{ form.fecha_nacimiento.label_tag }} {{ form.fecha_nacimiento }}
+            {{ form.edad.label_tag }} {{ form.edad }}
         </div>
+
+        <div class="form-group">
+            <label>Fotografía:</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="activarCamara()">📷 Tomar foto</button>
+                <label class="btn btn-secondary" style="margin: 0;">
+                    📁 Adjuntar foto
+                    <input type="file" name="fotografia" id="galeria" accept="image/*" style="display: none;">
+                </label>
+            </div>
+
+            <div id="camara-container" style="display: none; margin-top: 10px;">
+                <video id="video" width="100%" autoplay playsinline style="border: 1px solid #ccc;"></video>
+                <br>
+                <button type="button" onclick="capturarFoto()" class="btn btn-primary" style="margin-top: 10px;">📸 Capturar</button>
+                <button type="button" onclick="repetirFoto()" class="btn btn-danger" style="margin-top: 10px;">🔁 Repetir fotografía</button>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <input type="hidden" name="foto_capturada" id="foto_capturada">
+            </div>
+
+            <div id="preview-container" style="display: none; margin-top: 10px;">
+                <label>Vista previa de la fotografía:</label><br>
+                <img id="foto-preview" src="" alt="Foto previa" style="width: 100%; border-radius: 8px; border: 1px solid #ccc;">
+            </div>
+        </div>
+
         <button type="submit" class="btn-submit">Guardar</button>
     </form>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const fotoCapturadaInput = document.getElementById('foto_capturada');
+    const camaraContainer = document.getElementById('camara-container');
+    const previewContainer = document.getElementById('preview-container');
+    const fotoPreview = document.getElementById('foto-preview');
+    const inputGaleria = document.getElementById('galeria');
+
+    let streamActivo = null;
+
+    function activarCamara() {
+        camaraContainer.style.display = 'block';
+        video.style.display = 'block';
+        previewContainer.style.display = 'none';
+        fotoPreview.src = "";
+        fotoCapturadaInput.value = "";
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                streamActivo = stream;
+            })
+            .catch(err => {
+                alert("No se pudo acceder a la cámara.");
+                console.error(err);
+            });
+    }
+
+    function capturarFoto() {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+
+        const dataUrl = canvas.toDataURL('image/png');
+        fotoCapturadaInput.value = dataUrl;
+
+        fotoPreview.src = dataUrl;
+        previewContainer.style.display = 'block';
+
+        if (streamActivo) {
+            const tracks = streamActivo.getTracks();
+            tracks.forEach(track => track.stop());
+            streamActivo = null;
+        }
+        video.srcObject = null;
+        video.style.display = 'none';
+    }
+
+    function repetirFoto() {
+        // Limpiar datos y volver a activar cámara
+        fotoPreview.src = "";
+        previewContainer.style.display = "none";
+        fotoCapturadaInput.value = "";
+        activarCamara();
+    }
+
+    inputGaleria.addEventListener('change', function (event) {
+        const archivo = event.target.files[0];
+        if (archivo && archivo.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                fotoPreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+                fotoCapturadaInput.value = "";  // Limpiar foto base64 si se elige de galería
+            };
+            reader.readAsDataURL(archivo);
+        }
+    });
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% if success %}

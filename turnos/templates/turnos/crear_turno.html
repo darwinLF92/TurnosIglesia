@@ -34,6 +34,12 @@
         border-radius: 5px;
     }
 
+    .form-error {
+        color: #d9534f;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
     .btn-submit {
         width: 100%;
         padding: 10px;
@@ -56,34 +62,58 @@
     <form method="post">
         {% csrf_token %}
         
+        {% if form.non_field_errors %}
+            <div class="form-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
         <div class="form-group">
             <label for="id_procesion">Procesión:</label>
             {{ form.procesion }}
+            {% if form.procesion.errors %}
+                <div class="form-error">{{ form.procesion.errors.0 }}</div>
+            {% endif %}
         </div>
-        
+
         <div class="form-group">
             <label for="id_numero_turno">Número de Turno:</label>
             {{ form.numero_turno }}
+            {% if form.numero_turno.errors %}
+                <div class="form-error">{{ form.numero_turno.errors.0 }}</div>
+            {% endif %}
         </div>
-        
+
         <div class="form-group">
             <label for="id_referencia">Referencia:</label>
             {{ form.referencia }}
+            {% if form.referencia.errors %}
+                <div class="form-error">{{ form.referencia.errors.0 }}</div>
+            {% endif %}
         </div>
-        
+
         <div class="form-group">
             <label for="id_marcha_funebre">Marcha Fúnebre:</label>
             {{ form.marcha_funebre }}
+            {% if form.marcha_funebre.errors %}
+                <div class="form-error">{{ form.marcha_funebre.errors.0 }}</div>
+            {% endif %}
         </div>
-        
+
         <div class="form-group">
             <label for="id_capacidad">Capacidad:</label>
             {{ form.capacidad }}
+            {% if form.capacidad.errors %}
+                <div class="form-error">{{ form.capacidad.errors.0 }}</div>
+            {% endif %}
         </div>
-        
+
         <div class="form-group">
             <label for="id_valor">Valor:</label>
             {{ form.valor }}
+            {% if form.valor.errors %}
+                <div class="form-error">{{ form.valor.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <button type="submit" class="btn-submit">Crear Turno</button>

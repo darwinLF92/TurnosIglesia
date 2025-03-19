@@ -9,7 +9,10 @@ from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
+@method_decorator(login_required, name='dispatch')
 class CrearTurnoView(CreateView):
     model = Turno
     form_class = TurnoForm
@@ -55,23 +58,32 @@ class CrearTurnoView(CreateView):
         Redirige nuevamente al formulario de creación manteniendo la procesión seleccionada.
         """
         return reverse('turnos:crear_turno') + f"?procesion_id={self.request.GET.get('procesion_id', '')}"
-    
+
+@login_required    
 def lista_turnos(request):
     procesion_id = request.GET.get('procesion_id')  # Obtiene el ID de la procesión desde la URL
     turnos = None  # Inicializa turnos como None
-    procesiones = Procesion.objects.all()  # Obtiene todas las procesiones para el menú desplegable
+
+    # Solo procesiones activas
+    procesiones = Procesion.objects.filter(activo=True)
 
     if procesion_id:  # Verifica si hay un ID de procesión
         turnos = Turno.objects.filter(procesion_id=procesion_id)
 
-    return render(request, 'turnos/lista_turnos.html', {'turnos': turnos, 'procesiones': procesiones})
+    return render(request, 'turnos/lista_turnos.html', {
+        'turnos': turnos,
+        'procesiones': procesiones
+    })
 
+
+@method_decorator(login_required, name='dispatch')
 class EditarTurnoView(UpdateView):
     model = Turno
     form_class = TurnoForm
     template_name = 'turnos/editar_turno.html'
     success_url = reverse_lazy('turnos:lista_turnos')  # Asegúrate de definir esta URL
 
+@login_required
 def eliminar_turno(request, pk):
     turno = get_object_or_404(Turno, pk=pk)
     if request.method == 'POST':
@@ -79,6 +91,7 @@ def eliminar_turno(request, pk):
         return redirect('turnos:lista_turnos')
     return render(request, 'turnos/eliminar_turno.html', {'turno': turno})
 
+@login_required
 def detalle_turno(request, pk):
     turno = get_object_or_404(Turno, pk=pk)
     

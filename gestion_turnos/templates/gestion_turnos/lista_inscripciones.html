@@ -2,18 +2,24 @@
 {% block content %}
 <h2 class="titulo">Lista de Inscripciones</h2>
 
-<a href="{% url 'gestion_turnos:crear_inscripcion' %}" class="boton">Inscribir Devoto</a>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Formulario de búsqueda y filtrado -->
-<form method="GET" class="formulario-filtro">
-    <input type="text" name="nombre" placeholder="Buscar por nombre" value="{{ request.GET.nombre }}">
-    <input type="text" name="cui_o_nit" placeholder="Buscar por CUI o NIT" value="{{ request.GET.cui_o_nit }}">
-    <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
-    <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
-    <button type="submit">Filtrar</button>
-    
-</form>
+<div class="filtro-contenedor">
+    <form method="GET" class="filtros-izquierda">
+        <input type="text" name="nombre" placeholder="Buscar por nombre" value="{{ request.GET.nombre }}">
+        <input type="text" name="cui_o_nit" placeholder="Buscar por CUI o NIT" value="{{ request.GET.cui_o_nit }}">
+        <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+        <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <div class="boton-derecha">
+        <a href="{% url 'gestion_turnos:crear_inscripcion' %}" class="boton">Inscribir Devoto</a>
+    </div>
+</div>
+
 
 <div class="contenedor-tabla">
     <table class="tabla-macos">
@@ -253,21 +259,49 @@
         color: #777;
         padding: 15px;
     }
+    
 
-    .formulario-filtro {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
+    .filtro-contenedor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    margin: 0 auto 20px;
+    flex-wrap: wrap;
+}
+
+.filtros-izquierda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.boton-derecha {
+    margin-top: 10px;
+}
+
+.filtros-izquierda input,
+.filtros-izquierda button {
+    padding: 10px 15px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    min-width: 170px;
+}
+
+@media (max-width: 768px) {
+    .filtro-contenedor {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .formulario-filtro input,
-    .formulario-filtro button {
-        padding: 8px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+    .boton-derecha {
+        margin-top: 15px;
     }
+}
+
 
     .pagination {
         display: flex;

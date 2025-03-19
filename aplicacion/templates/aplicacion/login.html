@@ -5,7 +5,10 @@
 <div class="login-container">
     <div class="login-wrapper">
         <div class="login-form">
-            <h2>LOGIN</h2>
+            {% if nombre_hermandad %}
+            <h2 class="text-center mt-3">{{ nombre_hermandad }}</h2>
+            {% endif %}
+          
             <p>Ingresa tus credenciales para continuar</p>
             <form method="post">
                 {% csrf_token %}

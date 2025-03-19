@@ -15,8 +15,11 @@ from .models import MarchaFunebre, Favorito
 from .forms import MarchaFunebreForm
 from django.contrib import messages
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-@login_required(login_url='/login/')
+@login_required
 def home_view(request):
     imagenes = ImagenPresentacion.objects.filter(activo=True).order_by('-fecha_creacion')
     return render(request, 'aplicacion/home.html', {
@@ -26,11 +29,14 @@ def home_view(request):
 def login_view(request):
     error_message = None
     logo_url = None
+    nombre_hermandad = None  # Inicializa la variable
 
     # Verifica si hay un establecimiento
     establecimiento = Establecimiento.objects.first()
     if establecimiento and establecimiento.logo:
         logo_url = establecimiento.logo.url  # Obtén la URL del logo
+        nombre_hermandad = establecimiento.hermandad  # Aquí tomamos el nombre
+
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -42,15 +48,21 @@ def login_view(request):
         else:
             error_message = 'Usuario o contraseña inválidos'
 
-    # Pasa logo_url al contexto
-    return render(request, 'aplicacion/login.html', {'error_message': error_message, 'logo_url': logo_url})
+# Pasa logo_url y nombre_establecimiento al contexto
+    context = {
+        'error_message': error_message,
+        'logo_url': logo_url,
+        'nombre_hermandad': nombre_hermandad
+    }
+    return render(request, 'aplicacion/login.html', context)
 
-
+@login_required
 def logout_view(request):
     logout(request)
     return redirect('aplicacion:login')  
 
 # Vista para listar configuraciones
+@method_decorator(login_required, name='dispatch')
 class ConfiguracionHomeListView(ListView):
     model = ConfiguracionHome
     template_name = 'aplicacion/configuracion_home_list.html'
@@ -58,6 +70,7 @@ class ConfiguracionHomeListView(ListView):
 
 
 # Vista para crear una nueva configuración
+@method_decorator(login_required, name='dispatch')
 class ConfiguracionHomeCreateView(CreateView):
     model = ConfiguracionHome
     form_class = ConfiguracionHomeForm
@@ -65,6 +78,7 @@ class ConfiguracionHomeCreateView(CreateView):
     success_url = reverse_lazy('aplicacion:configuracion_home_list')
 
 # Vista para editar una configuración existente
+@method_decorator(login_required, name='dispatch')
 class ConfiguracionHomeUpdateView(UpdateView):
     model = ConfiguracionHome
     form_class = ConfiguracionHomeForm
@@ -72,32 +86,39 @@ class ConfiguracionHomeUpdateView(UpdateView):
     success_url = reverse_lazy('aplicacion:configuracion_home_list')
 
 # Vista para eliminar una configuración
+@method_decorator(login_required, name='dispatch')
 class ConfiguracionHomeDeleteView(DeleteView):
     model = ConfiguracionHome
     template_name = 'aplicacion/configuracion_home_confirm_delete.html'
     success_url = reverse_lazy('aplicacion:configuracion_home_list')
+
+@method_decorator(login_required, name='dispatch')
 class InformacionListView(ListView):
     model = Informacion
     template_name = 'informacion_list.html'
     context_object_name = 'informacion'
 
+@method_decorator(login_required, name='dispatch')
 class InformacionCreateView(CreateView):
     model = Informacion
     form_class = InformacionForm
     template_name = 'informacion_form.html'
     success_url = reverse_lazy('inicio')
 
+@method_decorator(login_required, name='dispatch')
 class InformacionUpdateView(UpdateView):
     model = Informacion
     form_class = InformacionForm
     template_name = 'informacion_form.html'
     success_url = reverse_lazy('inicio')
 
+@method_decorator(login_required, name='dispatch')
 class InformacionDeleteView(DeleteView):
     model = Informacion
     template_name = 'informacion_confirm_delete.html'
     success_url = reverse_lazy('inicio')
 
+@login_required
 def quienes_somos_view(request):
     info = Informacion.objects.last()  # O puedes usar .first() si solo habrá un registro
     config = ConfiguracionHome.objects.filter(seccion='quienes_somos', activo=True).first()
@@ -106,6 +127,7 @@ def quienes_somos_view(request):
         'config': config,
     })
 
+@login_required
 def crear_informacion(request):
     if request.method == 'POST':
         form_info = InformacionForm(request.POST)
@@ -124,12 +146,13 @@ def crear_informacion(request):
         'form_info': form_info
     })
 
+@method_decorator(login_required, name='dispatch')
 class InformacionListView(ListView):
     model = Informacion
     template_name = 'aplicacion/informacion_list.html'
     context_object_name = 'informaciones'
 
-
+@login_required
 def editar_informacion(request, pk):
     info = get_object_or_404(Informacion, pk=pk)
 
@@ -156,43 +179,46 @@ def editar_informacion(request, pk):
         'info': info
     })
 
+@method_decorator(login_required, name='dispatch')
 class InformacionDeleteView(DeleteView):
     model = Informacion
     template_name = 'aplicacion/informacion_confirm_delete.html'
     success_url = reverse_lazy('aplicacion:informacion_listar')
 
-
+@login_required
 @require_POST
 def eliminar_imagen(request, pk):
     imagen = get_object_or_404(ImagenInformacion, pk=pk)
     imagen.delete()
     return redirect(request.META.get('HTTP_REFERER', 'informacion_list'))
 
-
+@method_decorator(login_required, name='dispatch')
 class ImagenPresentacionCreateView(CreateView):
     model = ImagenPresentacion
     form_class = ImagenPresentacionForm
     template_name = 'aplicacion/imagen_presentacion_form.html'
     success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
 
+@method_decorator(login_required, name='dispatch')
 class ImagenPresentacionListView(ListView):
     model = ImagenPresentacion
     template_name = 'aplicacion/imagen_presentacion_list.html'
     context_object_name = 'imagenes'
 
+@method_decorator(login_required, name='dispatch')
 class ImagenPresentacionUpdateView(UpdateView):
     model = ImagenPresentacion
     form_class = ImagenPresentacionForm
     template_name = 'aplicacion/imagen_presentacion_form.html'
     success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
 
-
+@method_decorator(login_required, name='dispatch')
 class ImagenPresentacionDeleteView(DeleteView):
     model = ImagenPresentacion
     template_name = 'aplicacion/imagen_presentacion_confirm_delete.html'
     success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
 
-
+@login_required
 def lista_marchas(request):
     query = request.GET.get('q', '')
     filtro = request.GET.get('filtro', 'todas')
@@ -216,6 +242,7 @@ def lista_marchas(request):
         'favoritas_usuario': favoritas_usuario,
     })
 
+@login_required
 def subir_marcha(request):
     if request.method == 'POST':
         form = MarchaFunebreForm(request.POST, request.FILES)
@@ -227,6 +254,7 @@ def subir_marcha(request):
     
     return render(request, 'aplicacion/subir_marcha.html', {'form': form})
 
+@login_required
 def aumentar_favorito(request, marcha_id):
     marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
     marcha.favoritos += 1

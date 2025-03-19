@@ -10,9 +10,11 @@ from .forms import EditUserForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 
-
+@login_required
 def crear_usuario(request):
     grupos = Group.objects.all()  # Obtener todos los grupos disponibles
     if request.method == 'POST':
@@ -38,12 +40,12 @@ def crear_usuario(request):
 
     return render(request, 'crear_usuario.html', {'form': form, 'grupos': grupos})
 
-
+@login_required
 def lista_usuarios(request):
     usuarios = User.objects.filter(is_active=True)
     return render(request, 'lista_usuarios.html', {'usuarios': usuarios})
 
-
+@login_required
 def editar_usuario(request, user_id):
     user_instance = get_object_or_404(User, pk=user_id)
 
@@ -133,7 +135,7 @@ class CrearRolView(LoginRequiredMixin, CreateView):
         messages.error(self.request, "Hubo un error al crear el rol. Inténtelo de nuevo.")
         return self.render_to_response(self.get_context_data(form=form, success=False))
     
-
+@login_required
 def editar_role(request, pk):
     grupo = get_object_or_404(Group, pk=pk)
     

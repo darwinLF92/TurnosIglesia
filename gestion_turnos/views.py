@@ -23,8 +23,11 @@ from django.contrib import messages
 from django.utils import timezone
 import json
 from weasyprint import CSS
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 
+@login_required
 def inscribir_devoto(request):
     if request.method == 'POST':
         print("📌 Datos recibidos en POST:", request.POST)  # ✅ Agregar para depuración
@@ -58,7 +61,7 @@ def inscribir_devoto(request):
         'procesiones': procesiones  # ✅ Se pasa al contexto
     })
 
-
+@login_required
 def obtener_precio_turno(request):
     turno_id = request.GET.get('turno_id')
     if turno_id:
@@ -69,14 +72,18 @@ def obtener_precio_turno(request):
             return JsonResponse({'error': 'Turno no encontrado'}, status=404)
     return JsonResponse({'error': 'ID de turno no proporcionado'}, status=400)
 
-class ListaInscripciones(ListView):
+@method_decorator(login_required, name='dispatch')
+class ListaInscripciones(ListView): 
     model = RegistroInscripcion
     template_name = "gestion_turnos/lista_inscripciones.html"
     context_object_name = "inscripciones"
-    paginate_by = 7  # Ajustar para probar la paginación
+    paginate_by = 7
 
     def get_queryset(self):
-        queryset = RegistroInscripcion.objects.select_related("devoto").order_by("-fecha_inscripcion")
+        # Mostrar solo inscripciones activas (inscrito=True)
+        queryset = RegistroInscripcion.objects.filter(
+            inscrito=True
+        ).select_related("devoto").order_by("-fecha_inscripcion")
 
         # Capturar los parámetros de búsqueda desde la URL
         nombre = self.request.GET.get("nombre", "").strip()
@@ -84,15 +91,12 @@ class ListaInscripciones(ListView):
         fecha_inicio = self.request.GET.get("fecha_inicio", "").strip()
         fecha_fin = self.request.GET.get("fecha_fin", "").strip()
 
-        # Filtrar por nombre del devoto si el campo existe
         if nombre:
             queryset = queryset.filter(devoto__nombre__icontains=nombre)
 
-        # Filtrar por CUI/NIT
         if cui_o_nit:
             queryset = queryset.filter(devoto__cui_o_nit__icontains=cui_o_nit)
 
-        # Filtrar por rango de fechas
         if fecha_inicio:
             fecha_inicio = parse_date(fecha_inicio)
             if fecha_inicio:
@@ -103,20 +107,20 @@ class ListaInscripciones(ListView):
             if fecha_fin:
                 queryset = queryset.filter(fecha_inscripcion__lte=fecha_fin)
 
-        return queryset  # 🔥 Dejar que ListView maneje la paginación
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 🚀 Añadir control de paginación al contexto
         page = self.request.GET.get("page", 1)
         paginator = Paginator(self.get_queryset(), self.paginate_by)
         page_obj = paginator.get_page(page)
 
-        context["inscripciones"] = page_obj  # Asegurar que el contexto tenga paginación
+        context["inscripciones"] = page_obj
         return context
 
 
+@login_required
 def load_turnos(request):
     procesion_id = request.GET.get('procesion_id')
     if procesion_id:
@@ -124,22 +128,24 @@ def load_turnos(request):
         return JsonResponse(list(turnos), safe=False)
     return JsonResponse([], safe=False)
 
+@login_required
 def ajax_devotos_activos(request):
     devotos = Devoto.objects.filter(activo=True).values('id', 'nombre', 'cui_o_nit')
     return JsonResponse(list(devotos), safe=False)
 
-
+@login_required
 def ajax_procesiones_activas(request):
     procesiones = Procesion.objects.filter(activo=True).values('id', 'nombre')
     return JsonResponse(list(procesiones), safe=False)
 
-
+@login_required
 def buscar_devotos_list(request):
     termino_busqueda = request.GET.get('q', '')
     devotos = Devoto.objects.filter(nombre__icontains=termino_busqueda).values('nombre')[:10]  # Limita los resultados a 10
     return JsonResponse(list(devotos), safe=False)
 
 # Vista para anular una inscripción
+@method_decorator(login_required, name='dispatch')
 class AnularInscripcionView(View):
     def get(self, request, inscripcion_id):
         """Renderiza la plantilla de confirmación de anulación."""
@@ -178,12 +184,14 @@ class AnularInscripcionView(View):
         messages.success(request, "Inscripción anulada correctamente.")
         return render(request, 'gestion_turnos/anular_inscripcion.html', {'inscripcion': inscripcion})
 # Vista para generar el comprobante de inscripción
+@method_decorator(login_required, name='dispatch')
 class ComprobanteInscripcionView(View):
     def get(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
         html = render_to_string('gestion_turnos/comprobante_inscripcion.html', {'inscripcion': inscripcion})
         return HttpResponse(html)
     
+@method_decorator(login_required, name='dispatch')
 class ComprobanteRecepcionView(View):
     def get(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
@@ -192,12 +200,13 @@ class ComprobanteRecepcionView(View):
 
 
 # Vista para el detalle de inscripción
+@method_decorator(login_required, name='dispatch')
 class DetalleInscripcionView(View):
     def get(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
         return render(request, 'gestion_turnos/detalle_inscripcion.html', {'inscripcion': inscripcion})
     
-
+@method_decorator(login_required, name='dispatch')
 class ComprobanteInscripcionPDFView(View):
     def get(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
@@ -213,7 +222,8 @@ class ComprobanteInscripcionPDFView(View):
         response = HttpResponse(pdf_content, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="comprobante_{inscripcion.id}.pdf"'
         return response
-    
+
+@method_decorator(login_required, name='dispatch')    
 class ComprobanteRecepcionPDFView(View):
     def get(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
@@ -231,7 +241,7 @@ class ComprobanteRecepcionPDFView(View):
         return response
 
 
-
+@method_decorator(login_required, name='dispatch')
 class EnviarComprobanteWhatsAppView(View):
     def get(self, request, inscripcion_id):
         # Obtener la inscripción
@@ -286,7 +296,7 @@ class EnviarComprobanteWhatsAppView(View):
         # Retornar la URL de WhatsApp
         return JsonResponse({"whatsapp_url": whatsapp_url}, status=200)
     
-
+@method_decorator(login_required, name='dispatch')
 class ListaEntregaTurnos(View):
     template_name = "gestion_turnos/lista_entrega_turnos.html"
 
@@ -320,7 +330,7 @@ class ListaEntregaTurnos(View):
 
 
 
-
+@method_decorator(login_required, name='dispatch')
 class EntregarTurnoView(View):
     def post(self, request, inscripcion_id):
         inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id, inscrito=True, entregado=False)
@@ -332,26 +342,41 @@ class EntregarTurnoView(View):
 
         messages.success(request, f"Turno entregado correctamente a {inscripcion.devoto.nombre}.")
         return JsonResponse({"success": True})
-    
+
+@method_decorator(login_required, name='dispatch')   
 class ValidarEntregaTurnoView(View):
     def post(self, request, inscripcion_id):
         try:
             data = json.loads(request.body)
-            id_ingresado = data.get("id_inscripcion")
+            codigo_ingresado = data.get("id_inscripcion")
 
-            # Obtener la inscripción si está pendiente de entrega
-            inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id, inscrito=True, entregado=False)
+            # Buscar la inscripción válida (activa, no entregada)
+            inscripcion = get_object_or_404(
+                RegistroInscripcion,
+                id=inscripcion_id,
+                inscrito=True,
+                entregado=False
+            )
 
-            # Validar que el ID ingresado coincida con la inscripción
-            if str(inscripcion.id) != str(id_ingresado):
-                return JsonResponse({"success": False, "message": "El ID ingresado es incorrecto. Verifique e intente nuevamente."}, status=400)
+            # Validar usando el campo 'codigo'
+            if str(inscripcion.codigo).strip() != str(codigo_ingresado).strip():
+                return JsonResponse({
+                    "success": False,
+                    "message": "El código ingresado no coincide con la inscripción. Verifique e intente nuevamente."
+                }, status=400)
 
             # Marcar como entregado
             inscripcion.entregado = True
             inscripcion.fecha_entrega = timezone.now()
             inscripcion.save()
 
-            return JsonResponse({"success": True, "message": "Turno entregado correctamente."})
+            return JsonResponse({
+                "success": True,
+                "message": "Turno entregado correctamente."
+            })
 
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Error en la solicitud. Intente nuevamente."}, status=400)
+            return JsonResponse({
+                "success": False,
+                "message": "Error en la solicitud. Intente nuevamente."
+            }, status=400)
