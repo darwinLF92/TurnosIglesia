@@ -1,16 +1,104 @@
 {% extends 'aplicacion/base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
+<style>
+    .card-upload {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .card-upload h2 {
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .btn-success {
+        background-color: #198754;
+        border: none;
+        padding: 10px 25px;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+
+    .btn-secondary {
+        padding: 10px 25px;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+
+    .form-text-muted {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .descripcion-ajustada {
+    height: 45px !important; /* igual altura que el input título */
+    resize: none; /* opcional: para evitar que el usuario lo cambie */
+    overflow-y: hidden; /* quita barra de scroll */
+}
+
+</style>
+
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Subir Marcha Fúnebre</h2>
-    <form method="post" enctype="multipart/form-data" class="card p-4 shadow">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="text-center">
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="{% url 'aplicacion:lista_marchas' %}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
+    <div class="card-upload">
+        <h2>🎼 Subir Marcha Fúnebre</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                {{ form.titulo.label_tag }}
+                {{ form.titulo|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.descripcion.label_tag }}
+                {{ form.descripcion|add_class:"form-control descripcion-ajustada" }}
+            </div>
+            
+
+            <div class="mb-3">
+                {{ form.audio.label_tag }}
+                {{ form.audio|add_class:"form-control" }}
+                <div class="form-text-muted">Archivo de audio en formato MP3.</div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.imagen_portada.label_tag }}
+                {{ form.imagen_portada|add_class:"form-control" }}
+                <div class="form-text-muted">Opcional. Imagen que se mostrará como portada.</div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.duracion.label_tag }}
+                {{ form.duracion|add_class:"form-control" }}
+                <div class="form-text-muted">Ejemplo: 5:30</div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success me-2">
+                    <i class="fas fa-upload"></i> Guardar
+                </button>
+                <a href="{% url 'aplicacion:lista_marchas' %}" class="btn btn-secondary">
+                    ❌ Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<!-- Font Awesome (para íconos opcionales si no están en base.html) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 {% endblock %}

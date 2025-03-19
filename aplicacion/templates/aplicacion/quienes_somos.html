@@ -68,6 +68,32 @@
     .modal-img-bg .close-modal:hover {
         color: #ccc;
     }
+    .nav-arrow {
+    position: absolute;
+    top: 50%;
+    font-size: 40px;
+    font-weight: bold;
+    background: none;
+    color: rgb(165, 164, 164);
+    border: none;
+    cursor: pointer;
+    z-index: 1100;
+    padding: 10px;
+    transform: translateY(-50%);
+    user-select: none;
+}
+
+.nav-arrow.left {
+    left: 20px;
+}
+
+.nav-arrow.right {
+    right: 20px;
+}
+
+.nav-arrow:hover {
+    color: #ccc;
+}
 
 
 </style>
@@ -81,36 +107,60 @@
         </div>
 
         {% if info.imagenes.all %}
-            <div class="image-grid mt-4">
-                {% for img in info.imagenes.all %}
-                    <div class="zoom-img" onclick="mostrarModal('{{ img.imagen.url }}')">
-                        <img src="{{ img.imagen.url }}" alt="Imagen relacionada">
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="image-grid mt-4">
+            {% for img in info.imagenes.all %}
+                <div class="zoom-img" onclick="mostrarModal({{ forloop.counter0 }})">
+                    <img src="{{ img.imagen.url }}" alt="Imagen relacionada">
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
     {% endif %}
 </div>
 
 <!-- Modal de imagen -->
+<!-- Modal de imagen -->
 <div id="modalImagen" class="modal-img-bg">
     <span class="close-modal" onclick="cerrarModal()">&times;</span>
+    <button class="nav-arrow left" onclick="cambiarImagen(-1)">&#10094;</button>
     <img id="modalImg" src="">
+    <button class="nav-arrow right" onclick="cambiarImagen(1)">&#10095;</button>
 </div>
 
+
 <script>
-    function mostrarModal(src) {
-        const modal = document.getElementById("modalImagen");
-        const img = document.getElementById("modalImg");
-        img.src = src;
-        modal.classList.add("show");
+    const imagenes = [
+        {% for img in info.imagenes.all %}
+            "{{ img.imagen.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let imagenActual = 0;
+
+    function mostrarModal(indice) {
+        imagenActual = indice;
+        document.getElementById("modalImg").src = imagenes[imagenActual];
+        document.getElementById("modalImagen").classList.add("show");
+    }
+
+    function cambiarImagen(direccion) {
+        imagenActual += direccion;
+
+        // Si pasa del límite, vuelve al inicio o final
+        if (imagenActual < 0) {
+            imagenActual = imagenes.length - 1;
+        } else if (imagenActual >= imagenes.length) {
+            imagenActual = 0;
+        }
+
+        document.getElementById("modalImg").src = imagenes[imagenActual];
     }
 
     function cerrarModal() {
         document.getElementById("modalImagen").classList.remove("show");
     }
 
-    // Cerrar modal si se hace clic fuera de la imagen
     window.onclick = function (event) {
         const modal = document.getElementById("modalImagen");
         const modalImg = document.getElementById("modalImg");

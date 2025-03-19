@@ -174,6 +174,12 @@
                     
                     <span class="flex-grow-1">{{ marcha.titulo }}</span>
 
+                    <a href="#" class="btn-delete" title="Eliminar" data-marchaid="{{ marcha.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+
+                    <a href="#" class="editar-btn" title="Editar" data-marchaid="{{ marcha.id }}" onclick="event.stopPropagation();"><i class="fas fa-edit"></i></a>
+                    
                     <button onclick="reproducirMarcha('{{ marcha.audio.url }}', '{{ marcha.titulo|escapejs }}', '{{ marcha.descripcion|default:""|escapejs }}', '{% if marcha.imagen_portada %}{{ marcha.imagen_portada.url }}{% else %}/media/imagenes_marchas/Portada_default.webp{% endif %}', '{{ marcha.id }}')" 
                             class="btn btn-sm btn-outline-secondary me-2" title="Reproducir">
                         ▶
@@ -248,6 +254,54 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        $(".editar-btn").click(function() {
+        var marchaID = $(this).data("marchaid");
+        if (!marchaID) { console.error("Error: Marcha ID no definido."); return; }
+        var formulario = "{% url 'aplicacion:editar_marcha' 0 %}".replace("0", marchaID);
+
+        Swal.fire({
+            title: 'Editar Marcha Fúnebre',
+            html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+            didClose: () => { location.reload(); },
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data === 'closeModal') { Swal.close(); }
+        });
+
+        return false;
+    });
+
+    $(".btn-delete").click(function() {
+        var marchaID = $(this).data("marchaid");
+        if (!marchaID) { console.error("Error: Marcha ID no definido."); return; }
+        var formulario = "{% url 'aplicacion:eliminar_marcha' 0 %}".replace("0", marchaID);
+
+        Swal.fire({
+            title: 'Eliminar Marcha Fúnebre',
+            html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
+            didClose: () => { location.reload(); },
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data === 'closeModal') { Swal.close(); }
+        });
+
+        return false;
+    });
+});
+</script>
+
 <script>
     let currentMarchaIndex = -1;
     let marchasLista = [];
@@ -307,9 +361,6 @@
         }
     }
 };
-
-
-
 
         document.getElementById('tituloMarcha').innerText = titulo;
         document.getElementById('descripcionMarcha').innerText = descripcion;
@@ -456,6 +507,8 @@ function toggleAleatorio() {
         icono.title = 'Modo aleatorio desactivado';
     }
 }
+
+
 
 </script>
 

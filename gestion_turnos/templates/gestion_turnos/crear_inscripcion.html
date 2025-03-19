@@ -226,6 +226,17 @@
 
 <!-- Bootstrap JS (si no está en base.html) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% if error_message %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error de inscripción',
+        html: '{{ error_message.0|escapejs }}',
+        confirmButtonText: 'Aceptar'
+    });
+</script>
+{% endif %}
 
 <script>
     function seleccionarDevoto(id, nombre) {
@@ -278,7 +289,7 @@
                         data.forEach(function (item) {
                             var option = document.createElement('option');
                             option.value = item.id;
-                            option.text = "Turno " + item.numero_turno;
+                            option.text = "Turno " + item.numero_turno + " - " + item.referencia;
                             turnoSelect.appendChild(option);
                         });
                     })
@@ -309,10 +320,17 @@
         });
 
         document.getElementById('id_monto_pagado').addEventListener('input', function () {
-            var valorTurno = parseFloat(document.getElementById('id_valor_turno_hidden').value) || 0;
-            var montoPagado = parseFloat(this.value) || 0;
-            var cambio = Math.max(montoPagado - valorTurno, 0);
-            document.getElementById('id_cambio').value = cambio.toFixed(2);
+        var valorTurno = parseFloat(document.getElementById('id_valor_turno_hidden').value) || 0;
+        var montoPagado = parseFloat(this.value) || 0;
+        var cambio = Math.max(montoPagado - valorTurno, 0);
+        document.getElementById('id_cambio').value = cambio.toFixed(2);
+        });
+
+        // ✅ Este es el nuevo código que necesitas:
+        document.getElementById('id_monto_pagado').addEventListener('focus', function () {
+            if (this.value === "0.00") {
+                this.value = "";
+            }
         });
     });
 </script>

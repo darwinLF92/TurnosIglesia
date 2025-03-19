@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'aplicacion',
     'usuarios',
     'establecimiento',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

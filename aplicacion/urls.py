@@ -46,6 +46,8 @@ urlpatterns = [
      # urls.py
     path('marchas/favorito/toggle/<int:marcha_id>/', views.toggle_favorito, name='toggle_favorito'),
     path('marchas/es-favorita/<int:marcha_id>/', views.es_favorita, name='es_favorita'),
+    path('marchas/<int:marcha_id>/editar/', views.editar_marcha, name='editar_marcha'),
+    path('marchas/<int:marcha_id>/eliminar/', views.eliminar_marcha, name='eliminar_marcha'),
 
 
 

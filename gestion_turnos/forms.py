@@ -2,6 +2,7 @@ from django import forms
 from .models import RegistroInscripcion
 from procesiones.models import Procesion
 from turnos.models import Turno
+from django.core.exceptions import ValidationError
 
 class InscripcionForm(forms.ModelForm):
     procesion = forms.ModelChoiceField(queryset=Procesion.objects.all(), required=True, label="Procesión")
@@ -47,6 +48,22 @@ class InscripcionForm(forms.ModelForm):
             self.fields['fecha_entrega_estimada'].initial = self.instance.fecha_entrega_estimada
             self.fields['lugar_entrega'].initial = self.instance.lugar_entrega
 
+    def clean(self):
+        cleaned_data = super().clean()
+        devoto = cleaned_data.get("devoto")
+        turno = cleaned_data.get("turno")
+
+        if devoto and turno:
+         existe = RegistroInscripcion.objects.filter(
+            devoto=devoto,
+            turno=turno,
+            inscrito=True
+        )
+        if self.instance.pk:
+            existe = existe.exclude(pk=self.instance.pk)
+
+        if existe.exists():
+            raise ValidationError("Este devoto ya está inscrito en el turno seleccionado.")
 
 # Formulario para anular inscripción
 class AnularInscripcionForm(forms.ModelForm):

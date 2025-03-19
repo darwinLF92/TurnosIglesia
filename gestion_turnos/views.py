@@ -30,7 +30,6 @@ from django.utils.decorators import method_decorator
 @login_required
 def inscribir_devoto(request):
     if request.method == 'POST':
-        print("📌 Datos recibidos en POST:", request.POST)  # ✅ Agregar para depuración
         
         form = InscripcionForm(request.POST)
         if form.is_valid():
@@ -39,15 +38,17 @@ def inscribir_devoto(request):
 
             # ✅ Obtener el valor del turno antes de guardar
             if inscripcion.turno:
-                print(f"📌 Turno seleccionado antes de guardar: {inscripcion.turno.id}")
                 inscripcion.valor_turno = inscripcion.turno.valor  # Verifica que sea el campo correcto en el modelo
 
             inscripcion.save()
             return redirect(reverse('gestion_turnos:lista_inscripciones'))
         else:
             print("🚨 ERRORES EN EL FORMULARIO:", form.errors)
-            return render(request, 'gestion_turnos/crear_inscripcion.html', {'form': form})  
-
+            error_message = form.non_field_errors()
+            return render(request, 'gestion_turnos/crear_inscripcion.html', {
+                'form': form,
+                'error_message': error_message,
+            })
     else:
         form = InscripcionForm()
 
@@ -124,7 +125,7 @@ class ListaInscripciones(ListView):
 def load_turnos(request):
     procesion_id = request.GET.get('procesion_id')
     if procesion_id:
-        turnos = Turno.objects.filter(procesion_id=procesion_id).values('id', 'numero_turno')
+        turnos = Turno.objects.filter(procesion_id=procesion_id).values('id', 'numero_turno', 'referencia')
         return JsonResponse(list(turnos), safe=False)
     return JsonResponse([], safe=False)
 

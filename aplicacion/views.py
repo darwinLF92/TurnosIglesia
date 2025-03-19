@@ -279,3 +279,46 @@ def toggle_favorito(request, marcha_id):
 def es_favorita(request, marcha_id):
     es_fav = Favorito.objects.filter(usuario=request.user, marcha_id=marcha_id).exists()
     return JsonResponse({'favorita': es_fav})
+
+@login_required
+def editar_marcha(request, marcha_id):
+    marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
+
+    if request.method == 'POST':
+        form = MarchaFunebreForm(request.POST, request.FILES, instance=marcha)
+        if form.is_valid():
+            form.save()
+            return render(request, 'aplicacion/editar_marcha.html', {
+                'form': form,
+                'success': True,
+                'message': f"La marcha '{form.instance.titulo}' fue actualizada correctamente."
+            })
+        else:
+            return render(request, 'aplicacion/editar_marcha.html', {
+                'form': form,
+                'message': "Hubo un error al actualizar la marcha."
+            })
+    else:
+        form = MarchaFunebreForm(instance=marcha)
+
+    return render(request, 'aplicacion/editar_marcha.html', {'form': form})
+
+
+@login_required
+def eliminar_marcha(request, marcha_id):
+    marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
+
+    if request.method == 'POST':
+        titulo = marcha.titulo
+        marcha.delete()
+        messages.success(request, f"La marcha '{titulo}' fue eliminada correctamente.")
+        return render(request, 'aplicacion/editar_marcha.html', {
+            'form': None,
+            'marcha_eliminada': True,
+            'titulo_marcha': titulo
+        })
+
+    return render(request, 'aplicacion/eliminar_marcha.html', {
+        'marcha': marcha
+    })
+
