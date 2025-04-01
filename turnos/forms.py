@@ -18,7 +18,13 @@ class TurnoForm(forms.ModelForm):
         numero_turno = cleaned_data.get('numero_turno')
 
         if procesion and numero_turno:
-            if Turno.objects.filter(procesion=procesion, numero_turno=numero_turno).exists():
+            # Excluir el turno actual al validar duplicado
+            qs = Turno.objects.filter(procesion=procesion, numero_turno=numero_turno)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
                 self.add_error('numero_turno', f"Ya existe un turno número {numero_turno} para esta procesión.")
-        
+
         return cleaned_data
+

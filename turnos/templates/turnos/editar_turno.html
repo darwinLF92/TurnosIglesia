@@ -1,4 +1,3 @@
-
 {% block content %}
 
 <style>
@@ -33,6 +32,12 @@
         padding: 8px;
         border: 1px solid #ccc;
         border-radius: 5px;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
     }
 
     .btn-container {
@@ -70,38 +75,57 @@
 </style>
 
 <div class="form-container">
-   
+    <h2>Editar Turno</h2>
+
     <form method="post">
         {% csrf_token %}
         
         <div class="form-group">
             <label for="id_procesion">Procesión:</label>
             {{ form.procesion }}
+            {% if form.procesion.errors %}
+                <div class="text-danger">{{ form.procesion.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_numero_turno">Número de Turno:</label>
             {{ form.numero_turno }}
+            {% if form.numero_turno.errors %}
+                <div class="text-danger">{{ form.numero_turno.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_referencia">Referencia:</label>
             {{ form.referencia }}
+            {% if form.referencia.errors %}
+                <div class="text-danger">{{ form.referencia.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_marcha_funebre">Marcha Fúnebre:</label>
             {{ form.marcha_funebre }}
+            {% if form.marcha_funebre.errors %}
+                <div class="text-danger">{{ form.marcha_funebre.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_capacidad">Capacidad:</label>
             {{ form.capacidad }}
+            {% if form.capacidad.errors %}
+                <div class="text-danger">{{ form.capacidad.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_valor">Valor:</label>
             {{ form.valor }}
+            {% if form.valor.errors %}
+                <div class="text-danger">{{ form.valor.errors.0 }}</div>
+            {% endif %}
         </div>
         
         <div class="btn-container">
@@ -110,5 +134,37 @@
         </div>
     </form>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if success %}
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: '{{ message }}',
+                confirmButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.parent.postMessage('closeModal', '*');
+                }
+            });
+        {% endif %}
 
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: '{% if message.tags == "success" %}success{% else %}error{% endif %}',
+                    title: '{% if message.tags == "success" %}Éxito{% else %}Error{% endif %}',
+                    text: '{{ message }}',
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed && '{{ message.tags }}' == 'success') {
+                        window.parent.postMessage('closeModal', '*'); // Cerrar modal si el mensaje es de éxito
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    });
+</script>
 {% endblock %}
+

@@ -121,7 +121,7 @@
     <table class="info">
         <tr>
             <th>Fecha de Inscripción:</th>
-            <td>{{ inscripcion.fecha_inscripcion }}</td>
+            <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</td>
         </tr>
         <tr>
             <th>Devoto:</th>
@@ -147,7 +147,10 @@
         </tr>
         <tr>
             <th>Fecha Entrega Turno:</th>
-            <td>{{ inscripcion.fecha_entrega_estimada }}</td>
+            <td>
+                {{ inscripcion.fecha_entrega_estimada|date:"d-m-y" }} a las {{ inscripcion.fecha_entrega_estimada|date:"H:i" }} Horas
+            </td>
+            
         </tr>
         <tr>
             <th>Lugar de Entrega:</th>

@@ -4,6 +4,7 @@
     <h2>Lista de Procesiones</h2>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+
     <div class="d-flex justify-content-between mb-3">
         <button id="crearProcesion" class="btn btn-custom">
             Crear Procesión <i class='bx bx-plus'></i>
@@ -11,6 +12,12 @@
         <!-- Input de búsqueda -->
         <input type="text" id="searchInput" class="form-control w-25" placeholder="Buscar procesión...">
     </div>
+<!-- Botón corregido -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reporteTurnosModal">
+    Abrir Reporte
+</button>
+
+      
 
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -27,9 +34,9 @@
                 {% for procesion in procesiones %}
                 <tr class="procesion-row">
                     <td class="procesion-nombre">{{ procesion.nombre }}</td>
-                    <td>{{ procesion.fecha }}</td>
+                    <td>{{ procesion.fecha|date:"d/m/Y" }}</td>
                     <td class="procesion-descripcion">{{ procesion.descripcion }}</td>
-                    <td>{{ procesion.nombre }}</td>
+                    <td>{{ procesion.total_turnos }}</td>
                     <td>
                         <a href="#" class="editar-btn" title="Editar" data-procesionid="{{ procesion.id }}">
                             <i class="fas fa-edit"></i>
@@ -48,6 +55,61 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Modal -->
+<div class="modal fade" id="reporteTurnosModal" tabindex="-1" aria-labelledby="reporteTurnosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title" id="reporteTurnosLabel">Reporte por Turnos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+  
+        <div class="modal-body">
+          <form id="formReporteTurnos" class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label for="anioSelect" class="form-label">Año</label>
+              <select id="anioSelect" class="form-select">
+                <option value="">Seleccione Año</option>
+                {% for anio in anios %}
+                  <option value="{{ anio }}">{{ anio }}</option>
+                {% endfor %}
+              </select>
+            </div>
+  
+            <div class="col-md-5">
+              <label for="procesionSelect" class="form-label">Procesión</label>
+              <select id="procesionSelect" class="form-select" disabled>
+                <option value="">Seleccione Procesión</option>
+              </select>
+            </div>
+  
+            <div class="col-md-4">
+              <label for="turnoSelect" class="form-label">Turno</label>
+              <select id="turnoSelect" class="form-select" disabled>
+                <option value="">Todos los Turnos</option>
+              </select>
+            </div>
+  
+            <div class="col-md-12 text-end">
+              <button type="button" id="btnConsultarReporte" class="btn btn-primary">Consultar</button>
+            </div>
+            <div class="text-end mt-3">
+                <a id="btnExportPDF" class="btn btn-danger">Exportar PDF</a>
+                <a id="btnExportExcel" class="btn btn-success">Exportar Excel</a>
+            </div>
+            
+          </form>
+  
+          <div id="reporteContenido">
+            <!-- Aquí se cargará la tabla del reporte -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -125,6 +187,133 @@
             return false;
         });
     });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const anioSelect = document.getElementById('anioSelect');
+    const procesionSelect = document.getElementById('procesionSelect');
+    const turnoSelect = document.getElementById('turnoSelect');
+    const btnConsultar = document.getElementById('btnConsultarReporte');
+    const reporteContenido = document.getElementById('reporteContenido');
+
+// Cargar años al abrir el modal si está vacío
+const cargarAnios = () => {
+        if (anioSelect.options.length <= 1) {
+            fetch('/obtener-anios/')
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(anio => {
+                        const option = document.createElement('option');
+                        option.value = anio;
+                        option.textContent = anio;
+                        anioSelect.appendChild(option);
+                    });
+                });
+        }
+    };
+
+    // Activar cuando se abre el modal
+    const modalReporte = document.getElementById('reporteTurnosModal');
+    modalReporte.addEventListener('show.bs.modal', cargarAnios);
+
+
+    anioSelect.addEventListener('change', () => {
+        const anio = anioSelect.value;
+        procesionSelect.innerHTML = '<option value="">Seleccione Procesión</option>';
+        turnoSelect.innerHTML = '<option value="">Todos los Turnos</option>';
+        turnoSelect.disabled = true;
+
+        if (anio) {
+            fetch(`/ajax/obtener-procesiones/?anio=${anio}`)
+                .then(res => res.json())
+                .then(data => {
+                    procesionSelect.disabled = false;
+                    data.forEach(p => {
+                        procesionSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+                    });
+                });
+        } else {
+            procesionSelect.disabled = true;
+        }
+    });
+
+    procesionSelect.addEventListener('change', () => {
+        const procesionId = procesionSelect.value;
+        turnoSelect.innerHTML = '<option value="">Todos los Turnos</option>';
+
+        if (procesionId) {
+            fetch(`/ajax/obtener-turnos/?procesion_id=${procesionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    turnoSelect.disabled = false;
+                    data.forEach(t => {
+                        turnoSelect.innerHTML += `<option value="${t.id}">Turno ${t.numero_turno}</option>`;
+                    });
+                });
+        } else {
+            turnoSelect.disabled = true;
+        }
+    });
+
+    btnConsultar.addEventListener('click', () => {
+        const anio = anioSelect.value;
+        const procesionId = procesionSelect.value;
+        const turnoId = turnoSelect.value;
+
+        if (!procesionId) {
+            alert("Debe seleccionar una procesión.");
+            return;
+        }
+
+        fetch(`/ajax/reporte-turnos/?anio=${anio}&procesion_id=${procesionId}&turno_id=${turnoId}`)
+            .then(res => res.json())
+            .then(data => {
+                let html = `<p><strong>Nombre Procesión:</strong> ${data.procesion_nombre}</p>
+                            <p><strong>Fecha Procesión:</strong> ${data.fecha_procesion}</p>`;
+
+                html += `<table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Turno No.</th>
+                            <th>Referencia</th>
+                            <th>Marcha Fúnebre</th>
+                            <th>Inscritos</th>
+                            <th>Entregado</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                data.turnos.forEach(turno => {
+                    html += `<tr>
+                        <td>${turno.numero_turno}</td>
+                        <td>${turno.referencia}</td>
+                        <td>${turno.marcha_funebre}</td>
+                        <td>${turno.inscritos}</td>
+                        <td>${turno.entregados}</td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table>`;
+                reporteContenido.innerHTML = html;
+            });
+    });
+    document.getElementById('btnExportPDF').addEventListener('click', function() {
+    const anio = document.getElementById('anioSelect').value;
+    const procesionId = document.getElementById('procesionSelect').value;
+    const turnoId = document.getElementById('turnoSelect').value;
+    window.open(`/exportar-reporte-turnos-pdf/?anio=${anio}&procesion_id=${procesionId}&turno_id=${turnoId}`, '_blank');
+});
+
+document.getElementById('btnExportExcel').addEventListener('click', function() {
+    const anio = document.getElementById('anioSelect').value;
+    const procesionId = document.getElementById('procesionSelect').value;
+    const turnoId = document.getElementById('turnoSelect').value;
+    window.open(`/exportar-reporte-turnos-excel/?anio=${anio}&procesion_id=${procesionId}&turno_id=${turnoId}`, '_blank');
+});
+
+});
+
 </script>
 
 <style>

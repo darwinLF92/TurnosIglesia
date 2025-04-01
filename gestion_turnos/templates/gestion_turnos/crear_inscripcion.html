@@ -3,29 +3,21 @@
 
 
 <style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        background-color: #f5f5f7;
-        color: #333;
-    }
+
     h2 {
         font-weight: 600;
         text-align: center;
         margin-bottom: 20px;
     }
     form {
-        background: white;
-        padding: 20px;
-        border-radius: 14px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        max-width: 600px;
-        margin: auto;
-    }
-    .form-control {
-        border-radius: 10px;
-        border: 1px solid #d1d1d6;
-        font-size: 16px;
-    }
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    max-width: 600px;
+    margin: auto;
+}
+
     #devoto-nombre, #procesion-nombre{
         text-align: left;
         padding: 10px;
@@ -143,7 +135,7 @@
             </div>
             <input type="text" id="searchDevotos" placeholder="Buscar Devoto..." class="m-2" oninput="filterTableDevotos(this.value)">
             <div class="modal-body" style="overflow:scroll; max-height: 450px;">
-                <table class="table table-hover" id="table2">
+                <table class="table table-hover" id="tableDevotos">
                     <thead>
                         <tr>
                             <th># ID</th>
@@ -188,7 +180,7 @@
             </div>
             <input type="text" id="searchProcesiones" placeholder="Buscar Procesion..." class="m-2" oninput="filterTableProcesiones(this.value)">
             <div class="modal-body" style="overflow:scroll; max-height: 450px;">
-                <table class="table table-hover" id="table2">
+                <table class="table table-hover" id="tableProcesiones">
                     <thead>
                         <tr>
                             <th># ID</th>
@@ -204,7 +196,7 @@
                             <td>{{ i.id }}</td>
                             <td>{{ i.nombre }}</td>
                             <td>{{ i.descripcion }}</td>
-                            <td>{{ i.fecha }}</td>
+                            <td>{{ i.fecha|date:"d-m-y" }}</td>
                             <td>
                                 <button onclick="seleccionarProcesion('{{ i.id }}', '{{ i.nombre }}')" class="btn-seleccionar btn btn-sm btn-outline-primary" data-bs-dismiss="modal" type="button">
                                     <i class="fas fa-share-square"></i> Seleccionar
@@ -251,7 +243,7 @@
     }
 
     function filterTableDevotos(query) {
-        var rows = document.querySelectorAll("#table2 tbody tr");
+        var rows = document.querySelectorAll("#tableDevotos tbody tr");
         rows.forEach(row => {
             let text = row.textContent.toLowerCase();
             row.style.display = text.includes(query.toLowerCase()) ? "" : "none";
@@ -259,7 +251,7 @@
     }
 
     function filterTableProcesiones(query) {
-        var rows = document.querySelectorAll("#table2 tbody tr");
+        var rows = document.querySelectorAll("#tableProcesiones tbody tr");
         rows.forEach(row => {
             let text = row.textContent.toLowerCase();
             row.style.display = text.includes(query.toLowerCase()) ? "" : "none";

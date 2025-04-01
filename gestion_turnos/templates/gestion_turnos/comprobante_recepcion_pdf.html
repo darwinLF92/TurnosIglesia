@@ -121,7 +121,7 @@
     <table class="info">
         <tr>
             <th>Fecha de Inscripción:</th>
-            <td>{{ inscripcion.fecha_inscripcion }}</td>
+            <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</td>
         </tr>
         <tr>
             <th>Procesión:</th>
@@ -147,7 +147,10 @@
         </tr>
         <tr>
             <th>Fecha de Entrega:</th>
-            <td>{{ inscripcion.fecha_entrega }}</td>
+            <td>
+                {{ inscripcion.fecha_entrega|date:"d-m-y" }} a las {{ inscripcion.fecha_entrega|date:"H:i" }} Horas
+            </td>
+            
         </tr>
         <tr>
             <th>Lugar de Entrega:</th>

@@ -3,7 +3,7 @@
     <h2 class="macos-title">Comprobante de Inscripción</h2>
 
     <div class="macos-content">
-        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion }}</p>
+        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</p>
         <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
         <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }}</p>
         <p><strong>Valor del Turno:</strong> Q{{ inscripcion.valor_turno }}</p>
@@ -13,7 +13,7 @@
 
 
     <div class="macos-content">
-        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega_estimada }}</p>
+        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega_estimada|date:"d/m/Y" }}</p>
         <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
     </div>
 
@@ -96,18 +96,35 @@
 <!-- Script para enviar por WhatsApp -->
 {% if inscripcion.devoto.telefono %}
 <script>
-    document.getElementById("btnEnviarWhatsApp").addEventListener("click", function() {
+    document.getElementById("btnEnviarWhatsApp").addEventListener("click", function () {
         fetch("{% url 'gestion_turnos:enviar_comprobante_whatsapp' inscripcion.id %}")
             .then(response => response.json())
             .then(data => {
                 if (data.whatsapp_url) {
-                    window.open(data.whatsapp_url, "_blank");
+                    if (navigator.clipboard && data.mensaje) {
+                        navigator.clipboard.writeText(data.mensaje)
+                            .then(() => {
+                                alert("📋 Mensaje copiado al portapapeles. Abriendo WhatsApp...");
+                                window.open(data.whatsapp_url, "_blank");
+                            })
+                            .catch(() => {
+                                alert("No se pudo copiar al portapapeles, pero se abrirá WhatsApp.");
+                                window.open(data.whatsapp_url, "_blank");
+                            });
+                    } else {
+                        // Si no hay acceso al portapapeles, solo abre el link
+                        window.open(data.whatsapp_url, "_blank");
+                    }
                 } else {
-                    alert("No se pudo generar el enlace de WhatsApp.");
+                    alert("❌ No se pudo generar el enlace de WhatsApp.");
                 }
             })
-            .catch(error => alert("Error al enviar el comprobante."));
+            .catch(error => {
+                console.error(error);
+                alert("Ocurrió un error al intentar enviar el comprobante.");
+            });
     });
 </script>
+
 {% endif %}
 {% endblock %}

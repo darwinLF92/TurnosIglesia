@@ -235,12 +235,16 @@ def lista_marchas(request):
     if filtro == 'favoritas':
         marchas = marchas.filter(id__in=favoritas_usuario)
 
+    # ✅ Ordenar siempre por título (nombre)
+    marchas = marchas.order_by('titulo')
+
     return render(request, 'aplicacion/lista_marchas.html', {
         'marchas': marchas,
         'query': query,
         'filtro': filtro,
         'favoritas_usuario': favoritas_usuario,
     })
+
 
 @login_required
 def subir_marcha(request):
@@ -322,3 +326,36 @@ def eliminar_marcha(request, marcha_id):
         'marcha': marcha
     })
 
+from django.http import HttpResponse, HttpResponseNotFound
+from django.conf import settings
+import os
+import urllib.parse
+
+def serve_audio(request, filename):
+    filename = urllib.parse.unquote(filename)  # por si contiene %20 o caracteres especiales
+
+    file_path = os.path.join(settings.MEDIA_ROOT, filename)
+
+    if not os.path.exists(file_path):
+        return HttpResponseNotFound("Archivo no encontrado")
+
+    # Soporte para reproducir con barra de progreso
+    range_header = request.headers.get('Range', None)
+    file_size = os.path.getsize(file_path)
+    start = 0
+    end = file_size - 1
+
+    if range_header:
+        start = int(range_header.replace('bytes=', '').split('-')[0])
+
+    length = end - start + 1
+
+    with open(file_path, 'rb') as f:
+        f.seek(start)
+        data = f.read(length)
+
+    response = HttpResponse(data, status=206 if range_header else 200, content_type='audio/mpeg')
+    response['Content-Length'] = str(length)
+    response['Accept-Ranges'] = 'bytes'
+    response['Content-Range'] = f'bytes {start}-{end}/{file_size}'
+    return response

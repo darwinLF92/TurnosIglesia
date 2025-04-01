@@ -10,7 +10,7 @@ class Turno(models.Model):
     valor = models.DecimalField(max_digits=6, decimal_places=2, default=25.00)
     activo = models.BooleanField(default=True)  # Añadir este campo si no existe
     referencia = models.CharField(max_length=100, blank=True, null=True)
-    marcha_funebre = models.CharField(max_length=60, blank=True, null=True)
+    marcha_funebre = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return f'Turno {self.numero_turno} - Procesión {self.procesion.nombre}'

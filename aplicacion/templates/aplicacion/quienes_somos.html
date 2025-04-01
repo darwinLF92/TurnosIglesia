@@ -168,6 +168,20 @@
             cerrarModal();
         }
     }
+
+    document.addEventListener("keydown", function(event) {
+    const modal = document.getElementById("modalImagen");
+    if (modal.classList.contains("show")) {
+        if (event.key === "ArrowLeft") {
+            cambiarImagen(-1); // Flecha izquierda
+        } else if (event.key === "ArrowRight") {
+            cambiarImagen(1);  // Flecha derecha
+        } else if (event.key === "Escape") {
+            cerrarModal(); // Escape para cerrar el modal
+        }
+    }
+});
+
 </script>
 
 {% endblock %}

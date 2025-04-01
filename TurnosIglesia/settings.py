@@ -25,7 +25,7 @@ SECRET_KEY = 'ydby_a#tteohf6t+y6zxy-f=f+i4twn@r=_$*(v8i=&1!jn#5&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','192.168.1.18']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','192.168.2.219']
 
 
 # Application definition
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # debe ser el primero
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -137,6 +138,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 👈 esta línea es clave
 MEDIA_URL = '/media/'  # URL base para acceder a los archivos multimedia
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Carpeta donde se guardan los archivos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 X_FRAME_OPTIONS = 'SAMEORIGIN'

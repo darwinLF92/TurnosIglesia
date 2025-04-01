@@ -118,14 +118,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const inscripcionId = this.getAttribute("data-id");
 
             Swal.fire({
-                title: "Ingrese el ID de inscripción",
+                title: "Ingrese Contraseña del Turno",
                 input: "text",
-                inputPlaceholder: "Ingrese el número de inscripción",
+                inputValue: "HSVD-",  // 👈 precargamos el prefijo
+                inputPlaceholder: "Ingrese la Contraseña del Turno",
                 showCancelButton: true,
                 confirmButtonText: "Validar",
                 cancelButtonText: "Cancelar",
                 inputValidator: (value) => {
-                    if (!value) return "Debe ingresar un ID válido";
+                    if (!value || !value.startsWith("HSVD-")) {
+                        return "La contraseña debe comenzar con 'HSVD-'";
+                    }
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -137,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             "X-CSRFToken": "{{ csrf_token }}",
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ id_inscripcion: idIngresado })
+                        body: JSON.stringify({ id_inscripcion: idIngresado })  // 👈 aquí se envía completo
                     })
                     .then(response => response.json())
                     .then(data => {

@@ -20,5 +20,12 @@ urlpatterns = [
     path("gestion_turnos/validar_entrega/<int:inscripcion_id>/", views.ValidarEntregaTurnoView.as_view(), name="validar_entrega"),
     path('gestion_turnos/<int:inscripcion_id>/recepcion/', views.ComprobanteRecepcionView.as_view(), name='comprobante_recepcion'),
     path('recepcion/<int:inscripcion_id>/recepcionpdf/', views.ComprobanteRecepcionPDFView.as_view(), name='comprobante_recepcion_pdf'),
+    path('reporte-inscripciones/', views.reporte_inscripciones, name='reporte_inscripciones'),
+
+    path('ajax/obtener-anios-procesiones/', views.obtener_anios_procesiones, name='obtener_anios_procesiones'),
+    path('ajax/obtener-procesiones/', views.obtener_procesiones_por_anio, name='obtener_procesiones_por_anio'),
+    path('ajax/obtener-turnos/', views.obtener_turnos_por_procesion, name='obtener_turnos'),
+    path('reporte-inscripciones-pdf/', views.exportar_inscripciones_pdf, name='exportar_inscripciones_pdf'),
+    path('exportar-inscripciones-excel/', views.exportar_inscripciones_excel, name='exportar_inscripciones_excel'),
 
 ]

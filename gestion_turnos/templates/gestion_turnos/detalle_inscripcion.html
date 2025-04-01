@@ -3,7 +3,7 @@
     <h2 class="macos-title">Detalle de Inscripción</h2>
 
     <div class="macos-content">
-        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion }}</p>
+        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion|date:"d-m-y H:i" }}</p>
         <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
         <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }} - {{inscripcion.turno.referencia}}</p>
 
@@ -14,7 +14,9 @@
         </p>
         <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega|default:"No entregado" }}</p>
         <p><strong>Valor del Turno:</strong> Q{{ inscripcion.valor_turno }}</p>
-        <p><strong>Fecha de Entrega Estimada:</strong> {{ inscripcion.fecha_entrega_estimada }}</p>
+        <p><strong>Fecha de Entrega Estimada:</strong> {{ inscripcion.fecha_entrega_estimada|date:"d-m-y" }}
+            a las {{ inscripcion.fecha_entrega_estimada|date:"H:i" }} Horas</p>
+        
         <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
         <p><strong>Monto Pagado:</strong> Q{{ inscripcion.monto_pagado }}</p>
         <p><strong>Cambio:</strong> Q{{ inscripcion.cambio }}</p>

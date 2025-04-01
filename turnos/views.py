@@ -70,6 +70,8 @@ def lista_turnos(request):
     if procesion_id:  # Verifica si hay un ID de procesión
         turnos = Turno.objects.filter(procesion_id=procesion_id)
 
+    turnos = Turno.objects.filter(procesion_id=procesion_id).order_by('numero_turno')
+
     return render(request, 'turnos/lista_turnos.html', {
         'turnos': turnos,
         'procesiones': procesiones
@@ -81,7 +83,19 @@ class EditarTurnoView(UpdateView):
     model = Turno
     form_class = TurnoForm
     template_name = 'turnos/editar_turno.html'
-    success_url = reverse_lazy('turnos:lista_turnos')  # Asegúrate de definir esta URL
+
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, "¡Turno actualizado exitosamente!")
+        context = self.get_context_data(form=form)
+        context['turno'] = self.object  # 🔥 Aquí pasamos el turno actualizado
+        return render(self.request, self.template_name, context)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Hubo un error al actualizar el turno. Verifica los datos ingresados.")
+        context = self.get_context_data(form=form)
+        context['turno'] = self.object if hasattr(self, 'object') else None
+        return render(self.request, self.template_name, context)
 
 @login_required
 def eliminar_turno(request, pk):

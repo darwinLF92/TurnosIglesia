@@ -48,22 +48,29 @@ class InscripcionForm(forms.ModelForm):
             self.fields['fecha_entrega_estimada'].initial = self.instance.fecha_entrega_estimada
             self.fields['lugar_entrega'].initial = self.instance.lugar_entrega
 
+    
     def clean(self):
         cleaned_data = super().clean()
         devoto = cleaned_data.get("devoto")
         turno = cleaned_data.get("turno")
 
         if devoto and turno:
-         existe = RegistroInscripcion.objects.filter(
-            devoto=devoto,
-            turno=turno,
-            inscrito=True
-        )
-        if self.instance.pk:
-            existe = existe.exclude(pk=self.instance.pk)
+            # Validar si ya está inscrito
+            existe = RegistroInscripcion.objects.filter(
+                devoto=devoto,
+                turno=turno,
+                inscrito=True
+            )
+            if self.instance.pk:
+                existe = existe.exclude(pk=self.instance.pk)
 
-        if existe.exists():
-            raise ValidationError("Este devoto ya está inscrito en el turno seleccionado.")
+            if existe.exists():
+                raise ValidationError("Este devoto ya está inscrito en el turno seleccionado.")
+
+            # Validar capacidad del turno
+            inscripciones_actuales = RegistroInscripcion.objects.filter(turno=turno, inscrito=True).count()
+            if inscripciones_actuales >= turno.capacidad:
+                raise ValidationError("El turno seleccionado ya se encuentra completo.")
 
 # Formulario para anular inscripción
 class AnularInscripcionForm(forms.ModelForm):

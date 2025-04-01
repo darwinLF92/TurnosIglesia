@@ -1,6 +1,8 @@
 # aplicacion/urls.py
 from django.urls import path
 from . import views
+from django.urls import re_path
+from .views import serve_audio
 from .views import (
     InformacionListView, InformacionCreateView, InformacionUpdateView, InformacionDeleteView,
     ConfiguracionHomeListView,
@@ -48,7 +50,7 @@ urlpatterns = [
     path('marchas/es-favorita/<int:marcha_id>/', views.es_favorita, name='es_favorita'),
     path('marchas/<int:marcha_id>/editar/', views.editar_marcha, name='editar_marcha'),
     path('marchas/<int:marcha_id>/eliminar/', views.eliminar_marcha, name='eliminar_marcha'),
-
+    re_path(r'^media/(?P<filename>.+)$', serve_audio, name='serve_audio'),
 
 
 

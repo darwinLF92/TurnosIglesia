@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Inscripciones</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #444; padding: 6px; text-align: center; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <h2>Reporte de Inscripciones</h2>
+    <p><strong>Procesión:</strong> 
+        {% if procesion_nombre %}
+            {{ procesion_nombre }}
+        {% else %}
+            CONSULTA GENERAL
+        {% endif %}
+    </p>    
+    <p><strong>Turno:</strong> {{ numero_turno }}</p>
+    <p><strong>Generado el:</strong> {{ fecha_hoy|date:"d/m/Y H:i" }}</p>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Turno</th>
+                <th>Devoto</th>
+                <th>Fecha</th>
+                <th>Entregado</th>
+                <th>Pagado</th>
+                <th>Cambio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in inscripciones %}
+            <tr>
+                <td>{{ i.turno.numero_turno }}</td>
+                <td>{{ i.devoto.nombre }}</td>
+                <td>{{ i.fecha_inscripcion|date:'d/m/Y H:i' }}</td>
+                <td>{{ i.entregado|yesno:"Sí,No" }}</td>
+                <td>{{ i.monto_pagado }}</td>
+                <td>{{ i.cambio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

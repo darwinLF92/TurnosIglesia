@@ -16,29 +16,26 @@ from django.utils.decorators import method_decorator
 
 @login_required
 def crear_usuario(request):
-    grupos = Group.objects.all()  # Obtener todos los grupos disponibles
+    grupos = Group.objects.all()
     if request.method == 'POST':
         form = UserForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            group = form.cleaned_data.get('grupo')
-            if group:
-                user.groups.add(group)
+            user = form.save()  # Ya incluye la asignación del grupo
             return render(request, 'crear_usuario.html', {
                 'success': True,
                 'message': 'Usuario creado satisfactoriamente',
-                'form': UserForm(),  # Formulario limpio
+                'form': UserForm(),
                 'grupos': grupos
             })
         else:
             return render(request, 'crear_usuario.html', {
-                'form': form,  # Formulario con datos ingresados
+                'form': form,
                 'grupos': grupos
             })
     else:
         form = UserForm()
-
     return render(request, 'crear_usuario.html', {'form': form, 'grupos': grupos})
+
 
 @login_required
 def lista_usuarios(request):

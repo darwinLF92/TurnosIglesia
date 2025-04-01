@@ -3,7 +3,7 @@
     <h2 class="macos-title">Comprobante de Recepción</h2>
 
     <div class="macos-content">
-        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion }}</p>
+        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</p>
         <p><strong>Procesion:</strong> {{ inscripcion.turno.procesion.nombre }}</p>
         <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
         <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }}</p>
@@ -14,7 +14,7 @@
         <p>
             <strong>Entregado: Sí ✅</strong>
         </p>
-        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega }}</p>
+        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega|date:"d-m-y" }} a las {{ inscripcion.fecha_entrega|date:"H:i" }} Horas</p>
         <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
     </div>
 

@@ -4,11 +4,11 @@ from django.utils import timezone
 
 class Devoto(models.Model):
     nombre = models.CharField(max_length=100)
-    correo = models.EmailField()
+    correo = models.EmailField(blank=True, null=True)
     telefono = models.CharField(max_length=20)
     direccion = models.CharField(max_length=50)
     codigo = models.CharField(max_length=10, editable=False, unique=True, null=True)
-    edad = models.PositiveIntegerField()
+    edad = models.PositiveIntegerField(blank=True, null=True)
     cui_o_nit = models.CharField(max_length=15, unique=True, blank=True, null=True)
     activo = models.BooleanField(default=True)
 

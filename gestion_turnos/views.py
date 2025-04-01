@@ -25,6 +25,10 @@ import json
 from weasyprint import CSS
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.db.models.functions import ExtractYear
+from openpyxl.utils import get_column_letter
+from openpyxl import Workbook
+import io
 
 
 @login_required
@@ -53,8 +57,8 @@ def inscribir_devoto(request):
         form = InscripcionForm()
 
     # Agregar la lista de devotos activos y procesiones activas al contexto
-    devotos_activos = Devoto.objects.filter(activo=True) 
-    procesiones = Procesion.objects.filter(activo=True)  # Suponiendo que hay un campo `activo`
+    devotos_activos = Devoto.objects.filter(activo=True).order_by('nombre')
+    procesiones = Procesion.objects.filter(activo=True).order_by('nombre')  # Suponiendo que hay un campo `activo`
 
     return render(request, 'gestion_turnos/crear_inscripcion.html', {
         'form': form,
@@ -259,7 +263,11 @@ class EnviarComprobanteWhatsAppView(View):
         # Obtener la procesión y turno
         nombre_procesion = inscripcion.turno.procesion.nombre
         numero_turno = inscripcion.turno.numero_turno
+        marcha_funebre= inscripcion.turno.marcha_funebre
+        referencia= inscripcion.turno.referencia
+        fecha_procesion= inscripcion.turno.procesion.fecha.strftime("%d-%m-%Y")
         fecha_entrega_estimada = inscripcion.fecha_entrega_estimada.strftime("%d-%m-%Y") if inscripcion.fecha_entrega_estimada else "No definida"
+        hora_entrega = inscripcion.fecha_entrega_estimada.strftime("%H:%M") if inscripcion.fecha_entrega_estimada else ""
         lugar_entrega = inscripcion.lugar_entrega if inscripcion.lugar_entrega else "No definido"
 
         # Obtener el establecimiento
@@ -279,23 +287,26 @@ class EnviarComprobanteWhatsAppView(View):
         # Construir el mensaje de WhatsApp con los datos relevantes
         mensaje = (
             f"Hola {inscripcion.devoto.nombre},\n\n"
-            f"✅ Se ha inscrito exitosamente a la procesión *{nombre_procesion}* en el turno *{numero_turno}* con el recibo No. *{inscripcion.id}*.\n\n"
-            f"📅 *Fecha de entrega:* {fecha_entrega_estimada}\n"
+            f"✅ Se ha inscrito exitosamente a la procesión *{nombre_procesion}* de fecha: *{fecha_procesion }*, en el turno *{numero_turno}* - *{referencia}*.\n\n"
+            f"🎶 *Marcha Fúnebre:* {marcha_funebre}\n"
+            f"📅 *Fecha de entrega:* {fecha_entrega_estimada} a las {hora_entrega} Horas.\n"
+            f"🔐 *Contraseña del Turno:* {inscripcion.codigo}\n"
             f"📍 *Lugar de entrega:* {lugar_entrega}\n\n"
             f"Agradecemos su colaboración con nuestra Hermandad y, de parte de Nuestro Señor Jesucristo, le deseamos bendiciones.\n\n"
             f"🙏 Que tenga un buen y bendecido Turno.\n\n"
             f"Atentamente,\n{nombre_hermandad}.\n\n"
-            f"📄 Puede descargar su comprobante aquí:\n{pdf_url}"
         )
 
-        # Codificar correctamente el mensaje
         mensaje_codificado = urllib.parse.quote(mensaje)
+        whatsapp_url = f"https://wa.me/{telefono_devoto}?text={mensaje_codificado}"
 
-        # Generar el enlace de WhatsApp
-        whatsapp_url = f"https://api.whatsapp.com/send?phone={telefono_devoto}&text={mensaje_codificado}"
 
         # Retornar la URL de WhatsApp
-        return JsonResponse({"whatsapp_url": whatsapp_url}, status=200)
+        return JsonResponse({
+            "whatsapp_url": whatsapp_url,
+            "mensaje": mensaje  # ← Mensaje sin urlencode
+        }, status=200)
+
     
 @method_decorator(login_required, name='dispatch')
 class ListaEntregaTurnos(View):
@@ -314,7 +325,7 @@ class ListaEntregaTurnos(View):
             inscripciones = inscripciones.filter(devoto__nombre__icontains=nombre)
 
         # Paginación
-        paginacion = request.GET.get("paginacion", 5)  # Se permite personalizar cantidad de elementos por página
+        paginacion = request.GET.get("paginacion", 6)  # Se permite personalizar cantidad de elementos por página
         paginator = Paginator(inscripciones, paginacion)
         page = request.GET.get("page")
         inscripciones_paginadas = paginator.get_page(page)
@@ -381,3 +392,255 @@ class ValidarEntregaTurnoView(View):
                 "success": False,
                 "message": "Error en la solicitud. Intente nuevamente."
             }, status=400)
+        
+from datetime import datetime
+from django.db.models import Count, Sum, Q
+
+
+@login_required
+def reporte_inscripciones(request):
+    # Filtros
+    filtro_procesion = request.GET.get('procesion', '')
+    filtro_turno = request.GET.get('turno')
+    fecha_inicio_str = request.GET.get('fechainicio', '')
+    fecha_fin_str = request.GET.get('fechafin', '')
+    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+
+    # Validar fechas solo si se enviaron
+    try:
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date() if fecha_inicio_str else None
+    except ValueError:
+        fecha_inicio = None
+
+    try:
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date() if fecha_fin_str else None
+    except ValueError:
+        fecha_fin = None
+
+    # Obtener años únicos de procesiones
+    anios = Procesion.objects.annotate(anio=ExtractYear('fecha')) \
+        .values_list('anio', flat=True).distinct().order_by('-anio')
+
+    # Inscripciones activas
+    inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
+
+    if fecha_inicio:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio)
+    if fecha_fin:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__lte=fecha_fin)
+
+    if filtro_procesion:
+        inscripciones = inscripciones.filter(turno__procesion_id=filtro_procesion)
+
+    if filtro_turno:
+        inscripciones = inscripciones.filter(turno_id=filtro_turno)
+
+    # Agrupación por procesión
+    procesiones = inscripciones.values(
+        'turno__procesion__id',
+        'turno__procesion__nombre'
+    ).annotate(
+        total_turnos=Count('turno', distinct=True),
+        total_inscritos=Count('id'),
+        total_entregados=Count('id', filter=Q(entregado=True)),
+        total_valor=Sum('valor_turno'),
+        total_pagado=Sum('monto_pagado')
+    ).order_by('turno__procesion__nombre')
+
+    # Detalle por turno
+    turnos = inscripciones.values(
+        'turno__id',
+        'turno__numero_turno',
+        'turno__procesion__nombre'
+    ).annotate(
+        cantidad_inscritos=Count('id'),
+        entregados=Count('id', filter=Q(entregado=True)),
+        total_valor=Sum('valor_turno'),
+        total_pagado=Sum('monto_pagado')
+    ).order_by('turno__procesion__nombre', 'turno__numero_turno')
+
+    # Lista de devotos por turno
+    devotos_por_turno = inscripciones.values(
+        'turno__id',
+        'turno__numero_turno',
+        'devoto__id',
+        'devoto__nombre',
+        'fecha_inscripcion',
+        'entregado',
+        'monto_pagado',
+        'cambio'
+    ).order_by('turno__id', 'devoto__nombre')
+
+    # Lista general de devotos inscritos
+    devotos_inscritos = inscripciones.values(
+        'devoto__id',
+        'devoto__nombre',
+        'turno__numero_turno',
+        'turno__procesion__nombre',
+        'fecha_inscripcion',
+        'entregado',
+        'monto_pagado',
+        'cambio'
+    ).order_by('devoto__nombre')
+
+    return JsonResponse({
+        'fecha_hoy': fecha_hoy,
+        'procesiones': list(procesiones),
+        'turnos': list(turnos),
+        'anios': list(anios),
+        'devotos_por_turno': list(devotos_por_turno),
+        'devotos_inscritos': list(devotos_inscritos),
+    })
+
+
+
+def obtener_anios_procesiones(request):
+    """
+    Devuelve una lista de años únicos de las procesiones.
+    """
+    anios = Procesion.objects.annotate(anio=ExtractYear('fecha')) \
+        .values_list('anio', flat=True).distinct().order_by('-anio')
+    return JsonResponse(list(anios), safe=False)
+
+def obtener_procesiones_por_anio(request):
+    """
+    Devuelve las procesiones correspondientes a un año dado.
+    """
+    anio = request.GET.get('anio')
+
+    if not anio or not anio.isdigit():
+        return JsonResponse({'error': 'Año inválido.'}, status=400)
+
+    procesiones = Procesion.objects.filter(fecha__year=anio).values('id', 'nombre')
+    return JsonResponse(list(procesiones), safe=False)
+
+
+def obtener_turnos_por_procesion(request):
+    """
+    Devuelve los turnos asociados a una procesión.
+    """
+    procesion_id = request.GET.get('procesion_id')
+
+    if not procesion_id or not procesion_id.isdigit():
+        return JsonResponse({'error': 'ID de procesión inválido.'}, status=400)
+
+    turnos = Turno.objects.filter(procesion_id=procesion_id).values('id', 'numero_turno')
+    return JsonResponse(list(turnos), safe=False)
+
+@login_required
+def exportar_inscripciones_pdf(request):
+    filtro_procesion = request.GET.get('procesion', '')
+    filtro_turno = request.GET.get('turno')
+    fecha_inicio_str = request.GET.get('fechainicio', '')
+    fecha_fin_str = request.GET.get('fechafin', '')
+    fecha_hoy = datetime.now()
+
+    try:
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date() if fecha_inicio_str else None
+    except ValueError:
+        fecha_inicio = None
+
+    try:
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date() if fecha_fin_str else None
+    except ValueError:
+        fecha_fin = None
+
+    inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
+
+    if fecha_inicio:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio)
+    if fecha_fin:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__lte=fecha_fin)
+    if filtro_procesion:
+        inscripciones = inscripciones.filter(turno__procesion_id=filtro_procesion)
+    if filtro_turno:
+        inscripciones = inscripciones.filter(turno_id=filtro_turno)
+
+    devotos = inscripciones.order_by('turno__numero_turno', 'devoto__nombre')
+
+    # Obtener nombre de la procesión
+    procesion_nombre = ''
+    if filtro_procesion:
+        from procesiones.models import Procesion
+        procesion = Procesion.objects.filter(id=filtro_procesion).first()
+        if procesion:
+            procesion_nombre = procesion.nombre
+
+    # Obtener número del turno si se consultó
+    numero_turno = ''
+    if filtro_turno:
+        from gestion_turnos.models import Turno
+        turno = Turno.objects.filter(id=filtro_turno).first()
+        if turno:
+            numero_turno = str(turno.numero_turno)
+
+    context = {
+        'fecha_hoy': fecha_hoy,
+        'inscripciones': devotos,
+        'procesion_nombre': procesion_nombre or 'CONSULTA GENERAL',
+        'numero_turno': numero_turno or 'CONSULTA GENERAL',
+    }
+
+    html = render_to_string('gestion_turnos/reporte_inscripciones_pdf.html', context)
+    pdf = HTML(string=html).write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="reporte_inscripciones.pdf"'
+    return response
+
+
+
+@login_required
+def exportar_inscripciones_excel(request):
+    filtro_procesion = request.GET.get('procesion', '')
+    filtro_turno = request.GET.get('turno')
+    fecha_inicio_str = request.GET.get('fechainicio', '')
+    fecha_fin_str = request.GET.get('fechafin', '')
+
+    inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
+
+    if fecha_inicio_str:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio_str)
+    if fecha_fin_str:
+        inscripciones = inscripciones.filter(fecha_inscripcion__date__lte=fecha_fin_str)
+    if filtro_procesion:
+        inscripciones = inscripciones.filter(turno__procesion_id=filtro_procesion)
+    if filtro_turno:
+        inscripciones = inscripciones.filter(turno_id=filtro_turno)
+
+    # Crear libro Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte Inscripciones"
+
+    # Encabezados
+    encabezados = ["N° Turno", "Devoto", "Fecha Inscripción", "Entregado", "Pagado", "Cambio"]
+    ws.append(encabezados)
+
+    # Datos
+    for ins in inscripciones.select_related('turno', 'devoto').order_by('turno__numero_turno', 'devoto__nombre'):
+        ws.append([
+            ins.turno.numero_turno,
+            ins.devoto.nombre,
+            ins.fecha_inscripcion.strftime('%Y-%m-%d %H:%M:%S'),
+            "Sí" if ins.entregado else "No",
+            float(ins.monto_pagado),
+            float(ins.cambio),
+        ])
+
+    # Ajustar ancho de columnas
+    for col_idx, header in enumerate(encabezados, 1):
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = max(15, len(header) + 2)
+
+    # Respuesta HTTP
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename="reporte_inscripciones.xlsx"'
+    return response
