@@ -546,6 +546,7 @@ def exportar_inscripciones_pdf(request):
         fecha_fin = None
 
     inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
+    
 
     if fecha_inicio:
         inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio)
@@ -557,6 +558,14 @@ def exportar_inscripciones_pdf(request):
         inscripciones = inscripciones.filter(turno_id=filtro_turno)
 
     devotos = inscripciones.order_by('turno__numero_turno', 'devoto__nombre')
+    
+     # Contar inscritos como en reporte_turnos
+    cantidad_inscritos = 0
+    if filtro_turno:
+        cantidad_inscritos = RegistroInscripcion.objects.filter(turno_id=filtro_turno).count()
+    elif filtro_procesion:
+        turnos = Turno.objects.filter(procesion_id=filtro_procesion)
+        cantidad_inscritos = RegistroInscripcion.objects.filter(turno__in=turnos).count()
 
     # Obtener nombre de la procesión
     procesion_nombre = ''
@@ -577,6 +586,7 @@ def exportar_inscripciones_pdf(request):
     context = {
         'fecha_hoy': fecha_hoy,
         'inscripciones': devotos,
+         'cantidad_inscritos': cantidad_inscritos,
         'procesion_nombre': procesion_nombre or 'CONSULTA GENERAL',
         'numero_turno': numero_turno or 'CONSULTA GENERAL',
     }

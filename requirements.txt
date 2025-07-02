@@ -7,7 +7,7 @@ django-widget-tweaks==1.5.0
 et_xmlfile==2.0.0
 fonttools==4.56.0
 mysql-connector-python==9.2.0
-pymysql
+mysqlclient==2.2.7
 openpyxl==3.1.5
 pillow==11.1.0
 pycparser==2.22
