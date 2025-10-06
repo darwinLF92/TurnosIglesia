@@ -1,23 +1,9 @@
-asgiref==3.8.1
-Brotli==1.1.0
-cffi==1.17.1
-cssselect2==0.8.0
-Django==5.1.1
-django-widget-tweaks==1.5.0
-et_xmlfile==2.0.0
-fonttools==4.56.0
-mysql-connector-python==9.2.0
-mysqlclient==2.2.7
-openpyxl==3.1.5
-pillow==11.1.0
-pycparser==2.22
-pydyf==0.11.0
-pyphen==0.17.2
-sqlparse==0.5.1
-tinycss2==1.4.0
-tinyhtml5==2.0.0
-tzdata==2024.1
-weasyprint==64.1
-webencodings==0.5.1
-whitenoise==6.9.0
-zopfli==0.2.3.post1
+# Django compatible con runtimes modernos de Vercel
+Django>=4.2,<5
+
+# Driver MySQL 100% Python (no compila)
+mysql-connector-python>=9.0.0
+
+# utilidades
+python-dotenv>=1.0
+whitenoise>=6.0
