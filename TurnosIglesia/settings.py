@@ -23,13 +23,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ydby_a#tteohf6t+y6zxy-f=f+i4twn@r=_$*(v8i=&1!jn#5&'
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','192.168.157.219']
+ALLOWED_HOSTS = [
+    "localhost", "127.0.0.1",
+    ".vercel.app",                 # comodín para cualquier subdominio de Vercel
+    "turnos-iglesia.vercel.app",   # tu dominio concreto (opcional, pero recomendado)
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://turnos-iglesia.vercel.app",
+    "https://*.vercel.app",
+]
 
 # Application definition
 
@@ -148,3 +156,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Carpeta donde se guardan los arc
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
