@@ -6,3 +6,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "turnos_iglesia.settings")
 
 # Expone la aplicación WSGI que Vercel buscará
 app = get_wsgi_application()
+
+
+def handler(request):
+    return {"status": "ok"}
