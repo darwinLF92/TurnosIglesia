@@ -32,11 +32,14 @@
                 <button class="social-btn facebook"><i class="fa fa-facebook"></i> Login with Facebook</button>
             </div>
         </div>
-        <div class="login-image">
-            <div class="logo-container">
-            <img src="{{ configuracion.logo_empresa.url|default:DEFAULT_LOGO }}" alt="Logo">
-            </div>
-        </div>
+<div class="logo-container">
+    {% if establecimiento.logo %}
+        <img src="{{ establecimiento.logo.url }}" alt="Logo Hermandad">
+    {% else %}
+        <img src="{% static 'logos/escudo_default.png' %}" alt="Logo Hermandad">
+    {% endif %}
+</div>
+
     </div>
 </div>
 
