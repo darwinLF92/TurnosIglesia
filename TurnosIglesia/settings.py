@@ -28,16 +28,15 @@ SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "localhost", "127.0.0.1",
-    ".vercel.app",                 # comodín para cualquier subdominio de Vercel
-    "turnos-iglesia.vercel.app",   # tu dominio concreto (opcional, pero recomendado)
-]
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "turnosiglesia.onrender.com,localhost,127.0.0.1"
+).split(",")
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://turnos-iglesia.vercel.app",
-    "https://*.vercel.app",
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
+    "https://turnosiglesia.onrender.com"
+).split(",")
 
 # Application definition
 
