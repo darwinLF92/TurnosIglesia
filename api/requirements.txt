@@ -1,9 +1,0 @@
-# Django compatible con runtimes modernos de Vercel
-Django>=4.2,<5
-
-# Driver MySQL 100% Python (no compila)
-mysql-connector-python>=9.0.0
-
-# utilidades
-python-dotenv>=1.0
-whitenoise>=6.0

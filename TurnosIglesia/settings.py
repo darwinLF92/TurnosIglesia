@@ -158,3 +158,14 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# Media (subidas) -> Cloudinary en producción, disco local en desarrollo
+if not DEBUG:
+    INSTALLED_APPS += ['cloudinary', 'cloudinary_storage']
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    # (STATIC sigue con Whitenoise; no cambies STATICFILES_STORAGE)
+    CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')  # formato: cloudinary://<api_key>:<api_secret>@<cloud_name>
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # solo para DEV

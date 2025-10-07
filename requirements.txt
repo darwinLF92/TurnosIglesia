@@ -24,3 +24,5 @@ zopfli==0.2.3.post1
 gunicorn==23.0.0
 whitenoise==6.9.0
 python-dotenv==1.0.1
+cloudinary==1.40.0
+django-cloudinary-storage==0.3.0
