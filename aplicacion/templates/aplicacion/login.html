@@ -34,11 +34,9 @@
         </div>
         <div class="login-image">
             <div class="logo-container">
-                {% if logo_url %}
-                    <img src="{{ logo_url }}" alt="Logo Empresa">
-                {% else %}
-                    <p>No Logo Available</p>
-                {% endif %}
+            <img
+                src="{% if logo_url %}{{ logo_url }}{% else %}{% static 'img/logo.png' %}{% endif %}"
+                alt="Logo Empresa">
             </div>
         </div>
     </div>
