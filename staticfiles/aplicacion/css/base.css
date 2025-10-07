@@ -1,0 +1,108 @@
+/* Google Fonts Import Link */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ==============================
+   RESET Y BASE
+================================= */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background-color: #F7F3DA;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* ==============================
+   NAVBAR SUPERIOR
+================================= */
+.navbar {
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    z-index: 1030;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.navbar-nav .nav-link {
+    font-size: 15px;
+    margin-right: 10px;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: #ffc107;
+}
+
+/* Dropdown personalizado */
+.dropdown-menu {
+    background-color: #343a40;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.dropdown-menu a {
+    color: #fff;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.dropdown-menu a:hover {
+    background-color: #495057;
+    color: #ffc107;
+}
+
+/* ==============================
+   CONTENIDO PRINCIPAL
+================================= */
+main {
+    margin: 0;
+    padding: 0;
+}
+
+.home-content {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+
+
+/* ==============================
+   BOTONES
+================================= */
+.btn {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* ==============================
+   RESPONSIVE
+================================= */
+@media (max-width: 768px) {
+    .navbar-nav .nav-item {
+        margin-bottom: 10px;
+    }
+
+    .home-content {
+        padding: 10px;
+    }
+
+    .carousel-wrapper {
+        height: 300px;
+    }
+}

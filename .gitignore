@@ -15,9 +15,7 @@ build/
 *.pyc
 db.sqlite3
 *.sqlite3
-/media
-/staticfiles
-/static
+
 
 # Virtual environments
 venv/
