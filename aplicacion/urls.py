@@ -51,7 +51,18 @@ urlpatterns = [
     path('marchas/<int:marcha_id>/editar/', views.editar_marcha, name='editar_marcha'),
     path('marchas/<int:marcha_id>/eliminar/', views.eliminar_marcha, name='eliminar_marcha'),
     re_path(r'^media/(?P<filename>.+)$', serve_audio, name='serve_audio'),
+        # --- Vista pública ---
+    path('historia-imagenes/', views.historia_imagenes_view, name='historia_imagenes'),
 
+# CRUD (cambia el prefijo "admin" por "panel")
+    path('panel/historia-imagenes/', views.HistoriaImagenListView.as_view(),
+         name='historia_imagenes_admin'),
+    path('panel/historia-imagenes/crear/', views.HistoriaImagenCreateView.as_view(),
+         name='historia_imagenes_crear'),
+    path('panel/historia-imagenes/<int:pk>/editar/', views.HistoriaImagenUpdateView.as_view(),
+         name='historia_imagenes_editar'),
+    path('panel/historia-imagenes/<int:pk>/eliminar/', views.HistoriaImagenDeleteView.as_view(),
+         name='historia_imagenes_eliminar'),
 
 
 ]

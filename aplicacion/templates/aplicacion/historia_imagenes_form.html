@@ -1,0 +1,95 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Editar bloque,Crear bloque" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="fw-bold mb-3">{{ form.instance.pk|yesno:"Editar bloque,Crear bloque" }}</h3>
+
+  <form method="post" enctype="multipart/form-data" class="card shadow-sm">
+    <div class="card-body">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="row g-3">
+        <div class="col-md-8">
+          <div class="mb-3">
+            <label class="form-label">Título</label>
+            {{ form.titulo }}
+            {% if form.titulo.errors %}
+              <div class="text-danger small">{{ form.titulo.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+              <div class="text-danger small">{{ form.descripcion.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Orden</label>
+              {{ form.orden }}
+              {% if form.orden.errors %}
+                <div class="text-danger small">{{ form.orden.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3 d-flex align-items-end">
+              <div class="form-check">
+                {{ form.activo }}
+                <label class="form-check-label">Activo</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Imagen</label>
+          {{ form.imagen }}
+          {% if form.imagen.errors %}
+            <div class="text-danger small">{{ form.imagen.errors }}</div>
+          {% endif %}
+
+          {% if form.instance.pk and form.instance.imagen %}
+            <div class="mt-3 text-center">
+              <img src="{{ form.instance.imagen.url }}" alt="vista previa"
+                   class="img-fluid rounded"
+                   style="max-height: 220px; object-fit: cover;">
+              <div class="text-muted small mt-1">Vista previa actual</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer d-flex gap-2">
+      <button class="btn btn-primary" type="submit">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+      <a class="btn btn-secondary" href="{% url 'aplicacion:historia_imagenes_admin' %}">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Aplica las clases Bootstrap dinámicamente desde JS (sin widget-tweaks)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'checkbox') {
+        el.classList.add('form-check-input');
+      } else {
+        el.classList.add('form-control');
+      }
+    });
+  });
+</script>
+{% endblock %}

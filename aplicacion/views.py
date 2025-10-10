@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from establecimiento.models import Establecimiento
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -18,8 +18,17 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import HistoriaImagenForm
+from .models import HistoriaImagen
+from django.utils.http import url_has_allowed_host_and_scheme
 
-@login_required
+
+def is_admin(user):
+    return user.is_authenticated and (
+        user.is_superuser or user.groups.filter(name='Administrador').exists()
+    )
+
+
 def home_view(request):
     imagenes = ImagenPresentacion.objects.filter(activo=True).order_by('-fecha_creacion')
     return render(request, 'aplicacion/home.html', {
@@ -29,14 +38,17 @@ def home_view(request):
 def login_view(request):
     error_message = None
     logo_url = None
-    nombre_hermandad = None  # Inicializa la variable
+    nombre_hermandad = None
 
     # Verifica si hay un establecimiento
     establecimiento = Establecimiento.objects.first()
     if establecimiento and establecimiento.logo:
-        logo_url = establecimiento.logo.url  # Obtén la URL del logo
-        nombre_hermandad = establecimiento.hermandad  # Aquí tomamos el nombre
+        logo_url = establecimiento.logo.url
+        nombre_hermandad = establecimiento.hermandad
 
+    # Si el usuario ya está autenticado, lo enviamos al home directamente
+    if request.user.is_authenticated:
+        return redirect('aplicacion:home')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -44,22 +56,30 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+
+            # Recupera el parámetro "next" si viene de una página protegida
+            next_url = request.GET.get('next')
+
+            # Seguridad: verifica que "next" sea una URL válida del mismo dominio
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+
+            # Si no hay "next", va al home
             return redirect('aplicacion:home')
         else:
             error_message = 'Usuario o contraseña inválidos'
 
-# Pasa logo_url y nombre_establecimiento al contexto
     context = {
         'error_message': error_message,
         'logo_url': logo_url,
-        'nombre_hermandad': nombre_hermandad
+        'nombre_hermandad': nombre_hermandad,
     }
     return render(request, 'aplicacion/login.html', context)
 
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect('aplicacion:login')  
+    return redirect('aplicacion:home')  
 
 # Vista para listar configuraciones
 @method_decorator(login_required, name='dispatch')
@@ -118,7 +138,6 @@ class InformacionDeleteView(DeleteView):
     template_name = 'informacion_confirm_delete.html'
     success_url = reverse_lazy('inicio')
 
-@login_required
 def quienes_somos_view(request):
     info = Informacion.objects.last()  # O puedes usar .first() si solo habrá un registro
     config = ConfiguracionHome.objects.filter(seccion='quienes_somos', activo=True).first()
@@ -218,7 +237,7 @@ class ImagenPresentacionDeleteView(DeleteView):
     template_name = 'aplicacion/imagen_presentacion_confirm_delete.html'
     success_url = reverse_lazy('aplicacion:imagen_presentacion_list')
 
-@login_required
+
 def lista_marchas(request):
     query = request.GET.get('q', '')
     filtro = request.GET.get('filtro', 'todas')
@@ -246,7 +265,8 @@ def lista_marchas(request):
     })
 
 
-@login_required
+@login_required(login_url='aplicacion:login')
+@user_passes_test(is_admin, login_url='aplicacion:login')
 def subir_marcha(request):
     if request.method == 'POST':
         form = MarchaFunebreForm(request.POST, request.FILES)
@@ -284,7 +304,8 @@ def es_favorita(request, marcha_id):
     es_fav = Favorito.objects.filter(usuario=request.user, marcha_id=marcha_id).exists()
     return JsonResponse({'favorita': es_fav})
 
-@login_required
+@login_required(login_url='aplicacion:login')
+@user_passes_test(is_admin, login_url='aplicacion:login')
 def editar_marcha(request, marcha_id):
     marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
 
@@ -308,7 +329,8 @@ def editar_marcha(request, marcha_id):
     return render(request, 'aplicacion/editar_marcha.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='aplicacion:login')
+@user_passes_test(is_admin, login_url='aplicacion:login')
 def eliminar_marcha(request, marcha_id):
     marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
 
@@ -359,3 +381,40 @@ def serve_audio(request, filename):
     response['Accept-Ranges'] = 'bytes'
     response['Content-Range'] = f'bytes {start}-{end}/{file_size}'
     return response
+
+
+# Página pública (o visible con login, como prefieras)
+def historia_imagenes_view(request):
+    items = HistoriaImagen.objects.filter(activo=True).order_by('orden','-fecha_creacion')
+    return render(request, 'aplicacion/historia_imagenes.html', {'items': items})
+
+# CRUD solo para usuarios con permisos
+class HistoriaImagenListView(LoginRequiredMixin, ListView):
+    model = HistoriaImagen
+    template_name = 'aplicacion/historia_imagenes_list.html'
+    context_object_name = 'items'
+    permission_required = 'aplicacion.view_historiaimagen'   # ver el listado
+    raise_exception = True
+
+class HistoriaImagenCreateView(LoginRequiredMixin, CreateView):
+    model = HistoriaImagen
+    form_class = HistoriaImagenForm
+    template_name = 'aplicacion/historia_imagenes_form.html'
+    success_url = reverse_lazy('aplicacion:historia_imagenes_admin')
+    permission_required = 'aplicacion.add_historiaimagen'
+    raise_exception = True
+
+class HistoriaImagenUpdateView(LoginRequiredMixin, UpdateView):
+    model = HistoriaImagen
+    form_class = HistoriaImagenForm
+    template_name = 'aplicacion/historia_imagenes_form.html'
+    success_url = reverse_lazy('aplicacion:historia_imagenes_admin')
+    permission_required = 'aplicacion.change_historiaimagen'
+    raise_exception = True
+
+class HistoriaImagenDeleteView(LoginRequiredMixin, DeleteView):
+    model = HistoriaImagen
+    template_name = 'aplicacion/historia_imagenes_confirm_delete.html'
+    success_url = reverse_lazy('aplicacion:historia_imagenes_admin')
+    permission_required = 'aplicacion.delete_historiaimagen'
+    raise_exception = True

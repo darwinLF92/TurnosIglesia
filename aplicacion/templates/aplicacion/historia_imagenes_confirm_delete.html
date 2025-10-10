@@ -1,0 +1,23 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Eliminar bloque{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold text-danger">Eliminar bloque</h3>
+      <p>¿Seguro que deseas eliminar <strong>"{{ object.titulo }}"</strong>?</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">
+          <i class="fas fa-trash-alt"></i> Eliminar
+        </button>
+        <a class="btn btn-secondary" href="{% url 'aplicacion:historia_imagenes_admin' %}">
+          Cancelar
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

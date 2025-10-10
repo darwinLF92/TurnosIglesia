@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS",
@@ -140,7 +140,10 @@ USE_L10N = True
 
 USE_TZ = False
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/login/'            # Página donde se hace el login
+LOGIN_REDIRECT_URL = '/'         # Página a donde redirige después de iniciar sesión (el home)
+LOGOUT_REDIRECT_URL = '/'        # Página a donde redirige después de cerrar sesión
+
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 

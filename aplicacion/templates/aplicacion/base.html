@@ -18,97 +18,107 @@
     <!-- Contenedor principal -->
     <div class="container-fluid p-0">
 
+      <!-- NAVBAR SUPERIOR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'aplicacion:home' %}">DMLR System</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido" aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContenido">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+
         {% if user.is_authenticated %}
-        <!-- NAVBAR SUPERIOR -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'aplicacion:home' %}">DMLR System</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido" aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+          <!-- Mantenedor -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Mantenedor
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
+              <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
+            </ul>
+          </li>
 
-                <div class="collapse navbar-collapse" id="navbarContenido">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- Mantenedor -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Mantenedor
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
-                                <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
-                            </ul>
-                        </li>
+          <!-- Procesiones -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Procesiones
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Procesiones</a></li>
+            </ul>
+          </li>
 
-                        <!-- Procesiones -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Procesiones
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Procesiones</a></li>
-                            </ul>
-                        </li>
+          <!-- Turnos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Turnos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Turnos</a></li>
+            </ul>
+          </li>
 
-                        <!-- Turnos -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Turnos
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Turnos</a></li>
-                            </ul>
-                        </li>
+          <!-- Devotos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Devotos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Devotos</a></li>
+            </ul>
+          </li>
 
-                        <!-- Devotos -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Devotos
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Devotos</a></li>
-                            </ul>
-                        </li>
+          <!-- Inscripciones -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Inscripciones
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Inscripciones</a></li>
+            </ul>
+          </li>
 
-                        <!-- Inscripciones -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Inscripciones
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Inscripciones</a></li>
-                            </ul>
-                        </li>
+          <!-- Gestión Turnos -->
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">Gestión Turnos</a>
+          </li>
 
-                        <!-- Gestión Turnos -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">Gestión Turnos</a>
-                        </li>
-
-                        <!-- Establecimiento -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Establecimiento
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Gestiones</a></li>
-                                <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Conf Home</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                    <!-- Botón Salir -->
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'aplicacion:logout' %}">
-                                <i class="bx bx-log-out"></i> Salir
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+          <!-- Establecimiento -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Establecimiento
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Gestiones</a></li>
+              <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Conf Home</a></li>
+            </ul>
+          </li>
         {% endif %}
+      </ul>
+
+      <!-- 🔹 Sección derecha del navbar -->
+      <ul class="navbar-nav ms-auto">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'aplicacion:logout' %}">
+              <i class="bx bx-log-out"></i> Salir
+            </a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'aplicacion:login' %}">
+              <i class="bx bx-log-in"></i> Acceder
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
 
         <!-- Bloque carrusel fuera del container principal -->
         {% block carrusel_fullscreen %}{% endblock %}

@@ -120,4 +120,18 @@ class ImagenPresentacion(models.Model):
 
     def __str__(self):
         return self.titulo if self.titulo else f"Imagen {self.id}"
+    
+class HistoriaImagen(models.Model):
+    titulo = models.CharField(max_length=150)
+    descripcion = models.TextField()
+    imagen = models.ImageField(upload_to='historia_imagenes/')
+    activo = models.BooleanField(default=True)
+    orden = models.PositiveIntegerField(default=0)   # para ordenar manualmente
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['orden', '-fecha_creacion']
+
+    def __str__(self):
+        return self.titulo
 

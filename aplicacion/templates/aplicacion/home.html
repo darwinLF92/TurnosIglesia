@@ -1,6 +1,7 @@
 {% extends 'aplicacion/base.html' %}
 {% load static %}
 {% block carrusel_fullscreen %}
+<link rel="stylesheet" href="https://unpkg.com/swiper@10/swiper-bundle.min.css"/>
 <div class="carousel-wrapper">
     <div id="carouselExample" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
         <div class="carousel-inner">
@@ -32,71 +33,170 @@
 
 {% block content %}
 <!-- Sección de tarjetas -->
-<div class="row row-cols-1 row-cols-md-3 g-4 seccion-tarjetas">
-    <!-- Tarjeta 1 -->
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">¿Quiénes somos?</h5>
-                <p class="card-text">Información sobre nuestra iglesia y comunidad.</p>
+<div class="container my-5">
+  <div class="feature-swiper-outer">
+    <div class="swiper feature-swiper">
+      <div class="swiper-wrapper">
+
+      <!-- Slide 1 -->
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'home/logo_hermandad.png' %}" alt="¿Quiénes somos?">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">¿QUIENES SOMOS?</h3>
+            <div class="post-meta">
+              <span>22 de febrero de 2025</span>
+              <span>• Por la Hermandad V.I. Señor Sepultado y V.I. Virgen de Dolores</span>
             </div>
-            <div class="card-footer text-center">
-                <a href="{% url 'aplicacion:quienes_somos' %}" class="btn btn-primary">Ver más</a>
+            <p class="post-excerpt">Información sobre nuestra hermandad, visión y valores.</p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="{% url 'aplicacion:quienes_somos' %}">
+              VER MÁS <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'home/h_imagenes.png' %}" alt="Historia de nuestras imágenes">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">UN LEGADO DE FE Y TRADICIÓN</h3>
+            <div class="post-meta">
+              <span>02 Abril 2020</span>
+              <span>• Por la Hermandad V.I. Señor Sepultado y V.I. Virgen de Dolores</span>
             </div>
-        </div>
+            <p class="post-excerpt">Descubre la historia detrás de nuestras imágenes religiosas.</p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="{% url 'aplicacion:historia_imagenes' %}">
+              VER MÁS <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'home/multimedia.png' %}" alt="Multimedia">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">PENTAGRAMA FÚNEBRE</h3>
+            <div class="post-meta">
+              <span>03 Enero 2024</span>
+              <span>• por Hermandad</span>
+              <span><i class="fa-regular fa-comment"></i> 0</span>
+            </div>
+            <p class="post-excerpt">Pentagrama Fúnebre, marchas que han marcado historia y que son parte de nuestro sentir, como cucurucho fiel y devoto, cada una de ellas
+                transmite emociones y recuerdos imborrables de nuestras queridas imágenes de pasión.
+            </p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="{% url 'aplicacion:lista_marchas' %}">
+              EXPLORAR <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <!-- Agrega más slides (Fototeca, Recorridos, Oraciones) -->
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'img/home/fototeca.jpg' %}" alt="Fototeca y Video">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">FOTOTECA Y VIDEO</h3>
+            <div class="post-meta"><span>Actualizado</span></div>
+            <p class="post-excerpt">Documentación fotográfica y videoclips de nuestras actividades.</p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="#">
+              VER GALERÍA <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'img/home/recorridos.jpg' %}" alt="Recorridos Procesionales">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">RECORRIDOS PROCESIONALES</h3>
+            <div class="post-meta"><span>Mapa & galería</span></div>
+            <p class="post-excerpt">Imágenes e información de los recorridos procesionales.</p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="#">
+              VER RECORRIDOS <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <div class="swiper-slide">
+        <article class="post-card">
+          <div class="post-media">
+            <img src="{% static 'img/home/oraciones.jpg' %}" alt="Oraciones">
+          </div>
+          <div class="post-body">
+            <h3 class="post-title">ORACIONES</h3>
+            <div class="post-meta"><span>Devocionales</span></div>
+            <p class="post-excerpt">Imágenes y contenido de oraciones importantes.</p>
+          </div>
+          <div class="post-footer">
+            <a class="btn btn-verm" href="#">
+              EXPLORAR <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+
     </div>
-    <!-- Tarjetas 2 a 6 (mismo formato) -->
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Historia de nuestras imágenes</h5>
-                <p class="card-text">Descubre la historia detrás de nuestras imágenes religiosas.</p>
-            </div>
-            <div class="card-footer text-center"></div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Multimedia</h5>
-                <p class="card-text">Pentagrama Fúnebre Guatemalteco.</p>
-            </div>
-            <div class="card-footer text-center">
-                <a href="{% url 'aplicacion:lista_marchas' %}" class="btn btn-primary">Explorar</a>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Foteteca y Video</h5>
-                <p class="card-text">Documentacion fotográfica y videoclips de nuestras actividades.</p>
-            </div>
-            <div class="card-footer text-center"></div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Recorridos Procesionales</h5>
-                <p class="card-text">Imágenes e información de los recorridos procesionales.</p>
-            </div>
-            <div class="card-footer text-center"></div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Oraciones</h5>
-                <p class="card-text">Imágenes y contenido de oraciones importantes.</p>
-            </div>
-            <div class="card-footer text-center"></div>
-        </div>
-    </div>
+      <div class="swiper-pagination"></div>
+    </div
+
+    <!-- Flechas y dots -->
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+    <div class="swiper-pagination"></div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+
+<script src="https://unpkg.com/swiper@10/swiper-bundle.min.js"></script>
+<script>
+new Swiper('.feature-swiper', {
+  slidesPerView: 1,
+  spaceBetween: 24,
+  loop: true,
+  navigation: {
+    nextEl: '.feature-swiper-outer .swiper-button-next',
+    prevEl: '.feature-swiper-outer .swiper-button-prev',
+  },
+  pagination: {
+    el: '.feature-swiper .swiper-pagination',
+    clickable: true,
+  },
+  breakpoints: {
+    768:  { slidesPerView: 2 },
+    1200: { slidesPerView: 3 }
+  }
+});
+
+</script>
 <script>
     function mostrarInformacion() {
         Swal.fire({
@@ -113,7 +213,7 @@
 <style>
 carousel-wrapper {
     width: 100%;
-    height: 600px; /* ajustable: puedes usar 100vh también */
+    height: 1000px; /* ajustable: puedes usar 100vh también */
     position: relative;
     overflow: hidden;
     background: #000;
@@ -145,7 +245,7 @@ carousel-wrapper {
 .main-carousel-image {
     position: relative;
     z-index: 2;
-    max-height: 500px;
+    max-height: 800px;
     max-width: 70%;
     display: block;
     margin: 0 auto;
@@ -156,6 +256,75 @@ carousel-wrapper {
     margin-top: -80px; /* o -100px si quieres que se suba más */
     z-index: 3;
     position: relative;
+}
+
+/* ====== Tarjetas modernas (glass + hover) ====== */
+/* ====== Tarjetas modernas ====== */
+.post-card{
+  background:#fff;border-radius:14px;overflow:hidden;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);height:100%;
+  display:flex;flex-direction:column;transition:transform .2s ease, box-shadow .2s ease;
+}
+.post-card:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+
+.post-media{ width:100%; aspect-ratio:16/9; overflow:hidden; border-bottom:1px solid rgba(0,0,0,.04); }
+.post-media img{ width:100%; height:100%; display:block; object-fit:contain; }
+.post-card:hover .post-media img{ transform:scale(1.04); }
+
+.post-body{ padding:18px 18px 8px; }
+.post-title{ font-weight:800; font-size:1.1rem; letter-spacing:.2px; margin:2px 0 8px; }
+.post-meta{ color:#6b7280; font-size:.9rem; display:flex; gap:12px; flex-wrap:wrap; }
+.post-excerpt{ color:#4b5563; margin:10px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.post-footer{ padding:0 18px 18px; margin-top:auto; }
+.btn-verm{ display:inline-flex; align-items:center; gap:8px; background:#394150; color:#fff; border:0; border-radius:8px; padding:10px 16px; font-weight:700; }
+.btn-verm:hover{ filter:brightness(1.05); color:#f5f0f0; background:#081d44; }
+
+/* ====== Swiper: estructura correcta ====== */
+.feature-swiper-outer{
+  position: relative;       /* referencia para flechas */
+  overflow: visible;        /* permite que las flechas sobresalgan */
+}
+.feature-swiper{
+  overflow: hidden;         /* RECORTA los slides (importante) */
+  padding: 6px 6px 24px;    /* espacio inferior para los dots */
+  --swiper-navigation-color:#0ea5e9;  /* por si usas icono dentro */
+  --swiper-navigation-size:22px;
+}
+.feature-swiper .swiper-wrapper{ align-items: stretch; }
+.feature-swiper .swiper-slide{ height: auto; }
+
+/* Flechas posicionadas en el contenedor externo */
+.feature-swiper-outer .swiper-button-prev,
+.feature-swiper-outer .swiper-button-next{
+  position:absolute; top:50%; transform:translateY(-50%);
+  z-index:5; width:18px; height:18px;
+  /* anula cualquier fondo/sombra heredado */
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+ color:#141414;
+}
+.feature-swiper-outer .swiper-button-prev{ left:-34px; }
+.feature-swiper-outer .swiper-button-next{ right:-34px; }
+.feature-swiper-outer .swiper-button-prev:hover,
+.feature-swiper-outer .swiper-button-next:hover{ filter:brightness(1.1); }
+
+/* Dots */
+.feature-swiper .swiper-pagination-bullet{ background:#9ca3af; opacity:.6; }
+.feature-swiper .swiper-pagination-bullet-active{ background:#111827; opacity:1; }
+
+/* Responsive: trae flechas hacia adentro en móvil */
+@media (max-width:576px){
+  .feature-swiper-outer .swiper-button-prev{ left:6px; }
+  .feature-swiper-outer .swiper-button-next{ right:6px; }
+}
+
+/* Fallback si no hay aspect-ratio */
+@supports not (aspect-ratio: 1 / 1){
+  .post-media{ position:relative; padding-top:56.25%; }
+  .post-media img{ position:absolute; inset:0; }
 }
 
 
