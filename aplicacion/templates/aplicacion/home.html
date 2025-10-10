@@ -176,25 +176,40 @@
 
 <script src="https://unpkg.com/swiper@10/swiper-bundle.min.js"></script>
 <script>
-const featureSwiper = new Swiper('.feature-swiper', { 
-  loop: true,
-  grabCursor: true,
-  watchOverflow: true,
-  slidesPerView: 1.05,
-  centeredSlides: true,
-  spaceBetween: 16,
-  initialSlide: 1,  // 👈 empieza en el slide 2 (¿Quiénes somos?)
-  pagination: { el: '.feature-swiper .swiper-pagination', clickable: true },
-  navigation: {
-    nextEl: '.feature-swiper-outer .swiper-button-next',
-    prevEl: '.feature-swiper-outer .swiper-button-prev',
-  },
-  breakpoints: {
-    576:  { slidesPerView: 1.3, centeredSlides: false, spaceBetween: 20 },
-    768:  { slidesPerView: 2,   spaceBetween: 24 },
-    1200: { slidesPerView: 3,   spaceBetween: 24 }
-  }
-});
+ // Índice del slide "¿QUIÉNES SOMOS?" en tu HTML (es el primero)
+  const START_INDEX = 0;
+
+  const featureSwiper = new Swiper('.feature-swiper', {
+    init: false,                 // ← iniciamos manualmente
+    loop: true,
+    grabCursor: true,
+    watchOverflow: true,
+    slidesPerView: 1.05,
+    centeredSlides: true,        // móvil
+    spaceBetween: 16,
+    pagination: { el: '.feature-swiper .swiper-pagination', clickable: true },
+    navigation: {
+      nextEl: '.feature-swiper-outer .swiper-button-next',
+      prevEl: '.feature-swiper-outer .swiper-button-prev',
+    },
+    breakpoints: {
+      576:  { slidesPerView: 1.3, centeredSlides: false, spaceBetween: 20 },
+      768:  { slidesPerView: 2,   centeredSlides: false, spaceBetween: 24 },
+      1200: { slidesPerView: 3,   centeredSlides: false, spaceBetween: 24 }
+    }
+  });
+
+  // Asegura el inicio en "¿QUIÉNES SOMOS?" con loop activo
+  featureSwiper.on('init', () => {
+    featureSwiper.slideToLoop(START_INDEX, 0, false);
+  });
+
+  featureSwiper.init();
+
+  // (Opcional) si el usuario rota el dispositivo o cambia el tamaño, re-enfoca
+  window.addEventListener('resize', () => {
+    featureSwiper.slideToLoop(START_INDEX, 0, false);
+  });
 </script>
 <script>
     function mostrarInformacion() {
