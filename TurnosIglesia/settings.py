@@ -14,6 +14,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,15 +24,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-secret")
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+DEBUG = config('DEV_MODE', default=True, cast=bool)
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "turnosiglesia.onrender.com,localhost,127.0.0.1"
-).split(",")
+ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOSTS').split(',')]
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
@@ -151,24 +149,18 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 👈 esta línea es clave
-MEDIA_URL = '/media/'  # URL base para acceder a los archivos multimedia
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Carpeta donde se guardan los archivos
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# --- STATIC ---
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")   # para collectstatic
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")] # si tienes assets del repo
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# --- MEDIA (subidas) ---
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")          # donde se guardan subidas
+
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-
-# Media (subidas) -> Cloudinary en producción, disco local en desarrollo
-if not DEBUG:
-    INSTALLED_APPS += ['cloudinary', 'cloudinary_storage']
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    # (STATIC sigue con Whitenoise; no cambies STATICFILES_STORAGE)
-    CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')  # formato: cloudinary://<api_key>:<api_secret>@<cloud_name>
-else:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # solo para DEV
