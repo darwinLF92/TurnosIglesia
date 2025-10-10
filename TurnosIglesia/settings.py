@@ -31,11 +31,6 @@ DEBUG = config('DEV_MODE', default=True, cast=bool)
 
 ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOSTS').split(',')]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "CSRF_TRUSTED_ORIGINS",
-    "https://turnosiglesia.onrender.com"
-).split(",")
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -79,10 +74,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'aplicacion.context_processors.logo_establecimiento',
+                "aplicacion.context_processors.system_meta",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'TurnosIglesia.wsgi.application'
 
@@ -163,4 +161,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")          # donde se guardan subidas
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_TEMPLATE_PACK = ''  # O 'bootstrap'
+
+SYSTEM_META = {
+    "VERSION": config("APP_VERSION", default=""),
+    "ORG_NAME": config("ORG_NAME", default=""),
+    "AUTHOR_NAME": config("AUTHOR_NAME", default=""),
+    "AUTHOR_LINK": config("AUTHOR_LINK", default="#"),
+    "AUTHOR_PHONE": config("AUTHOR_PHONE", default=""),
+}

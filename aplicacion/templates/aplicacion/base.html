@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}DMLR System{% endblock %}</title>
+    <title>{% block title %}Hermandad Aldea El Ingeniero{% endblock %}</title>
 
     <!-- Bootstrap 5.3 y Boxicons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons/css/boxicons.min.css">
     <link rel="stylesheet" href="{% static 'aplicacion/css/base.css' %}">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -21,7 +23,11 @@
       <!-- NAVBAR SUPERIOR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'aplicacion:home' %}">DMLR System</a>
+      <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
+      <!-- Usa PNG/SVG para mejor calidad (mejor que .ico) -->
+      <img src="{% static 'logos/home.png' %}" alt="" width="50" height="50">
+      <span class="visually-hidden">Inicio</span>
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido" aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -136,5 +142,89 @@
     <script src="{% static 'index/js/base.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
+
+
+    <style>
+      :root{
+  --brand-size-desktop: 48px;  /* cámbialo a lo que necesites */
+  --brand-size-mobile: 40px;
+  --brand-radius: 10px;        /* 50% si lo quieres circular */
+}
+
+.navbar .brand-logo img{
+  width: var(--brand-size-desktop);
+  height: var(--brand-size-desktop);
+  object-fit: contain;         /* o 'cover' si quieres que llene */
+  border-radius: var(--brand-radius);
+  display: block;
+}
+
+@media (max-width: 576px){
+  .navbar .brand-logo img{
+    width: var(--brand-size-mobile);
+    height: var(--brand-size-mobile);
+  }
+}
+
+/* ===== Footer ===== */
+.site-footer {
+  background: #081d4400;              /* color oscuro elegante */
+  color: #0e153b;                   /* texto claro */
+  text-align: center;               /* centrado */
+  font-size: 0.9rem;
+  padding: 16px 8px;
+  border-top: 3px solid #39415000;    /* borde superior sutil */
+}
+
+.site-footer p {
+  margin: 0;
+  line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
+}
+
+.site-footer a {
+   color: #052daf;                   /* tono dorado o amarillo cálido */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.site-footer a:hover {
+  color: #052daf;
+  text-decoration: underline;
+}
+
+/* Versión responsive: texto más pequeño y con saltos en móvil */
+@media (max-width: 576px) {
+  .site-footer {
+    font-size: 0.8rem;
+    padding: 12px 6px;
+  }
+  .site-footer p {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+
+    </style>
 </body>
+<footer class="site-footer">
+  <p>
+    <strong>DMLR System</strong>
+    {% if system_meta.VERSION %} - v{{ system_meta.VERSION }}{% endif %}
+    &nbsp;|&nbsp; © {{ system_meta.ORG_NAME }}
+    &nbsp;|&nbsp; Desarrollado por 
+    <a href="{{ system_meta.AUTHOR_LINK }}" target="_blank" rel="noopener">
+      {{ system_meta.AUTHOR_NAME }}
+    </a>
+    {% if system_meta.AUTHOR_PHONE %}
+      &nbsp;|&nbsp; Contacto: {{ system_meta.AUTHOR_PHONE }}
+    {% endif %}
+  </p>
+</footer>
+
+
+
+
 </html>

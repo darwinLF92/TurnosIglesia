@@ -418,3 +418,4 @@ class HistoriaImagenDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('aplicacion:historia_imagenes_admin')
     permission_required = 'aplicacion.delete_historiaimagen'
     raise_exception = True
+

@@ -2,38 +2,36 @@
 {% load static %}
 {% block carrusel_fullscreen %}
 <link rel="stylesheet" href="https://unpkg.com/swiper@10/swiper-bundle.min.css"/>
-<div class="carousel-wrapper">
-    <div id="carouselExample" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
-        <div class="carousel-inner">
-            {% for img in imagenes_presentacion %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="carousel-background" style="background-image: url('{{ img.imagen.url|urlencode }}');"></div>
-                <img src="{{ img.imagen.url|urlencode }}" class="main-carousel-image" alt="{{ img.titulo }}">
-                {% if img.titulo %}
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>{{ img.titulo }}</h5>
-                    </div>
-                {% endif %}
-            </div>
-            
-            
-            {% endfor %}
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
+<div class="carousel-wrapper">  <!-- OJO: .carousel-wrapper (con punto en CSS) -->
+  <div id="carouselExample" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
+    <div class="carousel-inner">
+      {% for img in imagenes_presentacion %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <div class="carousel-background" style="background-image: url('{{ img.imagen.url|urlencode }}');"></div>
+        <img src="{{ img.imagen.url|urlencode }}" class="main-carousel-image" alt="{{ img.titulo }}">
+        {% if img.titulo %}
+          <div class="carousel-caption d-none d-md-block">
+            <h5>{{ img.titulo }}</h5>
+          </div>
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+  </div>
 </div>
 {% endblock %}
 
 {% block content %}
 <!-- Sección de tarjetas -->
-<div class="container my-5">
+<div class="container card-home">
   <div class="feature-swiper-outer">
     <div class="swiper feature-swiper">
       <div class="swiper-wrapper">
@@ -164,7 +162,7 @@
 
     </div>
       <div class="swiper-pagination"></div>
-    </div
+  </div>
 
     <!-- Flechas y dots -->
     <div class="swiper-button-prev"></div>
@@ -178,24 +176,25 @@
 
 <script src="https://unpkg.com/swiper@10/swiper-bundle.min.js"></script>
 <script>
-new Swiper('.feature-swiper', {
-  slidesPerView: 1,
-  spaceBetween: 24,
+const featureSwiper = new Swiper('.feature-swiper', { 
   loop: true,
+  grabCursor: true,
+  watchOverflow: true,
+  slidesPerView: 1.05,
+  centeredSlides: true,
+  spaceBetween: 16,
+  initialSlide: 1,  // 👈 empieza en el slide 2 (¿Quiénes somos?)
+  pagination: { el: '.feature-swiper .swiper-pagination', clickable: true },
   navigation: {
     nextEl: '.feature-swiper-outer .swiper-button-next',
     prevEl: '.feature-swiper-outer .swiper-button-prev',
   },
-  pagination: {
-    el: '.feature-swiper .swiper-pagination',
-    clickable: true,
-  },
   breakpoints: {
-    768:  { slidesPerView: 2 },
-    1200: { slidesPerView: 3 }
+    576:  { slidesPerView: 1.3, centeredSlides: false, spaceBetween: 20 },
+    768:  { slidesPerView: 2,   spaceBetween: 24 },
+    1200: { slidesPerView: 3,   spaceBetween: 24 }
   }
 });
-
 </script>
 <script>
     function mostrarInformacion() {
@@ -252,73 +251,110 @@ carousel-wrapper {
     object-fit: contain;
 }
 
-.seccion-tarjetas {
-    margin-top: -80px; /* o -100px si quieres que se suba más */
-    z-index: 3;
-    position: relative;
+/* Altura responsiva del hero */
+.carousel-inner,
+.carousel-item {
+  height: 55vh;               /* móvil */
+}
+@media (min-width:576px){
+  .carousel-inner, .carousel-item { height: 60vh; }
+}
+@media (min-width:992px){
+  .carousel-inner, .carousel-item { height: 70vh; }
 }
 
-/* ====== Tarjetas modernas (glass + hover) ====== */
-/* ====== Tarjetas modernas ====== */
+
+/* Overlay suave para legibilidad de captions si los habilitas */
+.carousel-item::after{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 40%);
+  z-index:3;
+}
+.carousel-caption{ z-index:4; }
+
+/* Flechas del hero: más pequeñas; ocultas en XS */
+.carousel-control-prev, .carousel-control-next{
+  width: 44px; height: 44px; top: 50%; transform: translateY(-50%);
+  opacity: .85;
+}
+@media (max-width:480px){
+  .carousel-control-prev, .carousel-control-next{ display:none; }
+}
+
+/* Separación del bloque de tarjetas respecto al hero */
+.card-home {
+  margin-top: -48px !important;  /* pega las cards al hero */
+  margin-bottom: 2rem;
+}
+
+/* =========================
+   CARDS / FEATURE SWIPER
+   ========================= */
 .post-card{
-  background:#fff;border-radius:14px;overflow:hidden;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);height:100%;
-  display:flex;flex-direction:column;transition:transform .2s ease, box-shadow .2s ease;
+  background:#fff; border-radius:16px; overflow:hidden;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
+  height:100%; display:flex; flex-direction:column;
+  transition:transform .2s ease, box-shadow .2s ease;
 }
-.post-card:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+.post-card:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,.12); }
 
-.post-media{ width:100%; aspect-ratio:16/9; overflow:hidden; border-bottom:1px solid rgba(0,0,0,.04); }
+.post-media{ width:100%; aspect-ratio:16/9; overflow:hidden; border-bottom:1px solid rgba(0,0,0,.06); background:#fafafa; }
 .post-media img{ width:100%; height:100%; display:block; object-fit:contain; }
 .post-card:hover .post-media img{ transform:scale(1.04); }
 
-.post-body{ padding:18px 18px 8px; }
-.post-title{ font-weight:800; font-size:1.1rem; letter-spacing:.2px; margin:2px 0 8px; }
+.post-body{ padding:16px 16px 8px; }
+.post-title{ font-weight:800; font-size:1.05rem; letter-spacing:.2px; margin:2px 0 6px; }
 .post-meta{ color:#6b7280; font-size:.9rem; display:flex; gap:12px; flex-wrap:wrap; }
-.post-excerpt{ color:#4b5563; margin:10px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.post-footer{ padding:0 18px 18px; margin-top:auto; }
-.btn-verm{ display:inline-flex; align-items:center; gap:8px; background:#394150; color:#fff; border:0; border-radius:8px; padding:10px 16px; font-weight:700; }
+.post-excerpt{ color:#4b5563; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.post-footer{ padding:0 16px 16px; margin-top:auto; }
+.btn-verm{ display:inline-flex; align-items:center; gap:8px; background:#394150; color:#fff; border:0; border-radius:10px; padding:10px 16px; font-weight:700; }
 .btn-verm:hover{ filter:brightness(1.05); color:#f5f0f0; background:#081d44; }
 
-/* ====== Swiper: estructura correcta ====== */
+/* Swiper contenedor */
 .feature-swiper-outer{
-  position: relative;       /* referencia para flechas */
-  overflow: visible;        /* permite que las flechas sobresalgan */
+  position: relative;      /* referencia para flechas */
+  overflow: visible;
 }
 .feature-swiper{
-  overflow: hidden;         /* RECORTA los slides (importante) */
-  padding: 6px 6px 24px;    /* espacio inferior para los dots */
-  --swiper-navigation-color:#0ea5e9;  /* por si usas icono dentro */
-  --swiper-navigation-size:22px;
+  overflow: hidden;        /* recorta slides */
+  padding: 6px 6px 28px;   /* espacio para dots */
+  --swiper-navigation-size: 22px;
 }
 .feature-swiper .swiper-wrapper{ align-items: stretch; }
 .feature-swiper .swiper-slide{ height: auto; }
 
-/* Flechas posicionadas en el contenedor externo */
+/* Flechas dentro del outer, discretas en desktop */
 .feature-swiper-outer .swiper-button-prev,
 .feature-swiper-outer .swiper-button-next{
   position:absolute; top:50%; transform:translateY(-50%);
-  z-index:5; width:18px; height:18px;
-  /* anula cualquier fondo/sombra heredado */
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
- color:#141414;
+  z-index:5; width:36px; height:36px;
+  background:rgba(255,255,255,.92); border-radius:999px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
 }
-.feature-swiper-outer .swiper-button-prev{ left:-34px; }
-.feature-swiper-outer .swiper-button-next{ right:-34px; }
-.feature-swiper-outer .swiper-button-prev:hover,
-.feature-swiper-outer .swiper-button-next:hover{ filter:brightness(1.1); }
+.feature-swiper-outer .swiper-button-prev::after,
+.feature-swiper-outer .swiper-button-next::after{
+  font-size:18px; color:#111827;
+}
+.feature-swiper-outer .swiper-button-prev{ left:8px; }
+.feature-swiper-outer .swiper-button-next{ right:8px; }
+
+/* Ocultar flechas en móvil; usar swipe + dots */
+@media (max-width:575.98px){
+  .feature-swiper-outer .swiper-button-prev,
+  .feature-swiper-outer .swiper-button-next{ display:none; }
+  /* Separación del bloque de tarjetas respecto al hero */
+}
 
 /* Dots */
+.feature-swiper .swiper-pagination{ bottom: 2px !important; }
 .feature-swiper .swiper-pagination-bullet{ background:#9ca3af; opacity:.6; }
 .feature-swiper .swiper-pagination-bullet-active{ background:#111827; opacity:1; }
 
-/* Responsive: trae flechas hacia adentro en móvil */
-@media (max-width:576px){
-  .feature-swiper-outer .swiper-button-prev{ left:6px; }
-  .feature-swiper-outer .swiper-button-next{ right:6px; }
+/* Tipografía más compacta en pantallas muy pequeñas */
+@media (max-width:480px){
+  .post-title{ font-size:1rem; }
+  .post-meta{ font-size:.85rem; gap:8px; }
 }
 
 /* Fallback si no hay aspect-ratio */
@@ -326,6 +362,89 @@ carousel-wrapper {
   .post-media{ position:relative; padding-top:56.25%; }
   .post-media img{ position:absolute; inset:0; }
 }
+
+/* ====== Estilos generales responsivos ====== */
+@media (max-width: 768px) {
+
+  /* ==== Carrusel superior ==== */
+  .carousel-wrapper {
+    width: 100vw;               /* ocupa todo el ancho de la ventana */
+    margin-left: calc(-50vw + 50%); /* elimina márgenes laterales del contenedor */
+    max-height: 320px;          /* limita altura */
+    overflow: hidden;
+    position: relative;
+    border-radius: 0;           /* quita bordes si los tenía */
+  }
+
+  .carousel-inner {
+    width: 100%;
+    height: 100%;
+  }
+
+  .carousel-item {
+    width: 100%;
+    height: 100%;
+  }
+
+  .main-carousel-image,
+  .carousel-background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;          /* mantiene proporción sin deformar */
+  }
+
+  .carousel-caption {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  /* ==== Carrusel de tarjetas ==== */
+  .feature-swiper-outer {
+    margin-top: 1rem;
+    padding: 0 8px;
+  }
+
+  .feature-swiper {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .feature-swiper .swiper-slide {
+    width: 90%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .feature-swiper .post-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* ==== Para pantallas aún más pequeñas (menos de 480px) ==== */
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    max-height: 260px;
+  }
+
+  .carousel-caption h5 {
+    font-size: 0.8rem;
+  }
+
+  .feature-swiper .swiper-slide {
+    width: 95%;
+  }
+}
+
 
 
 </style>
