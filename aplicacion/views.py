@@ -21,6 +21,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import HistoriaImagenForm
 from .models import HistoriaImagen
 from django.utils.http import url_has_allowed_host_and_scheme
+from .models import MediaAlbum, Foto, Video
+from .forms import MediaAlbumForm, FotoBulkUploadForm, VideoForm, FotoForm, VideoForm2
+from django.db import transaction
+from django.core.exceptions import ValidationError
 
 
 def is_admin(user):
@@ -419,3 +423,131 @@ class HistoriaImagenDeleteView(LoginRequiredMixin, DeleteView):
     permission_required = 'aplicacion.delete_historiaimagen'
     raise_exception = True
 
+# Página principal (tabs)
+def galeria_view(request):
+    fotos_albums = MediaAlbum.objects.filter(activo=True, tipo=MediaAlbum.FOTO)
+    videos_albums = MediaAlbum.objects.filter(activo=True, tipo=MediaAlbum.VIDEO)
+    return render(request, 'aplicacion/galeria.html', {
+        'fotos_albums': fotos_albums,
+        'videos_albums': videos_albums
+    })
+
+# Detalle de álbum (muestra fotos o videos según tipo)
+#vistas para el apartado de fototeca y videos
+def album_detalle_view(request, pk):
+    album = get_object_or_404(MediaAlbum, pk=pk, activo=True)
+    return render(request, 'aplicacion/album_detalle.html', {'album': album})
+
+# --------- ADMIN / PANEL ----------
+class AlbumListView(LoginRequiredMixin, ListView):
+    model = MediaAlbum
+    template_name = 'aplicacion/album_list.html'
+    context_object_name = 'albumes'
+    permission_required = 'aplicacion.view_mediaalbum'
+
+class AlbumCreateView(LoginRequiredMixin, CreateView):
+    model = MediaAlbum
+    form_class = MediaAlbumForm
+    template_name = 'aplicacion/album_form.html'
+    success_url = reverse_lazy('aplicacion:album_admin')
+    permission_required = 'aplicacion.add_mediaalbum'
+
+class AlbumUpdateView(LoginRequiredMixin, UpdateView):
+    model = MediaAlbum
+    form_class = MediaAlbumForm
+    template_name = 'aplicacion/album_form.html'
+    success_url = reverse_lazy('aplicacion:album_admin')
+    permission_required = 'aplicacion.change_mediaalbum'
+
+class AlbumDeleteView(LoginRequiredMixin, DeleteView):
+    model = MediaAlbum
+    template_name = 'aplicacion/album_confirm_delete.html'
+    success_url = reverse_lazy('aplicacion:album_admin')
+    permission_required = 'aplicacion.delete_mediaalbum'
+
+# Subir varias fotos a un álbum
+@login_required
+def album_foto_upload_view(request, pk):
+    album = get_object_or_404(MediaAlbum, pk=pk, tipo=MediaAlbum.FOTO)
+
+    if request.method == 'POST':
+        archivos = request.FILES.getlist('imagenes')  # << clave
+        if not archivos:
+            messages.error(request, 'No seleccionaste ningún archivo.')
+            return render(request, 'aplicacion/foto_upload_form.html', {'album': album})
+
+        guardadas, errores = 0, 0
+        try:
+            with transaction.atomic():
+                for f in archivos:
+                    try:
+                        Foto.objects.create(album=album, imagen=f)
+                        guardadas += 1
+                    except Exception as e:
+                        errores += 1
+                        messages.error(request, f'Error guardando {f.name}: {e}')
+        except Exception as e:
+            messages.error(request, f'Error general guardando archivos: {e}')
+            return render(request, 'aplicacion/foto_upload_form.html', {'album': album})
+
+        if guardadas:
+            messages.success(request, f'{guardadas} foto(s) agregada(s).')
+            if errores:
+                messages.warning(request, f'{errores} archivo(s) no se pudieron subir.')
+            return redirect('aplicacion:album_detalle', pk=album.pk)
+
+        messages.error(request, 'No se pudo guardar ninguna foto.')
+        return render(request, 'aplicacion/foto_upload_form.html', {'album': album})
+
+    return render(request, 'aplicacion/foto_upload_form.html', {'album': album})
+
+# Subir video a un álbum (URL o archivo)
+
+def album_video_upload_view(request, pk):
+    album = get_object_or_404(MediaAlbum, pk=pk, tipo=MediaAlbum.VIDEO)
+    if request.method == 'POST':
+        form = VideoForm(request.POST, request.FILES)
+        if form.is_valid():
+            vid = form.save(commit=False)
+            vid.album = album
+            vid.save()
+            messages.success(request, 'Video agregado al álbum.')
+            return redirect('aplicacion:album_detalle', pk=album.pk)
+        else:
+            messages.error(request, 'El formulario no es válido. Revisa los campos.')
+    else:
+        form = VideoForm()
+    return render(request, 'aplicacion/video_upload_form.html', {'album': album, 'form': form})
+
+
+# ------- FOTOS -------
+class FotoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Foto
+    form_class = FotoForm
+    template_name = 'aplicacion/foto_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('aplicacion:album_detalle', kwargs={'pk': self.object.album.pk})
+
+class FotoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Foto
+    template_name = 'aplicacion/foto_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('aplicacion:album_detalle', kwargs={'pk': self.object.album.pk})
+
+# ------- VIDEOS -------
+class VideoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Video
+    form_class = VideoForm2
+    template_name = 'aplicacion/video_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('aplicacion:album_detalle', kwargs={'pk': self.object.album.pk})
+
+class VideoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Video
+    template_name = 'aplicacion/video_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('aplicacion:album_detalle', kwargs={'pk': self.object.album.pk})

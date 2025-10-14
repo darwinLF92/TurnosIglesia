@@ -1,0 +1,64 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Subir video a {{ album.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <h4 class="mb-3">Subir video a: {{ album.titulo }}</h4>
+  <form method="post" enctype="multipart/form-data" class="card p-3 shadow-sm">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Título (opcional)</label>
+      {{ form.titulo }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">URL (YouTube/Vimeo/Facebook)</label>
+      {{ form.url }}
+      <div class="form-text">{{ form.fields.url.help_text }}</div>
+      {% for e in form.url.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Archivo de video</label>
+      {{ form.archivo }}
+      <div class="form-text">{{ form.fields.archivo.help_text }}</div>
+      {% for e in form.archivo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Miniatura / Portada (opcional)</label>
+      {{ form.miniatura }}
+      <div class="form-text">{{ form.fields.miniatura.help_text }}</div>
+      {% for e in form.miniatura.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="alert alert-info">
+      Usa <strong>solo uno</strong>: <em>URL</em> o <em>Archivo</em>. Si completas ambos, el sistema mostrará un error.
+    </div>
+
+    <button class="btn btn-primary">
+      <i class="fas fa-upload"></i> Subir
+    </button>
+    <a class="btn btn-secondary" href="{% url 'aplicacion:album_detalle' album.pk %}">
+      Cancelar
+    </a>
+  </form>
+</div>
+
+<script>
+  // Aplicar estilos Bootstrap a los campos de formulario automáticamente
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.querySelectorAll('input,textarea').forEach(el=>{
+      if (el.type === 'file') el.classList.add('form-control');
+      else el.classList.add('form-control');
+    });
+  });
+</script>
+{% endblock %}

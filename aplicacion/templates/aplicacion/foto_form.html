@@ -1,0 +1,30 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Editar foto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-3">Editar foto</h4>
+  <form method="post" enctype="multipart/form-data" class="card p-3 shadow-sm">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Título</label>
+      {{ form.titulo }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Imagen (opcional para reemplazar)</label>
+      {{ form.imagen }}
+      {% if form.instance.imagen %}
+        <div class="mt-2">
+          <img src="{{ form.instance.imagen.url }}" alt="" class="img-fluid rounded" style="max-height:180px;object-fit:cover;">
+          <div class="text-muted small">Actual</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <button class="btn btn-primary">Guardar</button>
+    <a href="{% url 'aplicacion:album_detalle' form.instance.album.pk %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

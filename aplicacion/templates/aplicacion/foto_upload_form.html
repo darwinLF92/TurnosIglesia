@@ -1,0 +1,28 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Subir fotos a {{ album.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <h4 class="mb-3">Subir fotos a: {{ album.titulo }}</h4>
+
+  <form method="post" enctype="multipart/form-data" class="card p-3">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Selecciona imágenes (múltiples)</label>
+      <input type="file" name="imagenes" multiple accept="image/*" class="form-control">
+      <div class="form-text">JPG, PNG…</div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Subir</button>
+      <a class="btn btn-secondary" href="{% url 'aplicacion:album_detalle' album.pk %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

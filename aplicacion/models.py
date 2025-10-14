@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+from django.core.exceptions import ValidationError
+from urllib.parse import urlencode, urlparse, parse_qs, quote
 
 # Create your models here.
 # Modelo para "¿Quiénes somos?"
@@ -135,3 +136,98 @@ class HistoriaImagen(models.Model):
     def __str__(self):
         return self.titulo
 
+class MediaAlbum(models.Model):
+    FOTO = 'foto'
+    VIDEO = 'video'
+    TIPOS = [(FOTO, 'Fotografías'), (VIDEO, 'Videos')]
+
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True)
+    tipo = models.CharField(max_length=10, choices=TIPOS)
+    portada = models.ImageField(upload_to='albumes/portadas/', blank=True, null=True)
+    activo = models.BooleanField(default=True)
+    orden = models.PositiveIntegerField(default=0)
+    creado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['orden', '-creado']
+
+    def __str__(self):
+        return f'{self.get_tipo_display()}: {self.titulo}'
+
+
+class Foto(models.Model):
+    album = models.ForeignKey(MediaAlbum, on_delete=models.CASCADE, related_name='fotos')
+    imagen = models.ImageField(upload_to='albumes/fotos/')
+    titulo = models.CharField(max_length=200, blank=True)
+
+    def clean(self):
+        if self.album and self.album.tipo != MediaAlbum.FOTO:
+            raise ValidationError('Solo puedes subir fotos a álbumes de tipo Fotografías.')
+
+    def __str__(self):
+        return self.titulo or f'Foto #{self.pk}'
+
+
+class Video(models.Model):
+    album = models.ForeignKey(MediaAlbum, on_delete=models.CASCADE, related_name='videos')
+    titulo = models.CharField(max_length=200, blank=True)
+    # puedes admitir URL (YouTube/Vimeo) o archivo subido
+    url = models.URLField(blank=True)
+    archivo = models.FileField(upload_to='albumes/videos/', blank=True, null=True)
+    creado  = models.DateTimeField(auto_now_add=True)
+    miniatura = models.ImageField(upload_to='albumes/video_posters/', blank=True, null=True)  # opcional
+    
+    def clean(self):
+        if not self.url and not self.archivo:
+            raise ValidationError('Debes proporcionar una URL o un archivo de video.')
+        if self.url and self.archivo:
+            raise ValidationError('Proporciona solo URL o solo archivo, no ambos.')
+
+    # --- URL de embed para iframe (ya la usabas) ---
+    def embed_src(self):
+        u = (self.url or '').strip()
+        if not u: return ''
+        # YouTube
+        if 'youtube.com/watch' in u or 'youtu.be/' in u:
+            vid = self.youtube_id()
+            return f'https://www.youtube.com/embed/{vid}' if vid else u
+        # Vimeo
+        if 'vimeo.com/' in u and 'player.vimeo.com' not in u:
+            vid = u.rstrip('/').split('/')[-1]
+            return f'https://player.vimeo.com/video/{vid}'
+        # Facebook
+        if 'facebook.com/' in u:
+            base = 'https://www.facebook.com/plugins/video.php'
+            qs = urlencode({'href': u, 'show_text': 0, 'width': 1280})
+            return f'{base}?{qs}'
+        return u
+
+    # --- Helpers para miniaturas ---
+    def youtube_id(self):
+        u = (self.url or '').strip()
+        if 'watch' in u:
+            return parse_qs(urlparse(u).query).get('v', [''])[0]
+        if 'youtu.be/' in u:
+            return u.rstrip('/').split('/')[-1]
+        return ''
+
+    def thumbnail_url(self):
+        """URL de imagen para mostrar en la grilla."""
+        # 1) Si subieron miniatura manual
+        if self.miniatura:
+            try:
+                return self.miniatura.url
+            except Exception:
+                pass
+        # 2) Si es YouTube
+        yid = self.youtube_id()
+        if yid:
+            return f'https://img.youtube.com/vi/{yid}/hqdefault.jpg'
+        # 3) Si es Vimeo (servicio público de thumbs)
+        u = (self.url or '')
+        if 'vimeo.com/' in u:
+            vid = u.rstrip('/').split('/')[-1]
+            return f'https://vumbnail.com/{vid}.jpg'
+        # 4) Sin suerte → None (usa placeholder en template)
+        return ''

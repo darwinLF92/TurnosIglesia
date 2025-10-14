@@ -192,9 +192,11 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <form method="GET" action="{% url 'aplicacion:lista_marchas' %}" class="search-bar">
-        <input type="text" name="q" class="form-control" placeholder="Buscar marchas..." value="{{ query }}">
-    </form>
+        <form method="GET" action="{% url 'aplicacion:lista_marchas' %}" class="search-bar">
+        <input id="searchInput" type="text" name="q" class="form-control"
+                placeholder="Buscar marchas..." value="{{ query }}" autocomplete="off">
+        </form>
+
 
     <div class="filtro-tabs">
         <a href="?filtro=todas" class="{% if filtro == 'todas' %}active{% endif %}">Todas</a>
@@ -206,7 +208,8 @@
         <div class="col-md-4">
             <div class="list-group marchas-scroll-container">
                 {% for marcha in marchas %}
-                <div class="list-group-item" id="marcha_{{ marcha.id }}">
+                <div class="list-group-item" id="marcha_{{ marcha.id }}"
+                data-title="{{ marcha.titulo|lower }}">
                     {% if marcha.imagen_portada %}
                         <img src="{{ marcha.imagen_portada.url }}" alt="{{ marcha.titulo }}">
                     {% else %}
@@ -297,6 +300,33 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function () {
+
+          // Filtro simple por título
+ // --- Filtro en vivo como en álbumes, pero para .list-group-item ---
+        (function () {
+            const input = document.getElementById('searchInput');
+            if (!input) return;
+
+            // Función para normalizar (quita acentos y pasa a minúsculas)
+            const norm = (s) => (s || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+            input.addEventListener('input', () => {
+            const q = norm(input.value);
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                // 1) intenta con data-title; 2) fallback: texto visible
+                const title = item.dataset.title
+                ? norm(item.dataset.title)
+                : norm(item.textContent || '');
+
+                item.style.display = title.includes(q) ? '' : 'none';
+            });
+            });
+        })();
+
         $(".editar-btn").click(function() {
         var marchaID = $(this).data("marchaid");
         if (!marchaID) { console.error("Error: Marcha ID no definido."); return; }

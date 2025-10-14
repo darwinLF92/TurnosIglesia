@@ -65,4 +65,27 @@ urlpatterns = [
          name='historia_imagenes_eliminar'),
 
 
+     # Público
+    path('galeria/', views.galeria_view, name='galeria'),
+    path('galeria/album/<int:pk>/', views.album_detalle_view, name='album_detalle'),
+
+    # Panel
+    path('panel/galeria/', views.AlbumListView.as_view(), name='album_admin'),
+    path('panel/galeria/crear/', views.AlbumCreateView.as_view(), name='album_crear'),
+    path('panel/galeria/<int:pk>/editar/', views.AlbumUpdateView.as_view(), name='album_editar'),
+    path('panel/galeria/<int:pk>/eliminar/', views.AlbumDeleteView.as_view(), name='album_eliminar'),
+
+    # Subidas
+    path('panel/galeria/<int:pk>/fotos/subir/', views.album_foto_upload_view, name='album_foto_subir'),
+    path('panel/galeria/<int:pk>/videos/subir/', views.album_video_upload_view, name='album_video_subir'),
+
+      # FOTOS
+    path('album/foto/<int:pk>/editar/',  views.FotoUpdateView.as_view(),  name='foto_editar'),
+    path('album/foto/<int:pk>/eliminar/', views.FotoDeleteView.as_view(), name='foto_eliminar'),
+
+    # VIDEOS
+    path('album/video/<int:pk>/editar/',  views.VideoUpdateView.as_view(),  name='video_editar'),
+    path('album/video/<int:pk>/eliminar/', views.VideoDeleteView.as_view(), name='video_eliminar'),
+
+
 ]

@@ -1,0 +1,18 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Eliminar álbum{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold text-danger">Eliminar álbum</h3>
+      <p>¿Seguro que deseas eliminar el álbum <strong>{{ object.titulo }}</strong>?</p>
+      <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit"><i class="fas fa-trash-alt"></i> Eliminar</button>
+        <a class="btn btn-secondary" href="{% url 'aplicacion:album_admin' %}">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

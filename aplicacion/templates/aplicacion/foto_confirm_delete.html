@@ -1,0 +1,16 @@
+{% extends 'aplicacion/base.html' %}
+{% block title %}Eliminar foto{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card p-4 shadow-sm">
+    <h4 class="mb-3">¿Eliminar esta foto?</h4>
+    <img src="{{ object.imagen.url }}" alt="" class="img-fluid rounded mb-3" style="max-height:220px;object-fit:cover;">
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger">Eliminar</button>
+      <a href="{% url 'aplicacion:album_detalle' object.album.pk %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

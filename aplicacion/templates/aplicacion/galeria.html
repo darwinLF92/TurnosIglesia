@@ -1,0 +1,108 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+{% block title %}Fototeca y Videos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <input class="form-control mb-3" placeholder="Buscar álbumes..." id="searchInput">
+
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="fotos-tab" data-bs-toggle="tab" data-bs-target="#fotos" type="button" role="tab">Fotografías</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Videos</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- 📸 Fotografías -->
+    <div class="tab-pane fade show active" id="fotos" role="tabpanel" aria-labelledby="fotos-tab">
+      <div class="row g-3" id="gridFotos">
+        {% for a in fotos_albums %}
+          <div class="col-md-4 album-card" data-title="{{ a.titulo|lower }}" data-url="{% url 'aplicacion:album_detalle' a.pk %}">
+            <div class="card h-100 album-clickable" style="cursor: pointer;">
+              {% if a.portada %}
+                <img src="{{ a.portada.url }}" class="card-img-top" style="height:200px;object-fit:cover;" alt="{{ a.titulo }}">
+              {% else %}
+                <img src="{% static 'imagenes/placeholder.jpg' %}" class="card-img-top" style="height:200px;object-fit:cover;" alt="">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ a.titulo }}</h5>
+                <p class="card-text text-muted">{{ a.descripcion|default:"" }}</p>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                {% if request.user.is_authenticated %}
+                  <a href="{% url 'aplicacion:album_editar' a.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                  <a href="{% url 'aplicacion:album_eliminar' a.pk %}" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-center text-muted">No hay álbumes de fotografías aún.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 🎥 Videos -->
+    <div class="tab-pane fade" id="videos" role="tabpanel" aria-labelledby="videos-tab">
+      <div class="row g-3" id="gridVideos">
+        {% for a in videos_albums %}
+          <div class="col-md-4 album-card" data-title="{{ a.titulo|lower }}" data-url="{% url 'aplicacion:album_detalle' a.pk %}">
+            <div class="card h-100 album-clickable" style="cursor: pointer;">
+              {% if a.portada %}
+                <img src="{{ a.portada.url }}" class="card-img-top" style="height:200px;object-fit:cover;" alt="{{ a.titulo }}">
+              {% else %}
+                <img src="{% static 'imagenes/placeholder.jpg' %}" class="card-img-top" style="height:200px;object-fit:cover;" alt="">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ a.titulo }}</h5>
+                <p class="card-text text-muted">{{ a.descripcion|default:"" }}</p>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+
+                {% if request.user.is_authenticated %}
+                  <a href="{% url 'aplicacion:album_editar' a.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                  <a href="{% url 'aplicacion:album_eliminar' a.pk %}" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-center text-muted">No hay álbumes de videos aún.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if request.user.is_authenticated %}
+    <div class="text-center mt-4">
+      <a href="{% url 'aplicacion:album_crear' %}" class="btn btn-success">Crear nuevo álbum</a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // 🔍 Filtro simple por título
+  const input = document.getElementById('searchInput');
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase();
+    document.querySelectorAll('.album-card').forEach(c => {
+      c.style.display = c.dataset.title.includes(q) ? '' : 'none';
+    });
+  });
+
+  // 🖱️ Hacer clic en la tarjeta = abrir el álbum
+  document.querySelectorAll('.album-clickable').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Evita conflictos si clickeas un botón dentro
+      if (e.target.closest('.btn')) return;
+      const url = card.closest('.album-card').dataset.url;
+      if (url) window.location.href = url;
+    });
+  });
+</script>
+{% endblock %}

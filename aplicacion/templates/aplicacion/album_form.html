@@ -1,0 +1,78 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block title %}Crear álbum{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="fw-bold mb-3">Crear álbum</h3>
+
+  <form method="post" enctype="multipart/form-data" class="card shadow-sm">
+    <div class="card-body">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label class="form-label">Título</label>
+        {{ form.titulo }}
+        {% if form.titulo.errors %}<div class="text-danger small">{{ form.titulo.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        {{ form.descripcion }}
+        {% if form.descripcion.errors %}<div class="text-danger small">{{ form.descripcion.errors }}</div>{% endif %}
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Tipo</label>
+          {{ form.tipo }}
+          <div class="form-text">Elige “Fotografías” o “Videos”.</div>
+          {% if form.tipo.errors %}<div class="text-danger small">{{ form.tipo.errors }}</div>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Orden</label>
+          {{ form.orden }}
+          {% if form.orden.errors %}<div class="text-danger small">{{ form.orden.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 mb-3">
+          <label class="form-label">Portada</label>
+          {{ form.portada }}
+          <div class="form-text">Imagen opcional que se mostrará como portada del álbum.</div>
+          {% if form.portada.errors %}<div class="text-danger small">{{ form.portada.errors }}</div>{% endif %}
+        </div>
+        <div class="col-md-4 mb-3 d-flex align-items-end">
+          <div class="form-check">
+            {{ form.activo }}
+            <label class="form-check-label">Activo</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer d-flex gap-2">
+      <button class="btn btn-success" type="submit">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+      <a class="btn btn-secondary" href="{% url 'aplicacion:album_admin' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<!-- Aplica clases Bootstrap a inputs sin widget-tweaks -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'checkbox') el.classList.add('form-check-input');
+      else el.classList.add('form-control');
+    });
+  });
+</script>
+{% endblock %}

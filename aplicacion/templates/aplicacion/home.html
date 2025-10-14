@@ -109,7 +109,7 @@
       <div class="swiper-slide">
         <article class="post-card">
           <div class="post-media">
-            <img src="{% static 'img/home/fototeca.jpg' %}" alt="Fototeca y Video">
+            <img src="{% static 'home/fototeca.png' %}" alt="Fototeca y Video">
           </div>
           <div class="post-body">
             <h3 class="post-title">FOTOTECA Y VIDEO</h3>
@@ -117,7 +117,7 @@
             <p class="post-excerpt">Documentación fotográfica y videoclips de nuestras actividades.</p>
           </div>
           <div class="post-footer">
-            <a class="btn btn-verm" href="#">
+            <a class="btn btn-verm" href="{% url 'aplicacion:galeria' %}">
               VER GALERÍA <i class="fa-solid fa-arrow-right-long"></i>
             </a>
           </div>
