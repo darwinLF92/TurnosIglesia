@@ -225,191 +225,304 @@
 
 {% block extra_css %}
 <style>
-carousel-wrapper {
-    width: 100%;
-    height: 1000px; /* ajustable: puedes usar 100vh también */
-    position: relative;
-    overflow: hidden;
-    background: #000;
+/* =========================
+   HERO / CAROUSEL SUPERIOR
+   ========================= */
+.carousel-wrapper {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #000;
 }
 
 .carousel-inner {
-    height: 100%;
+  height: 100%;
 }
 
 .carousel-item {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .carousel-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    background-size: cover;
-    filter: blur(20px) brightness(0.7);
-    transform: scale(1.1); /* para evitar bordes negros al hacer blur */
-    z-index: 1;
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  filter: blur(20px) brightness(0.7);
+  transform: scale(1.1);
+  z-index: 1;
 }
 
+/* ===== Imagen principal ===== */
+/* Desktop / por defecto: imagen centrada, sin deformar, con blur de complemento */
 .main-carousel-image {
-    position: relative;
-    z-index: 2;
-    max-height: 800px;
-    max-width: 70%;
-    display: block;
-    margin: 0 auto;
-    object-fit: contain;
+  position: relative;
+  z-index: 2;
+  display: block;
+  margin: 0 auto;
+  width: auto;           /* no fuerza 100% */
+  max-width: 70%;        /* controla ancho */
+  max-height: 70vh;      /* controla alto visible */
+  object-fit: contain;   /* NO distorsiona */
 }
 
-/* Altura responsiva del hero */
+/* Altura responsiva */
 .carousel-inner,
 .carousel-item {
-  height: 55vh;               /* móvil */
+  width: 100%;
+  height: 55vh; /* base */
 }
-@media (min-width:576px){
-  .carousel-inner, .carousel-item { height: 60vh; }
+@media (min-width: 576px) {
+  .carousel-inner,
+  .carousel-item { height: 60vh; }
 }
-@media (min-width:992px){
-  .carousel-inner, .carousel-item { height: 70vh; }
+@media (min-width: 992px) {
+  .carousel-inner,
+  .carousel-item { height: 70vh; }
 }
 
-
-/* Overlay suave para legibilidad de captions si los habilitas */
-.carousel-item::after{
-  content:"";
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 40%);
-  z-index:3;
+/* Overlay suave */
+.carousel-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top,
+              rgba(0,0,0,.45),
+              rgba(0,0,0,0) 40%);
+  z-index: 3;
 }
-.carousel-caption{ z-index:4; }
+.carousel-caption { z-index: 4; }
 
-/* Flechas del hero: más pequeñas; ocultas en XS */
-.carousel-control-prev, .carousel-control-next{
-  width: 44px; height: 44px; top: 50%; transform: translateY(-50%);
+/* Flechas hero */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 44px;
+  height: 44px;
+  top: 50%;
+  transform: translateY(-50%);
   opacity: .85;
 }
-@media (max-width:480px){
-  .carousel-control-prev, .carousel-control-next{ display:none; }
+@media (max-width: 480px) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    display: none;
+  }
 }
 
-/* Separación del bloque de tarjetas respecto al hero */
+/* =========================
+   TARJETAS / BLOQUE INFERIOR
+   ========================= */
+
+/* Desktop: leve superposición */
 .card-home {
-  margin-top: -48px !important;  /* pega las cards al hero */
+  margin-top: -48px !important;
   margin-bottom: 2rem;
 }
 
 /* =========================
    CARDS / FEATURE SWIPER
    ========================= */
-.post-card{
-  background:#fff; border-radius:16px; overflow:hidden;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);
-  height:100%; display:flex; flex-direction:column;
-  transition:transform .2s ease, box-shadow .2s ease;
+.post-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0,0,0,.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.post-card:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,.12); }
+.post-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(0,0,0,.12);
+}
 
-.post-media{ width:100%; aspect-ratio:16/9; overflow:hidden; border-bottom:1px solid rgba(0,0,0,.06); background:#fafafa; }
-.post-media img{ width:100%; height:100%; display:block; object-fit:contain; }
-.post-card:hover .post-media img{ transform:scale(1.04); }
+.post-media {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  background: #fafafa;
+}
+.post-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+.post-card:hover .post-media img {
+  transform: scale(1.04);
+}
 
-.post-body{ padding:16px 16px 8px; }
-.post-title{ font-weight:800; font-size:1.05rem; letter-spacing:.2px; margin:2px 0 6px; }
-.post-meta{ color:#6b7280; font-size:.9rem; display:flex; gap:12px; flex-wrap:wrap; }
-.post-excerpt{ color:#4b5563; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.post-footer{ padding:0 16px 16px; margin-top:auto; }
-.btn-verm{ display:inline-flex; align-items:center; gap:8px; background:#394150; color:#fff; border:0; border-radius:10px; padding:10px 16px; font-weight:700; }
-.btn-verm:hover{ filter:brightness(1.05); color:#f5f0f0; background:#081d44; }
+.post-body {
+  padding: 16px 16px 8px;
+}
+.post-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: .2px;
+  margin: 2px 0 6px;
+}
+.post-meta {
+  color: #6b7280;
+  font-size: .9rem;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.post-excerpt {
+  color: #4b5563;
+  margin: 8px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-footer {
+  padding: 0 16px 16px;
+  margin-top: auto;
+}
+.btn-verm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #394150;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+.btn-verm:hover {
+  filter: brightness(1.05);
+  color: #f5f0f0;
+  background: #081d44;
+}
 
 /* Swiper contenedor */
-.feature-swiper-outer{
-  position: relative;      /* referencia para flechas */
+.feature-swiper-outer {
+  position: relative;
   overflow: visible;
 }
-.feature-swiper{
-  overflow: hidden;        /* recorta slides */
-  padding: 6px 6px 28px;   /* espacio para dots */
+.feature-swiper {
+  overflow: hidden;
+  padding: 6px 6px 28px;
   --swiper-navigation-size: 22px;
 }
-.feature-swiper .swiper-wrapper{ align-items: stretch; }
-.feature-swiper .swiper-slide{ height: auto; }
+.feature-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+.feature-swiper .swiper-slide {
+  height: auto;
+}
 
-/* Flechas dentro del outer, discretas en desktop */
+/* Flechas Swiper (desktop) */
 .feature-swiper-outer .swiper-button-prev,
-.feature-swiper-outer .swiper-button-next{
-  position:absolute; top:50%; transform:translateY(-50%);
-  z-index:5; width:36px; height:36px;
-  background:rgba(255,255,255,.92); border-radius:999px;
-  box-shadow:0 6px 18px rgba(0,0,0,.15);
+.feature-swiper-outer .swiper-button-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,.92);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
 }
 .feature-swiper-outer .swiper-button-prev::after,
-.feature-swiper-outer .swiper-button-next::after{
-  font-size:18px; color:#111827;
+.feature-swiper-outer .swiper-button-next::after {
+  font-size: 18px;
+  color: #111827;
 }
-.feature-swiper-outer .swiper-button-prev{ left:8px; }
-.feature-swiper-outer .swiper-button-next{ right:8px; }
+.feature-swiper-outer .swiper-button-prev { left: 8px; }
+.feature-swiper-outer .swiper-button-next { right: 8px; }
 
-/* Ocultar flechas en móvil; usar swipe + dots */
-@media (max-width:575.98px){
+/* Ocultar flechas en móvil */
+@media (max-width: 575.98px) {
   .feature-swiper-outer .swiper-button-prev,
-  .feature-swiper-outer .swiper-button-next{ display:none; }
-  /* Separación del bloque de tarjetas respecto al hero */
+  .feature-swiper-outer .swiper-button-next {
+    display: none;
+  }
 }
 
 /* Dots */
-.feature-swiper .swiper-pagination{ bottom: 2px !important; }
-.feature-swiper .swiper-pagination-bullet{ background:#9ca3af; opacity:.6; }
-.feature-swiper .swiper-pagination-bullet-active{ background:#111827; opacity:1; }
-
-/* Tipografía más compacta en pantallas muy pequeñas */
-@media (max-width:480px){
-  .post-title{ font-size:1rem; }
-  .post-meta{ font-size:.85rem; gap:8px; }
+.feature-swiper .swiper-pagination {
+  bottom: 2px !important;
+}
+.feature-swiper .swiper-pagination-bullet {
+  background: #9ca3af;
+  opacity: .6;
+}
+.feature-swiper .swiper-pagination-bullet-active {
+  background: #111827;
+  opacity: 1;
 }
 
-/* Fallback si no hay aspect-ratio */
-@supports not (aspect-ratio: 1 / 1){
-  .post-media{ position:relative; padding-top:56.25%; }
-  .post-media img{ position:absolute; inset:0; }
+/* Tipografía XS */
+@media (max-width: 480px) {
+  .post-title { font-size: 1rem; }
+  .post-meta  { font-size: .85rem; gap: 8px; }
 }
 
-/* ====== Estilos generales responsivos ====== */
+/* Fallback sin aspect-ratio */
+@supports not (aspect-ratio: 1 / 1) {
+  .post-media { position: relative; padding-top: 56.25%; }
+  .post-media img { position: absolute; inset: 0; }
+}
+
+/* =========================
+   RESPONSIVE: MÓVIL
+   ========================= */
 @media (max-width: 768px) {
 
-  /* ==== Carrusel superior ==== */
+  /* Carrusel ancho completo */
   .carousel-wrapper {
-    width: 100vw;               /* ocupa todo el ancho de la ventana */
-    margin-left: calc(-50vw + 50%); /* elimina márgenes laterales del contenedor */
-    max-height: 320px;          /* limita altura */
-    overflow: hidden;
-    position: relative;
-    border-radius: 0;           /* quita bordes si los tenía */
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    height: 40vh; /* reduce un poco en móvil */
+    border-radius: 0;
   }
 
-  .carousel-inner {
-    width: 100%;
-    height: 100%;
-  }
 
+  .carousel-inner,
   .carousel-item {
-    width: 100%;
-    height: 100%;
+    height: 45vh;
   }
 
-  .main-carousel-image,
-  .carousel-background {
+ .main-carousel-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;          /* mantiene proporción sin deformar */
+    object-fit: cover;   /* ✅ se adapta sin bordes negros */
+    max-width: none;     /* anula el límite de 70% */
   }
 
-  .carousel-caption {
-    position: absolute;
+  /* 🔥 Pegamos las tarjetas al carrusel */
+  .card-home {
+    margin-top: -40px !important;   /* ajusta si quieres más/menos solapado */
+    margin-bottom: 1rem;
+    padding-top: 0 !important;
+  }
+
+  .feature-swiper-outer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .feature-swiper .swiper-slide {
+    width: 90%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .feature-swiper .post-card {
+    background: rgba(255,255,255,0.98);
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+.carousel-caption {
     bottom: 10px;
     left: 0;
     right: 0;
@@ -421,44 +534,32 @@ carousel-wrapper {
     border-radius: 6px;
   }
 
-  /* ==== Carrusel de tarjetas ==== */
-  .feature-swiper-outer {
-    margin-top: 1rem;
-    padding: 0 8px;
-  }
-
-  .feature-swiper {
-    width: 100%;
-    overflow: visible;
-  }
-
-  .feature-swiper .swiper-slide {
-    width: 90%;
-    max-width: 360px;
-    margin: 0 auto;
-  }
-
-  .feature-swiper .post-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  }
 }
 
-/* ==== Para pantallas aún más pequeñas (menos de 480px) ==== */
+/* =========================
+   RESPONSIVE: XS
+   ========================= */
 @media (max-width: 480px) {
-  .carousel-wrapper {
-    max-height: 260px;
+
+  .carousel-inner,
+  .carousel-item {
+    height: 40vh;
   }
 
-  .carousel-caption h5 {
-    font-size: 0.8rem;
+  .card-home {
+    margin-top: -36px !important;  /* un poquito más pegado en pantallas pequeñas */
+    margin-bottom: 1rem;
   }
 
   .feature-swiper .swiper-slide {
     width: 95%;
   }
+
+  .carousel-caption h5 {
+    font-size: 0.8rem;
+  }
 }
+
 
 
 

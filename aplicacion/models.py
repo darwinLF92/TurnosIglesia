@@ -3,6 +3,10 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from urllib.parse import urlencode, urlparse, parse_qs, quote
+import os
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
 
 # Create your models here.
 # Modelo para "¿Quiénes somos?"
@@ -156,14 +160,56 @@ class MediaAlbum(models.Model):
         return f'{self.get_tipo_display()}: {self.titulo}'
 
 
-class Foto(models.Model):
-    album = models.ForeignKey(MediaAlbum, on_delete=models.CASCADE, related_name='fotos')
+class Foto(models.Model): 
+    album = models.ForeignKey('MediaAlbum', on_delete=models.CASCADE, related_name='fotos')
     imagen = models.ImageField(upload_to='albumes/fotos/')
     titulo = models.CharField(max_length=200, blank=True)
 
     def clean(self):
         if self.album and self.album.tipo != MediaAlbum.FOTO:
             raise ValidationError('Solo puedes subir fotos a álbumes de tipo Fotografías.')
+
+    def save(self, *args, **kwargs):
+        # Si no hay imagen, guardar normal
+        if not self.imagen:
+            return super().save(*args, **kwargs)
+
+        # Extensión original
+        nombre_original = self.imagen.name
+        base, ext = os.path.splitext(nombre_original.lower())
+
+        # Si ya es .webp, no hacemos nada extra
+        if ext == '.webp':
+            return super().save(*args, **kwargs)
+
+        # Abrir imagen original desde el archivo subido
+        try:
+            self.imagen.open()  # asegura acceso al archivo
+            img = Image.open(self.imagen)
+        except Exception:
+            # Si falla al abrir, guardamos normal para no romper el flujo
+            return super().save(*args, **kwargs)
+
+        # Normalizar modo de color
+        # WEBP soporta RGB y RGBA; si viene en otro modo, convertimos
+        if img.mode not in ('RGB', 'RGBA'):
+            img = img.convert('RGB')
+
+        # Convertir a WEBP en memoria
+        buffer = BytesIO()
+        # quality puedes ajustarla (60–85 recomendado)
+        img.save(buffer, format='WEBP', quality=80, optimize=True)
+        buffer.seek(0)
+
+        # Nuevo nombre con extensión .webp manteniendo ruta base
+        # (usa mismo path upload_to pero termina en .webp)
+        nuevo_nombre = f"{base}.webp"
+
+        # Reemplazar archivo en el campo sin volver a llamar save recursivamente
+        self.imagen.save(nuevo_nombre, ContentFile(buffer.read()), save=False)
+
+        # Ahora sí, guardar modelo normalmente
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.titulo or f'Foto #{self.pk}'

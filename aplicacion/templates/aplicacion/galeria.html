@@ -7,14 +7,29 @@
 
   <input class="form-control mb-3" placeholder="Buscar álbumes..." id="searchInput">
 
-  <ul class="nav nav-tabs mb-3" role="tablist">
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-0" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="fotos-tab" data-bs-toggle="tab" data-bs-target="#fotos" type="button" role="tab">Fotografías</button>
+      <button class="nav-link active" id="fotos-tab" data-bs-toggle="tab" data-bs-target="#fotos" type="button" role="tab">
+        Fotografías
+      </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Videos</button>
+      <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">
+        Videos
+      </button>
     </li>
   </ul>
+
+  <!-- Botón arriba a la derecha -->
+  {% if request.user.is_authenticated %}
+    <a href="{% url 'aplicacion:album_crear' %}" class="btn btn-success ms-3">
+      Nuevo Álbum
+    </a>
+  {% endif %}
+</div>
+
 
   <div class="tab-content">
 
@@ -78,11 +93,7 @@
     </div>
   </div>
 
-  {% if request.user.is_authenticated %}
-    <div class="text-center mt-4">
-      <a href="{% url 'aplicacion:album_crear' %}" class="btn btn-success">Crear nuevo álbum</a>
-    </div>
-  {% endif %}
+
 </div>
 
 <script>

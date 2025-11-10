@@ -5,7 +5,19 @@
 
 {% block content %}
 <div class="container mt-5 mb-5">
-  <h2 class="text-center mb-4 fw-bold text-primary">Historia de Nuestras Imágenes</h2>
+<div class="d-flex justify-content-center justify-content-md-between align-items-center mb-4 position-relative">
+  <h2 class="fw-bold text-dark mb-0 text-center text-md-start flex-grow-1">
+    Historia de Nuestras Imágenes
+  </h2>
+
+  {% if user|has_group:"Administrador" %}
+    <a href="{% url 'aplicacion:historia_imagenes_crear' %}" 
+       class="btn btn-primary ms-md-3 mt-3 mt-md-0 boton-flotante-movil">
+      <i class="fas fa-plus-circle"></i> Nueva Historia
+    </a>
+  {% endif %}
+</div>
+
 
   {% if items %}
     {% for item in items %}
@@ -58,13 +70,21 @@
     </div>
   {% endif %}
 
-  <!-- Botón para crear nuevo bloque (solo si el usuario tiene permiso) -->
-{% if user|has_group:"Administrador" %}
-    <div class="text-center mt-4">
-      <a href="{% url 'aplicacion:historia_imagenes_crear' %}" class="btn btn-primary">
-        <i class="fas fa-plus-circle"></i> Agregar nueva imagen o descripción
-      </a>
-    </div>
-{% endif %}
 </div>
+
+<style>
+  /* Botón flotante en versión móvil */
+@media (max-width: 768px) {
+  .boton-flotante-movil {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    padding: 12px 16px;
+  }
+}
+
+</style>
 {% endblock %}

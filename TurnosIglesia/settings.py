@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'usuarios',
     'establecimiento',
     'widget_tweaks',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
