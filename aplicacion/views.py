@@ -58,8 +58,18 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
+
+            # 🔔 Mensaje de bienvenida (tag especial para SweetAlert)
+            nombre_mostrar = f"{user.first_name} {user.last_name}".strip() or user.username
+
+            messages.success(
+                request,
+                f"Bienvenido(a) de nuevo, {nombre_mostrar}.",
+                extra_tags="bienvenida"
+            )
 
             # Recupera el parámetro "next" si viene de una página protegida
             next_url = request.GET.get('next')

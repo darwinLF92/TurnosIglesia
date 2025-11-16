@@ -1,41 +1,46 @@
-<!-- crear_procesion.html & editar_procesion.html & eliminar_procesion.html -->
-
+{% load static %}
 <head>
-    {% load static %}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'js/Success.js' %}"></script>    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
 
-</head> 
 {% block content %}
-<div class="container-fluid p-4">
-    <div class="card shadow-lg border-0 rounded">
+<div class="container-fluid px-0 py-3">
+    <div class="card shadow-lg border-0 rounded-0 w-100">
         <div class="card-header bg-gradient-primary text-white text-center py-3">
-            <h3 class="mb-0 fw-bold"><i class="fas fa-church"></i> Crear Procesión</h3>
+            <h3 class="mb-0 fw-bold">
+                <i class="fas fa-church me-2"></i> Crear Procesión
+            </h3>
         </div>
-        <div class="card-body">
+
+        <div class="card-body px-3 px-md-4">
             <form method="post">
                 {% csrf_token %}
 
                 <div class="mb-3">
                     <label class="form-label fw-bold">Nombre</label>
-                    <input type="text" class="form-control form-control-lg shadow-sm" name="nombre" placeholder="Ingrese el nombre de la procesión" required>
+                    <input type="text" class="form-control form-control-lg shadow-sm"
+                           name="nombre" placeholder="Ingrese el nombre de la procesión" required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-bold">Descripción</label>
-                    <textarea class="form-control form-control-lg shadow-sm" name="descripcion" rows="4" placeholder="Ingrese una descripción" required></textarea>
+                    <textarea class="form-control form-control-lg shadow-sm"
+                              name="descripcion" rows="4"
+                              placeholder="Ingrese una descripción" required></textarea>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-bold">Fecha</label>
-                    <input type="date" class="form-control form-control-lg shadow-sm" name="fecha" required>
+                    <input type="date" class="form-control form-control-lg shadow-sm"
+                           name="fecha" required>
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg rounded">
-                        <i class="fas fa-save"></i> Guardar Procesión
+                    <button type="submit" class="btn btn-primary btn-lg rounded-0">
+                        <i class="fas fa-save me-1"></i> Guardar Procesión
                     </button>
                 </div>
             </form>
@@ -43,7 +48,6 @@
     </div>
 </div>
 
-<!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -69,7 +73,7 @@
                     confirmButtonColor: '#3085d6'
                 }).then((result) => {
                     if (result.isConfirmed && '{{ message.tags }}' == 'success') {
-                        window.parent.postMessage('closeModal', '*'); // Cerrar modal si el mensaje es de éxito
+                        window.parent.postMessage('closeModal', '*');
                     }
                 });
             {% endfor %}
@@ -78,22 +82,28 @@
 </script>
 
 <style>
-    /* Mejoras visuales */
+    /* 👉 Elimina margen por defecto del body en el iframe */
+    body {
+        margin: 0;
+        background-color: #f5f7fb;
+    }
+
+    /* El contenedor debe usar todo el ancho del iframe */
     .container-fluid {
-        max-width: 500px;
+        max-width: 100%;
     }
 
+    /* La tarjeta ocupa todo el ancho del SweetAlert */
     .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
     }
 
-    /* Fondo degradado del encabezado */
     .bg-gradient-primary {
         background: linear-gradient(135deg, #007bff, #0056b3);
     }
 
-    /* Estilo de los inputs */
     .form-control {
         font-size: 16px;
         padding: 12px;
@@ -108,12 +118,10 @@
         box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
     }
 
-    /* Ajuste automático para textarea */
     textarea {
         resize: none;
     }
 
-    /* Estilo del botón */
     .btn-primary {
         background-color: #007bff;
         border: none;
@@ -121,16 +129,12 @@
         padding: 12px;
         font-weight: bold;
         transition: all 0.3s ease-in-out;
+        width: 100%;
     }
 
     .btn-primary:hover {
         background-color: #0056b3;
-        transform: scale(1.05);
-    }
-
-    /* Check de activación */
-    .form-check-label {
-        font-size: 16px;
+        transform: scale(1.02);
     }
 </style>
 {% endblock %}

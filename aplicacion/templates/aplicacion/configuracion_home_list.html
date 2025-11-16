@@ -1,35 +1,148 @@
 {% extends 'aplicacion/base.html' %}
 
 {% block content %}
-<h1>Configuraciones del Home</h1>
-<a href="{% url 'aplicacion:configuracion_home_create' %}" class="btn btn-primary mb-3">Crear Sección</a>
-<a href="{% url 'aplicacion:crear_informacion' %}" class="btn btn-primary mb-3">Detalles de Sección</a>
-<a href="{% url 'aplicacion:informacion_listar' %}" class="btn btn-primary">Editar Sección</a>
-<a href="{% url 'aplicacion:imagen_presentacion_list' %}" class="btn btn-primary">Carrusel Inicio</a>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Sección</th>
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Activo</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for configuracion in configuraciones %}
-        <tr>
-            <td>{{ configuracion.get_seccion_display }}</td>
-            <td>{{ configuracion.titulo }}</td>
-            <td>{{ configuracion.descripcion }}</td>
-            <td>{{ configuracion.activo|yesno:"Sí,No" }}</td>
-            <td>
-                <a href="{% url 'aplicacion:configuracion_home_edit' configuracion.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                <a href="{% url 'aplicacion:configuracion_home_delete' configuracion.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h2 class="mb-3">Configuraciones del Home</h2>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{% url 'aplicacion:configuracion_home_create' %}" class="btn btn-primary btn-sm">
+        Crear Sección
+    </a>
+    <a href="{% url 'aplicacion:crear_informacion' %}" class="btn btn-info btn-sm">
+        Detalles de Sección
+    </a>
+    <a href="{% url 'aplicacion:informacion_listar' %}" class="btn btn-warning btn-sm">
+        Editar Sección
+    </a>
+    <a href="{% url 'aplicacion:imagen_presentacion_list' %}" class="btn btn-dark btn-sm">
+        Carrusel Inicio
+    </a>
+</div>
+
+{# ---------- VISTA ESCRITORIO: TABLA ---------- #}
+<div class="d-none d-md-block">
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Sección</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for configuracion in configuraciones %}
+                <tr>
+                    <td class="text-capitalize">{{ configuracion.get_seccion_display }}</td>
+
+                    <td class="fw-semibold">{{ configuracion.titulo }}</td>
+
+                    <td class="descripcion-col text-start">
+                        {{ configuracion.descripcion|truncatechars:80 }}
+                    </td>
+
+                    <td>
+                        {% if configuracion.activo %}
+                            <span class="badge bg-success px-3 py-2">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary px-3 py-2">Inactivo</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'aplicacion:configuracion_home_edit' configuracion.pk %}" 
+                           class="btn btn-warning btn-sm">
+                           Editar
+                        </a>
+                        <a href="{% url 'aplicacion:configuracion_home_delete' configuracion.pk %}" 
+                           class="btn btn-danger btn-sm">
+                           Eliminar
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-muted py-3">
+                        No hay configuraciones registradas.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# ---------- VISTA MÓVIL: TARJETAS ---------- #}
+<div class="d-block d-md-none mt-2">
+    {% if configuraciones %}
+        <div class="config-cards d-flex flex-column gap-2">
+            {% for configuracion in configuraciones %}
+                <div class="config-card card shadow-sm">
+                    <div class="card-body py-2 px-3">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div>
+                                <h6 class="mb-0 fw-semibold">{{ configuracion.titulo }}</h6>
+                                <small class="text-muted">
+                                    Sección: {{ configuracion.get_seccion_display }}
+                                </small>
+                            </div>
+                            {% if configuracion.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </div>
+
+                        {% if configuracion.descripcion %}
+                        <p class="mb-2 small text-muted">
+                            {{ configuracion.descripcion }}
+                        </p>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end gap-2 mt-1">
+                            <a href="{% url 'aplicacion:configuracion_home_edit' configuracion.pk %}"
+                               class="btn btn-warning btn-sm">
+                                Editar
+                            </a>
+                            <a href="{% url 'aplicacion:configuracion_home_delete' configuracion.pk %}"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-muted mt-3">No hay configuraciones registradas.</p>
+    {% endif %}
+</div>
+
+<style>
+    .descripcion-col {
+        max-width: 350px;
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    @media (max-width: 768px) {
+        .descripcion-col {
+            max-width: 200px;
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Tarjetas en móvil */
+    .config-card {
+        border-radius: 0.9rem;
+        border: 1px solid #e5e5e5;
+    }
+
+    .config-card .card-body {
+        font-size: 0.9rem;
+    }
+</style>
+
 {% endblock %}

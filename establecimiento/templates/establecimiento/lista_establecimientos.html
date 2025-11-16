@@ -1,35 +1,316 @@
 {% extends 'aplicacion/base.html' %}
 
 {% block content %}
-<h2>Lista de Establecimientos</h2>
-<a href="{% url 'establecimiento:crear_establecimiento' %}" class="btn btn-primary">Crear Nuevo Establecimiento</a>
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>Iglesia</th>
-            <th>Nombre Hermandad</th>
-            <th>Dirección</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="container-fluid py-4">
+
+    <!-- ENCABEZADO -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="titulo mb-1">Lista de Establecimientos</h2>
+            <p class="text-muted small mb-0">
+                Administra las iglesias / hermandades registradas en el sistema.
+            </p>
+        </div>
+
+        <a href="{% url 'establecimiento:crear_establecimiento' %}"
+           class="btn btn-primary d-flex align-items-center mt-3 mt-md-0">
+            <i class="fa-solid fa-plus me-1"></i> Nuevo
+        </a>
+    </div>
+
+    {# ======= TABLA ESCRITORIO ======= #}
+    <div class="contenedor-tabla d-none d-md-block">
+        <table class="tabla-macos table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="col-iglesia">Iglesia</th>
+                    <th class="col-hermandad">Nombre Hermandad</th>
+                    <th class="col-direccion">Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for establecimiento in establecimientos %}
+                <tr>
+                    <td class="col-iglesia">{{ establecimiento.nombre }}</td>
+                    <td class="col-hermandad">{{ establecimiento.hermandad }}</td>
+                    <td class="col-direccion">{{ establecimiento.direccion }}</td>
+                    <td>{{ establecimiento.telefono }}</td>
+                    <td>{{ establecimiento.email }}</td>
+                    <td>
+                        {% if establecimiento.estado == 'activo' %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+
+                    </td>
+                    <td class="acciones-cell">
+                        <div class="acciones">
+                            <a href="{% url 'establecimiento:editar_establecimiento' establecimiento.id %}"
+                               class="btn-accion btn-edit" title="Editar">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn-accion btn-delete"
+                                    data-url="{% url 'establecimiento:eliminar_establecimiento' establecimiento.id %}"
+                                    title="Eliminar">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="sin-datos">No hay establecimientos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ======= TARJETAS MÓVIL ======= #}
+    <div class="establecimientos-cards d-block d-md-none">
         {% for establecimiento in establecimientos %}
-        <tr>
-            <td>{{ establecimiento.nombre }}</td>
-            <td>{{ establecimiento.hermandad}}</td>
-            <td>{{ establecimiento.direccion }}</td>
-            <td>{{ establecimiento.telefono }}</td>
-            <td>{{ establecimiento.email }}</td>
-            <td>{{ establecimiento.get_estado_display }}</td>
-            <td>
-                <a href="{% url 'establecimiento:editar_establecimiento' establecimiento.id %}" class="btn btn-warning btn-sm">Editar</a>
-                <a href="{% url 'establecimiento:eliminar_establecimiento' establecimiento.id %}" class="btn btn-danger btn-sm">Eliminar</a>
-            </td>
-        </tr>
+        <div class="establecimiento-card">
+            <div class="card-header-mobile">
+                <div>
+                    <div class="iglesia-nombre">{{ establecimiento.nombre }}</div>
+                    <div class="hermandad-nombre text-muted">
+                        {{ establecimiento.hermandad }}
+                    </div>
+                </div>
+                 {% if establecimiento.estado == 'activo' %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                {% endif %}
+            </div>
+
+            <div class="card-body-mobile">
+                <div><strong>Dirección:</strong> {{ establecimiento.direccion }}</div>
+                <div><strong>Teléfono:</strong> {{ establecimiento.telefono }}</div>
+                <div><strong>Email:</strong> {{ establecimiento.email }}</div>
+            </div>
+
+            <div class="card-actions-mobile">
+                <a href="{% url 'establecimiento:editar_establecimiento' establecimiento.id %}"
+                   class="btn-mobile-action btn-edit" title="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                <button type="button"
+                        class="btn-mobile-action btn-delete"
+                        data-url="{% url 'establecimiento:eliminar_establecimiento' establecimiento.id %}"
+                        title="Eliminar">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted mt-3">No hay establecimientos registrados.</p>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const url = this.getAttribute("data-url");
+
+            Swal.fire({
+                title: '¿Eliminar establecimiento?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
+}
+
+/* Tabla escritorio */
+.contenedor-tabla {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+}
+
+.tabla-macos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.tabla-macos thead {
+    background: linear-gradient(135deg, #154980, #152535);
+    color: #f8f9fa;
+}
+
+.tabla-macos th{
+    background-color: #061524;
+    color: #e0e0e0;
+}
+
+.tabla-macos th,
+.tabla-macos td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.tabla-macos th.col-iglesia,
+.tabla-macos td.col-iglesia,
+.tabla-macos th.col-hermandad,
+.tabla-macos td.col-hermandad,
+.tabla-macos th.col-direccion,
+.tabla-macos td.col-direccion {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    word-wrap: break-word;
+}
+
+.sin-datos {
+    text-align: center;
+    font-weight: 500;
+    color: #777;
+    padding: 1rem;
+}
+
+/* Acciones tabla */
+.acciones {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-accion {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: #fff;
+    background: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.btn-accion.btn-edit {
+    background: #0d6efd;
+}
+
+.btn-accion.btn-delete {
+    background: #dc3545;
+}
+
+.btn-accion:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+}
+
+/* Tarjetas móvil */
+.establecimientos-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.establecimiento-card {
+    background: #ffffff;
+    border-radius: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.card-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.iglesia-nombre {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.hermandad-nombre {
+    font-size: 0.85rem;
+}
+
+.card-body-mobile {
+    font-size: 0.85rem;
+}
+
+.card-actions-mobile {
+    margin-top: 0.6rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.btn-mobile-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: #6c757d;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.btn-mobile-action.btn-edit {
+    background: #0d6efd;
+}
+
+.btn-mobile-action.btn-delete {
+    background: #dc3545;
+}
+
+.btn-mobile-action:hover {
+    filter: brightness(0.9);
+}
+</style>
 {% endblock %}

@@ -1,33 +1,66 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 {% block content %}
-<div class="container-fluid p-4">
-    <div class="card shadow-lg border-0 rounded">
+<div class="container-fluid p-3 p-md-4">
+    <div class="card shadow-lg border-0 form-card">
+        <!-- Encabezado -->
         <div class="card-header bg-gradient-primary text-white text-center py-3">
-    
+            <h5 class="mb-0 d-flex justify-content-center align-items-center gap-2">
+                <i class="fas fa-user-gear"></i>
+                <span>{{ titulo|default:"Formulario" }}</span>
+            </h5>
+            <p class="mb-0 small text-white-50">
+                Completa los campos requeridos y guarda los cambios.
+            </p>
         </div>
-        <div class="card-body">
-            <form method="post">
+
+        <!-- Cuerpo -->
+        <div class="card-body p-3 p-md-4">
+            <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="row">
                     {% for field in form %}
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="text-danger">{{ error }}</div>
-                            {% endfor %}
-                        </div>
+                        {# Ocultamos el campo password del admin #}
+                        {% if field.name != "password" %}
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted mb-1">
+                                    {{ field.label }}
+                                    {% if field.field.required %}
+                                        <span class="text-danger">*</span>
+                                    {% endif %}
+                                </label>
+ {% if field.field.widget.input_type == "password" %}
+<div class="password-wrapper position-relative">
+    {{ field }}
+    <span class="toggle-password" onclick="togglePassword(this)">
+        <i class="fa-solid fa-eye"></i>
+    </span>
+</div>
+{% else %}
+    {{ field }}
+{% endif %}
+
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted d-block mt-1">
+                                        {{ field.help_text }}
+                                    </small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-circle-exclamation me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg rounded">
-                        <i class="fas fa-save"></i> Guardar Cambios
+
+                <div class="d-grid gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill w-100">
+                        <i class="fas fa-save me-1"></i> Guardar cambios
                     </button>
                 </div>
             </form>
@@ -35,63 +68,154 @@
     </div>
 </div>
 
+
 <style>
-    /* Mejoras visuales del modal */
-    .swal-popup {
-        width: 45vw !important; /* Ajustar el tamaño del modal */
-        max-width: 550px;
+    /* ---------- Tarjeta / contenedor ---------- */
+    .form-card {
+        border-radius: 1rem;
+        overflow: hidden;
     }
-    
+
+    .password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 40px !important;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 1.1rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.toggle-password:hover {
+    color: #000;
+}
+
+
+    /* Espaciado elegante entre campos */
+.col-12.mb-3 {
+    margin-bottom: 1.2rem !important;
+}
+
+/* Etiqueta más separada del input */
+.form-label {
+    margin-bottom: 0.45rem !important;
+    display: block;
+}
+
+/* Inputs respirando mejor */
+.card-body input,
+.card-body select,
+.card-body textarea {
+    margin-top: 0.2rem;
+}
+
+/* Help text separado */
+.form-text {
+    margin-top: 0.35rem !important;
+}
+
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    /* ---------- Inputs y selects ---------- */
+    .card-body input[type="text"],
+    .card-body input[type="email"],
+    .card-body input[type="password"],
+    .card-body input[type="number"],
+    .card-body select,
+    .card-body textarea {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border-radius: 0.7rem;
+        border: 1px solid #ced4da;
+        font-size: 0.95rem;
+        background: #f8f9fa;
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* No romper checkboxes / radios */
+    .card-body input[type="checkbox"],
+    .card-body input[type="radio"] {
+        width: auto;
+        padding: 0;
+        border-radius: 0.25rem;
+        background: transparent;
+    }
+
+    .card-body input:focus,
+    .card-body select:focus,
+    .card-body textarea:focus {
+        border-color: #007bff;
+        background: #ffffff;
+        box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    /* ---------- Botón ---------- */
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        width: 100%;
+        border-color: #0056b3;
+        font-weight: 600;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.25);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0056b3, #003f88);
+        border-color: #003f88;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 86, 179, 0.35);
+    }
+
+    /* ---------- Etiquetas ---------- */
+    .form-label {
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+    }
+
+    /* ---------- SweetAlert (tamaño modal) ---------- */
+    .swal-popup {
+        width: min(45vw, 550px) !important;
+        max-width: 95vw !important;
+    }
+
     .swal-container {
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
-    /* Ajustes para los inputs */
-    input[type="text"], 
-    input[type="email"],
-    input[type="password"],
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-        font-size: 16px;
-        background: #f8f9fa;
-        transition: all 0.3s ease-in-out;
-    }
+    /* ---------- Responsivo ---------- */
+    @media (max-width: 575.98px) {
+        .card-body {
+            padding: 1.25rem !important;
+        }
 
-    input:focus, select:focus {
-        border-color: #007bff;
-        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+        .swal-popup {
+            width: 95vw !important;
+        }
     }
-
-    /* Mejor estilo para el botón */
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        font-weight: bold;
-        padding: 12px;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-    }
-
-    /* Bordes redondeados para el formulario */
-    .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Fondo degradado para el encabezado */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-    }
-
 </style>
+
 
 {% if success %}
 <script>
@@ -99,6 +223,7 @@
         icon: 'success',
         title: '¡Éxito!',
         text: '{{ message }}',
+        confirmButtonText: 'Cerrar'
     }).then((result) => {
         if (result.isConfirmed) {
             window.parent.postMessage('closeModal', '*');
@@ -106,4 +231,20 @@
     });
 </script>
 {% endif %}
+
+<script>
+function togglePassword(iconElement) {
+    const input = iconElement.parentElement.querySelector('input');
+    if (!input) return;
+
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+
+    // Cambia ícono
+    iconElement.innerHTML = isPassword
+        ? '<i class="fa-solid fa-eye-slash"></i>'
+        : '<i class="fa-solid fa-eye"></i>';
+}
+</script>
+
 {% endblock %}

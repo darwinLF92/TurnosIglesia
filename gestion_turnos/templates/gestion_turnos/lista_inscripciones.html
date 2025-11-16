@@ -1,117 +1,214 @@
 {% extends 'aplicacion/base.html' %}
 
 {% block content %}
-<h2 class="titulo">Lista de Inscripciones</h2>
-
-
-
-<button id="botonAbrirModalInscripciones" class="btn btn-primary btn-report">Abrir Reporte</button>
-
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Formulario de búsqueda y filtrado -->
-<div class="filtro-contenedor">
-    <form method="GET" class="filtros-izquierda">
-        <input type="text" name="nombre" placeholder="Buscar por nombre" value="{{ request.GET.nombre }}">
-        <input type="text" name="cui_o_nit" placeholder="Buscar por CUI o NIT" value="{{ request.GET.cui_o_nit }}">
-        <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
-        <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
-        <button type="submit">Filtrar</button>
-    </form>
+<div class="inscripciones-page container-fluid py-4">
 
-    <div class="boton-derecha">
-        <a href="{% url 'gestion_turnos:crear_inscripcion' %}" class="boton">Inscribir Devoto</a>
+    <!-- ENCABEZADO -->
+    <div class="inscripciones-header d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="titulo mb-1">Lista de Inscripciones</h2>
+            <p class="text-muted mb-0 small">
+                Administra las inscripciones realizadas, filtra por fechas o devotos y genera reportes.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+            <button id="botonAbrirModalInscripciones"
+                    class="btn btn-outline-info btn-sm d-flex align-items-center">
+                <i class="fa-solid fa-chart-simple me-1"></i> Reporte
+            </button>
+
+            <a href="{% url 'gestion_turnos:crear_inscripcion' %}"
+               class="btn btn-primary btn-sm d-flex align-items-center">
+                <i class="fa-solid fa-user-plus me-1"></i> Inscribir Devoto
+            </a>
+        </div>
     </div>
-</div>
 
+    <!-- FILTROS -->
+    <div class="filtro-contenedor card shadow-sm mb-3">
+        <div class="card-body filtros-wrapper">
+            <form method="GET" class="filtros-izquierda">
+                <div class="filtro-item">
+                    <label class="filtro-label">Nombre</label>
+                    <input type="text" name="nombre"
+                           placeholder="Buscar por nombre"
+                           value="{{ request.GET.nombre }}">
+                </div>
 
-<div class="contenedor-tabla">
-    <table class="tabla-macos">
+                <div class="filtro-item">
+                    <label class="filtro-label">CUI / NIT</label>
+                    <input type="text" name="cui_o_nit"
+                           placeholder="Buscar por CUI o NIT"
+                           value="{{ request.GET.cui_o_nit }}">
+                </div>
+
+                <div class="filtro-item">
+                    <label class="filtro-label">Fecha inicio</label>
+                    <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+                </div>
+
+                <div class="filtro-item">
+                    <label class="filtro-label">Fecha fin</label>
+                    <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
+                </div>
+
+                <div class="filtro-item filtro-boton">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-filter me-1"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ================== VISTA TABLA (DESKTOP / TABLET) ================== #}
+<div class="contenedor-tabla d-none d-md-block">
+    <table class="tabla-macos table table-hover mb-0">
         <thead>
             <tr>
-                <th>Devoto</th>
+                <th class="col-devoto">Devoto</th>
                 <th>Turno</th>
-                <th>Procesión</th>
+                <th class="col-procesion">Procesión</th>
                 <th>Fecha Inscripción</th>
-                <th>Valor del Turno</th>
-                <th>Monto Pagado</th>
+                <th>Valor</th>
+                <th>Pagado</th>
                 <th>Cambio</th>
-                <th style="text-align: center;">Acciones</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for inscripcion in inscripciones %}
             <tr>
-                <td>{{ inscripcion.devoto.nombre }}</td>
+                <td class="col-devoto">{{ inscripcion.devoto.nombre }}</td>
                 <td>Turno {{ inscripcion.turno.numero_turno }}</td>
-                <td>{{ inscripcion.turno.procesion.nombre }}</td>
+                <td class="col-procesion">{{ inscripcion.turno.procesion.nombre }}</td>
                 <td>{{ inscripcion.fecha_inscripcion|date:"d-m-y H:i" }}</td>
-                <td>{{ inscripcion.turno.valor }}</td>
+                <td>{{ inscripcion.valor_turno }}</td>
                 <td>{{ inscripcion.monto_pagado }}</td>
                 <td>{{ inscripcion.cambio }}</td>
-                <td style="text-align: center;">
-                    <a href="#" class="btn-detalle" title="Ver Detalle" data-inscripcionid="{{ inscripcion.id }}">
-                        <i class="fa-solid fa-eye"></i>
-                    </a>
-                    <a href="#" class="btn-anular" title="Anular" data-inscripcionid="{{ inscripcion.id }}">
-                        <i class="fa-solid fa-square-xmark"></i>
-                    <a href="#" class="btn-imprimir" title="Imprimir" data-inscripcionid="{{ inscripcion.id }}">
-                        <i class="fa-solid fa-print"></i>
-                    </a>
 
+                <td class="acciones-cell">
+                    <div class="acciones">
+                        <a href="#" class="btn-detalle" title="Ver Detalle"
+                           data-inscripcionid="{{ inscripcion.id }}">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a href="#" class="btn-anular" title="Anular"
+                           data-inscripcionid="{{ inscripcion.id }}">
+                            <i class="fa-solid fa-square-xmark"></i>
+                        </a>
+                        <a href="#" class="btn-imprimir" title="Imprimir"
+                           data-inscripcionid="{{ inscripcion.id }}">
+                            <i class="fa-solid fa-print"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="sin-datos">No hay inscripciones aún.</td>
+                <td colspan="8" class="sin-datos">No hay inscripciones aún.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-<!-- Paginación -->
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-      {% if inscripciones.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?page=1{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">« Primera</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?page={{ inscripciones.previous_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">‹ Anterior</a>
-        </li>
-      {% endif %}
-  
-      {# Mostrar solo 5 páginas alrededor de la actual #}
-      {% for num in inscripciones.paginator.page_range %}
-        {% if num >= inscripciones.number|add:'-2' and num <= inscripciones.number|add:'2' %}
-          {% if inscripciones.number == num %}
-            <li class="page-item active">
-              <span class="page-link">{{ num }}</span>
-            </li>
-          {% else %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ num }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">{{ num }}</a>
-            </li>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-  
-      {% if inscripciones.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ inscripciones.next_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">Siguiente ›</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" href="?page={{ inscripciones.paginator.num_pages }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">Última »</a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
-  
-  
-      </div>
     </div>
-  </div>
+
+    {# ================== TARJETAS (MÓVIL) ================== #}
+    <div class="inscripciones-cards d-md-none">
+        {% for inscripcion in inscripciones %}
+        <div class="inscripcion-card shadow-sm">
+            <div class="card-header-mobile">
+                <span class="devoto-nombre">{{ inscripcion.devoto.nombre }}</span>
+                <span class="turno-pill">Turno {{ inscripcion.turno.numero_turno }}</span>
+            </div>
+            <div class="card-body-mobile">
+                <p class="mb-1">
+                    <strong>Procesión:</strong><br>
+                    {{ inscripcion.turno.procesion.nombre }}
+                </p>
+                <p class="mb-1">
+                    <strong>Fecha inscripción:</strong><br>
+                    {{ inscripcion.fecha_inscripcion|date:"d-m-y H:i" }}
+                </p>
+                <div class="row mt-2 text-sm">
+                    <div class="col-4">
+                        <strong>Valor</strong><br> {{ inscripcion.turno.valor }}
+                    </div>
+                    <div class="col-4">
+                        <strong>Pagado</strong><br> {{ inscripcion.monto_pagado }}
+                    </div>
+                    <div class="col-4">
+                        <strong>Cambio</strong><br> {{ inscripcion.cambio }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions-mobile">
+                <button class="btn-mobile-action btn-detalle"
+                        title="Ver Detalle"
+                        data-inscripcionid="{{ inscripcion.id }}">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn-mobile-action btn-anular"
+                        title="Anular"
+                        data-inscripcionid="{{ inscripcion.id }}">
+                    <i class="fa-solid fa-square-xmark"></i>
+                </button>
+                <button class="btn-mobile-action btn-imprimir"
+                        title="Imprimir"
+                        data-inscripcionid="{{ inscripcion.id }}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="sin-datos text-center mt-3">
+            No hay inscripciones aún.
+        </div>
+        {% endfor %}
+    </div>
+
+     {% if inscripciones.paginator.num_pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-3">
+              {% if inscripciones.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">« Primera</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ inscripciones.previous_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">‹ Anterior</a>
+                </li>
+              {% endif %}
+
+              {% for num in inscripciones.paginator.page_range %}
+                {% if num >= inscripciones.number|add:'-2' and num <= inscripciones.number|add:'2' %}
+                  {% if inscripciones.number == num %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ num }}</span>
+                    </li>
+                  {% else %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              {% if inscripciones.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ inscripciones.next_page_number }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">Siguiente ›</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ inscripciones.paginator.num_pages }}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.cui_o_nit %}&cui_o_nit={{ request.GET.cui_o_nit }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}">Última »</a>
+                </li>
+              {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+</div>
 
   <div id="InscripcionesModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-dialog-personalizado">
@@ -179,6 +276,8 @@
           </button>
           
         </div>
+
+
   
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -496,205 +595,245 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 <style>
-    /* Estilo inspirado en macOS */
-    .titulo {
-        text-align: center;
-        font-size: 24px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 20px;
-        padding-top: 20px;
-    }
+    .inscripciones-header .btn {
+    border-radius: 999px;
+}
 
-    .boton {
-        display: block;
-        width: max-content;
-        margin: 0 auto 20px;
-        padding: 8px 16px;
-        background-color: #007aff;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: background 0.3s;
-    }
+.titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
+}
 
-
-    .boton:hover {
-        background-color: #005ecb;
-    }
-
-    .contenedor-tabla {
-        width: 90%;
-        max-width: none;
-        margin: 0 auto;
-        overflow-x: auto;
-        box-shadow: 0px 4px 8px black;
-        border-radius: 12px;
-        padding: 15px;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .tabla-macos {
-        width: 100%;
-        max-width: none;
-        border-collapse: collapse;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        font-size: 14px;
-        border-radius: 12px;
-        overflow: hidden;
-        table-layout: fixed; /* Hace que las columnas se distribuyan uniformemente */
-    }
-
-    .tabla-macos thead {
-        background-color: #ececec;
-        font-weight: 900;
-        text-align: left;
-    }
-
-    .tabla-macos th,
-    .tabla-macos td {
-        padding: 12px 16px;
-        border-bottom: 1px solid #b6b3b3;
-    }
-
-    .tabla-macos tbody tr:hover {
-        background-color: #f5f5f5;
-        transition: background 0.2s ease-in-out;
-    }
-
-    .sin-datos {
-        text-align: center;
-        font-weight: 500;
-        color: #777;
-        padding: 15px;
-    }
-    
-
-    .filtro-contenedor {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
-    margin: 0 auto 20px;
-    flex-wrap: wrap;
+/* ---------- Filtros ---------- */
+.filtros-wrapper {
+    padding: 0.9rem 1.2rem;
 }
 
 .filtros-izquierda {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 0.75rem;
+    align-items: flex-end;
 }
 
-.boton-derecha {
-    margin-top: 10px;
-}
-
-.filtros-izquierda input,
-.filtros-izquierda button {
-    padding: 10px 15px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    outline: none;
-    transition: border-color 0.3s ease;
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     min-width: 170px;
 }
 
-@media (max-width: 768px) {
-    .filtro-contenedor {
-        flex-direction: column;
-        align-items: center;
-    }
+.filtro-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    font-weight: 600;
+}
 
-    .boton-derecha {
-        margin-top: 15px;
-    }
+.filtros-izquierda input {
+    padding: 0.45rem 0.7rem;
+    border-radius: 0.6rem;
+    border: 1px solid #ced4da;
+    font-size: 0.9rem;
+}
+
+.filtro-boton {
+    min-width: 120px;
+}
+
+/* ---------- Tabla (desktop) ---------- */
+.contenedor-tabla {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+}
+
+.tabla-macos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.tabla-macos thead {
+    background: linear-gradient(135deg, #154980, #152535);
+    color: #f8f9fa;
 }
 
 
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        gap: 10px;
-    }
 
-    .pagination a {
-        padding: 5px 10px;
-        background-color: #041e3a;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-    }
+.tabla-macos th,
+.tabla-macos td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
 
-    .pagination span {
-        font-weight: bold;
-    }
+.tabla-macos th{
+    background-color: #081829;
+    color: #ced4da;
+}
 
-/* Contenedor de los botones */
+/* Devoto y Procesión con varias líneas */
+.tabla-macos th.col-devoto,
+.tabla-macos td.col-devoto,
+.tabla-macos th.col-procesion,
+.tabla-macos td.col-procesion {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    word-wrap: break-word;
+}
+
+/* Celda de acciones: table-cell normal */
+.tabla-macos td.acciones-cell {
+    vertical-align: middle;
+}
+
+/* Contenedor interno de botones: flex */
 .acciones {
     display: flex;
-    justify-content: center; /* Centra los botones horizontalmente */
-    gap: 5px; /* Espaciado entre botones */
-}
-
-/* Estilo de los botones */
-.btn-detalle, .btn-imprimir, .btn-anular {
-    background-color: #777;
-    color: antiquewhite;
-    border-radius: 5px;
-    padding: 8px 5px;
-    margin: 5px 2px; /* Reducir margen para mejorar alineación */
-
+    align-items: center;
     justify-content: center;
-    width: 35px; /* Ajustar tamaño uniforme */
-    height: 35px;
+    gap: 6px;
 }
 
-
-    .btn-detalle:hover{
-        background-color: #005ecb;
-        color: #fcf7f7;
-    }
-    .btn-imprimir:hover{
-        background-color: #005ecb;
-        color: #fcf7f7;
-    }
-    .btn-anular:hover{
-        background-color: #005ecb;
-        color: #fcf7f7;
-    }
-
-    /*css para el modal*/
-.modal-header {
-    background-color: #17a2b8; /* Replace with the actual color code */
+.tabla-macos tbody tr:hover {
+    background-color: #f5f7fb;
+    transition: background 0.2s ease-in-out;
 }
 
-.modal-title {
-    color: #000000; /* Replace with the actual color code */
-}
-.modal-dialog-personalizado {
-    max-width: 90%; /* Cambia a 70%, 1000px, etc. según necesidad */
-    width: 95%;
-    margin: 1.75rem auto;
+.sin-datos {
+    text-align: center;
+    font-weight: 500;
+    color: #777;
+    padding: 1rem;
 }
 
+/* ---------- Botones acciones (desktop) ---------- */
+.btn-detalle,
+.btn-imprimir,
+.btn-anular {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    text-decoration: none;
+    background-color: #6c757d;
+    color: #fdfdfd;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-detalle:hover,
+.btn-imprimir:hover,
+.btn-anular:hover {
+    background-color: #005ecb;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* ---------- Paginación ---------- */
+.pagination .page-link {
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+/* ---------- Tarjetas (mobile) ---------- */
+.inscripciones-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.inscripcion-card {
+    background: #ffffff;
+    border-radius: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid #e5e5e5;
+}
+
+.card-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.devoto-nombre {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.turno-pill {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #154980;
+    color: #fdfdfd;
+    white-space: nowrap;
+}
+
+.card-body-mobile {
+    font-size: 0.85rem;
+}
+
+.card-actions-mobile {
+    margin-top: 0.6rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.btn-mobile-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: #6c757d;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.btn-mobile-action:hover {
+    background: #005ecb;
+}
+
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
-    .modal-dialog-personalizado {
+    .contenedor-tabla {
+        display: none;
+    }
+
+    .filtros-izquierda {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-item {
         width: 100%;
-        margin: 0.5rem;
     }
 }
 
-
-.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-    background-color: #f5f5f5; /* Replace with the actual color code */
-}
-
-.btn-danger {
-    background-color: #dc3545; /* Replace with the actual color code */
-    border-color: #dc3545; /* Replace with the actual color code */
-}
 </style>
 {% endblock %}

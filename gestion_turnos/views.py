@@ -88,7 +88,7 @@ class ListaInscripciones(ListView):
         # Mostrar solo inscripciones activas (inscrito=True)
         queryset = RegistroInscripcion.objects.filter(
             inscrito=True
-        ).select_related("devoto").order_by("-fecha_inscripcion")
+        ).select_related("devoto", "turno__procesion").order_by("-fecha_inscripcion")
 
         # Capturar los parámetros de búsqueda desde la URL
         nombre = self.request.GET.get("nombre", "").strip()
@@ -467,6 +467,7 @@ def reporte_inscripciones(request):
         'devoto__nombre',
         'fecha_inscripcion',
         'entregado',
+        'valor_turno',
         'monto_pagado',
         'cambio'
     ).order_by('turno__id', 'devoto__nombre')

@@ -18,206 +18,308 @@
 </head>
 
 <body>
-
-
     <!-- Contenedor principal -->
     <div class="container-fluid p-0">
 
       <!-- NAVBAR SUPERIOR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-      <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
-      <!-- Usa PNG/SVG para mejor calidad (mejor que .ico) -->
-      <img src="{% static 'logos/home.png' %}" alt="" width="50" height="50">
-      <span class="visually-hidden">Inicio</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido" aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
 
-    <div class="collapse navbar-collapse" id="navbarContenido">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- Logo / Home -->
+          <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
+            <img src="{% static 'logos/home.png' %}" alt="Inicio" width="50" height="50">
+            <span class="d-none d-sm-inline ms-2"></span>
+          </a>
 
+          <!-- Botón hamburguesa -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#navbarContenido" aria-controls="navbarContenido"
+                  aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
 
-        {% if user.is_authenticated %}
-          <!-- Mantenedor -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Mantenedor
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
-              <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
+          <!-- Contenido del menú -->
+          <div class="collapse navbar-collapse" id="navbarContenido">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+              {% if user.is_authenticated %}
+                <!-- MANTENEDOR -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-cog me-1"></i> Mantenedor
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
+                    <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
+                  </ul>
+                </li>
+
+                <!-- ESTABLECIMIENTO -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-building-house me-1"></i> Establecimiento
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Datos generales</a></li>
+                    <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Configuración del Home</a></li>
+                  </ul>
+                </li>
+
+                <!-- PROCESIONES -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-church me-1"></i> Procesiones
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Listado de procesiones</a></li>
+                  </ul>
+                </li>
+
+                <!-- TURNOS -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-list-ol me-1"></i> Turnos
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Gestión de turnos</a></li>
+                  </ul>
+                </li>
+
+                <!-- DEVOTOS -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-user-circle me-1"></i> Devotos
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Listado de devotos</a></li>
+                  </ul>
+                </li>
+
+                <!-- INSCRIPCIONES -->
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-file me-1"></i> Inscripciones
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Gestión de inscripciones</a></li>
+                  </ul>
+                </li>
+
+                <!-- GESTIÓN TURNOS -->
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">
+                    <i class="bx bx-transfer-alt me-1"></i> Gestión de Entrega
+                  </a>
+                </li>
+              {% endif %}
             </ul>
-          </li>
 
-          <!-- Procesiones -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Procesiones
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Procesiones</a></li>
+            <!-- DERECHA: usuario / salir -->
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+              {% if user.is_authenticated %}
+                <li class="nav-item me-2 d-none d-lg-block">
+                  <span class="navbar-text small">
+                    <i class="bx bx-user-circle me-1"></i>
+                    {{ user.first_name|default:user.username }}
+                  </span>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'aplicacion:logout' %}">
+                    <i class="bx bx-log-out"></i> Salir
+                  </a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'aplicacion:login' %}">
+                    <i class="bx bx-log-in"></i> Acceder
+                  </a>
+                </li>
+              {% endif %}
             </ul>
-          </li>
+          </div>
+        </div>
+      </nav>
 
-          <!-- Turnos -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Turnos
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Turnos</a></li>
-            </ul>
-          </li>
+      <!-- Carrusel a pantalla completa -->
+      {% block carrusel_fullscreen %}{% endblock %}
 
-          <!-- Devotos -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Devotos
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Devotos</a></li>
-            </ul>
-          </li>
-
-          <!-- Inscripciones -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Inscripciones
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Inscripciones</a></li>
-            </ul>
-          </li>
-
-          <!-- Gestión Turnos -->
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">Gestión Turnos</a>
-          </li>
-
-          <!-- Establecimiento -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Establecimiento
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Gestiones</a></li>
-              <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Conf Home</a></li>
-            </ul>
-          </li>
-        {% endif %}
-      </ul>
-
-      <!-- 🔹 Sección derecha del navbar -->
-      <ul class="navbar-nav ms-auto">
-        {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'aplicacion:logout' %}">
-              <i class="bx bx-log-out"></i> Salir
-            </a>
-          </li>
-        {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'aplicacion:login' %}">
-              <i class="bx bx-log-in"></i> Acceder
-            </a>
-          </li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
-
-        <!-- Bloque carrusel fuera del container principal -->
-        {% block carrusel_fullscreen %}{% endblock %}
-
-        <!-- Contenido principal -->
-        <main class="container mt-5 pt-4">
-            {% block content %}{% endblock %}
-        </main>
+      <!-- Contenido principal -->
+      <main class="container mt-5 pt-4">
+          {% block content %}{% endblock %}
+      </main>
     </div>
 
     <!-- Bootstrap JS 5.3 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Archivos JS personalizados -->
+    <!-- JS personalizado -->
     <script src="{% static 'index/js/base.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
 
+    <!-- SCRIPT: Cerrar menú al hacer clic fuera (móvil / colapsado) -->
+    <script>
+      document.addEventListener('click', function (event) {
+        const navbar = document.getElementById('navbarContenido');
+        const toggler = document.querySelector('.navbar-toggler');
+
+        if (!navbar) return;
+
+        const isOpen = navbar.classList.contains('show');
+        const clickInsideNavbar = navbar.contains(event.target);
+        const clickOnToggler = toggler && toggler.contains(event.target);
+
+        if (isOpen && !clickInsideNavbar && !clickOnToggler) {
+          const bsCollapse = bootstrap.Collapse.getInstance(navbar);
+          if (bsCollapse) {
+            bsCollapse.hide();
+          }
+        }
+      });
+    </script>
+
+    <!-- SCRIPT: Mensaje de bienvenida -->
+{% if user.is_authenticated and messages %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    {% for message in messages %}
+        {% if 'bienvenida' in message.tags %}
+        
+            const toast = document.getElementById("toast-bienvenida");
+            const texto = document.getElementById("toast-texto");
+
+            texto.textContent = "{{ message|escapejs }}";
+
+            // Mostrar toast
+            toast.classList.add("mostrar");
+
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                toast.classList.remove("mostrar");
+            }, 3000);
+
+        {% endif %}
+    {% endfor %}
+
+});
+</script>
+{% endif %}
+
 
     <style>
-      :root{
-  --brand-size-desktop: 48px;  /* cámbialo a lo que necesites */
-  --brand-size-mobile: 40px;
-  --brand-radius: 10px;        /* 50% si lo quieres circular */
+:root{
+  --brand-size-desktop: 65px;   /* antes 48 */
+  --brand-size-mobile: 50px;    /* antes 40 */
+  --brand-radius: 10px;
 }
 
-.navbar .brand-logo img{
-  width: var(--brand-size-desktop);
-  height: var(--brand-size-desktop);
-  object-fit: contain;         /* o 'cover' si quieres que llene */
-  border-radius: var(--brand-radius);
-  display: block;
+
+/* ALTURA CORRECTA DEL NAVBAR (Bootstrap Default 56px) */
+.navbar {
+    min-height: 56px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
 }
 
-@media (max-width: 576px){
-  .navbar .brand-logo img{
-    width: var(--brand-size-mobile);
-    height: var(--brand-size-mobile);
-  }
-}
-
-/* ===== Footer ===== */
-.site-footer {
-  background: #081d4400;              /* color oscuro elegante */
-  color: #0e153b;                   /* texto claro */
-  text-align: center;               /* centrado */
-  font-size: 0.9rem;
-  padding: 16px 8px;
-  border-top: 3px solid #39415000;    /* borde superior sutil */
-}
-
-.site-footer p {
-  margin: 0;
-  line-height: 1.6;
-  font-family: 'Poppins', sans-serif;
-}
-
-.site-footer a {
-   color: #052daf;                   /* tono dorado o amarillo cálido */
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.site-footer a:hover {
-  color: #052daf;
-  text-decoration: underline;
-}
-
-/* Versión responsive: texto más pequeño y con saltos en móvil */
-@media (max-width: 576px) {
-  .site-footer {
-    font-size: 0.8rem;
-    padding: 12px 6px;
-  }
-  .site-footer p {
+/* Centrar verticalmente los textos y dropdowns */
+.navbar .nav-link,
+.navbar .dropdown-toggle,
+.navbar .navbar-brand {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+    align-items: center;
+    height: 60px;  /* misma altura que navbar */
 }
 
+
+/* Logo */
+.navbar .brand-logo img {
+    width: var(--brand-size-desktop);
+    height: var(--brand-size-desktop);
+    object-fit: contain;
+}
+
+      @media (max-width: 576px){
+        .navbar .brand-logo img{
+          width: var(--brand-size-mobile);
+          height: var(--brand-size-mobile);
+        }
+      }
+
+      /* Footer */
+      .site-footer {
+        background: #081d4400;
+        color: #0e153b;
+        text-align: center;
+        font-size: 0.9rem;
+        padding: 16px 8px;
+        border-top: 3px solid #39415000;
+      }
+
+      .site-footer p {
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .site-footer a {
+        color: #052daf;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .site-footer a:hover {
+        color: #052daf;
+        text-decoration: underline;
+      }
+
+      @media (max-width: 576px) {
+        .site-footer {
+          font-size: 0.8rem;
+          padding: 12px 6px;
+        }
+        .site-footer p {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+      }
+
+      /* ===== TOAST BIENVENIDA ===== */
+.toast-bienvenida {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-40px);
+    background: #a1a52d;          /* verde éxito */
+    color: rgb(15, 14, 14);
+    padding: 12px 20px;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    opacity: 0;
+    transition: all 0.5s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+.toast-bienvenida.mostrar {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
 
     </style>
 </body>
+
+<div id="toast-bienvenida" class="toast-bienvenida">
+    <span id="toast-texto"></span>
+</div>
+
 <footer class="site-footer">
   <p>
     <strong>DMLR System</strong>
     {% if system_meta.VERSION %} - v{{ system_meta.VERSION }}{% endif %}
     &nbsp;|&nbsp; © {{ system_meta.ORG_NAME }}
-    &nbsp;|&nbsp; Desarrollado por 
+    &nbsp;|&nbsp; Desarrollado por
     <a href="{{ system_meta.AUTHOR_LINK }}" target="_blank" rel="noopener">
       {{ system_meta.AUTHOR_NAME }}
     </a>
@@ -226,6 +328,4 @@
     {% endif %}
   </p>
 </footer>
-
-
 </html>

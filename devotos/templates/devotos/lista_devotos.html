@@ -1,236 +1,156 @@
 {% extends 'aplicacion/base.html' %}
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-    /* Estilo general con inspiración en macOS */
 
-    .table-container {
-        width: 100%;
-        margin: auto;
-        padding: 20px;
-
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-    }
-
-    .search-container {
-        margin-bottom: 15px;
-        text-align: right;
-    }
-
-    .search-container input {
-        width: 300px;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        box-shadow: inset 0 1px 3px rgba(17, 17, 22, 0.1);
-    }
-
-    .table {
-        width: 100%;
-        border-collapse: fixed;
-        margin-top: 20px;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .table th, .table td {
-        padding: 14px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-        white-space: nowrap; /* Evita que se desborde el contenido */
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .table th {
-        background: linear-gradient(135deg, #154980, #152535);
-        color: aliceblue;
-        text-align: center;
-    }
-
-
-    .btn-container {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #007aff, #0056b3);
-        color: white;
-        padding: 10px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s;
-    }
-
-    .btn-primary:hover {
-        background: #0056b3;
-        transform: scale(1.05);
-    }
-
-    .btn-edit, .btn-delete {
-        padding: 8px 12px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.3s;
-    }
-
-    .btn-edit {
-        background: #504f4c;
-        color: rgb(247, 243, 243);
-    }
-
-    .btn-edit:hover {
-        background: #e6b800;
-        transform: scale(1.05);
-    }
-
-    .btn-delete {
-        background: #92130c;
-        color: white;
-    }
-
-    .btn-delete:hover {
-        background: #d32f2f;
-        transform: scale(1.05);
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .pagination a {
-        padding: 10px 14px;
-        margin: 0 5px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #007aff;
-        transition: all 0.3s;
-    }
-
-    .pagination a:hover {
-        background: #007aff;
-        color: white;
-        transform: scale(1.05);
-    }
-    .foto-miniatura {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-    cursor: zoom-in;
-    transition: transform 0.2s ease;
-}
-
-</style>
-
-<div class="table-container">
-    <h2>Lista de Devotos</h2>
-
-    <button id="crearDevoto" class="btn-primary">
-        Crear Devoto <i class='bx bx-plus'></i>
-    </button>
-    
-    <div class="search-container">
-        <form method="get">
-            <input type="text" name="q" placeholder="Buscar por Código, CUI/NIT o Nombre" value="{{ request.GET.q }}">
-            <button type="submit" class="btn-primary">Buscar</button>
-        </form>
+<div class="container py-4 py-md-5">
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+        <div>
+            <h2 class="page-title mb-1">Gestión de Devotos</h2>
+            <p class="text-muted mb-0 small">
+                Administra los devotos registrados, sus datos de contacto y fotografía.
+            </p>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="thead-dark">
-            <tr>
-                <th>Fotografía</th>
-                <th>Código</th>
-                <th>CUI / NIT</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Teléfono</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for devoto in object_list %}
-            <tr>
-                <td>
-                    {% if devoto.fotografia %}
-                    <img src="{{ devoto.fotografia.url }}" 
-                    alt="Foto de {{ devoto.nombre }}" 
-                    class="foto-miniatura" 
-                    data-nombre="{{ devoto.nombre }}" 
-                    data-src="{{ devoto.fotografia.url }}">
-               
-                    {% else %}
-                        <span class="text-muted">Sin foto</span>
+    <!-- Barra de acciones -->
+    <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 mb-3">
+        <div class="d-flex gap-2">
+            <button id="crearDevoto" class="btn-main d-inline-flex align-items-center gap-2">
+                <i class='bx bx-user-plus'></i>
+                <span>Nuevo</span>
+            </button>
+        </div>
+
+        <div class="ms-lg-auto w-100 w-lg-50">
+            <form method="get" class="search-form">
+                <div class="input-group search-group">
+                    <span class="input-group-text d-none d-sm-inline">
+                        <i class="bx bx-search"></i>
+                    </span>
+                    <input type="text"
+                           name="q"
+                           class="form-control"
+                           placeholder="Buscar por código, CUI/NIT o nombre"
+                           value="{{ request.GET.q }}">
+                    <button type="submit" class="btn-search">
+                        <i class="bx bx-filter-alt me-1"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tarjeta con tabla -->
+    <div class="card shadow-sm border-0 devotos-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 devotos-table">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col">Fotografía</th>
+                            <th scope="col">Código</th>
+                            <th scope="col">CUI / NIT</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Correo</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for devoto in object_list %}
+                        <tr>
+                            <td data-label="Fotografía">
+                                {% if devoto.fotografia %}
+                                    <img src="{{ devoto.fotografia.url }}"
+                                        alt="Foto de {{ devoto.nombre }}"
+                                        class="foto-miniatura"
+                                        data-nombre="{{ devoto.nombre }}"
+                                        data-src="{{ devoto.fotografia.url }}">
+                                {% else %}
+                                    <span class="text-muted small">Sin foto</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Código">
+                                <span class="cell-value fw-semibold">{{ devoto.codigo }}</span>
+                            </td>
+                            <td data-label="CUI / NIT">
+                                <span class="cell-value">{{ devoto.cui_o_nit }}</span>
+                            </td>
+                            <td data-label="Nombre">
+                                <span class="cell-value">{{ devoto.nombre }}</span>
+                            </td>
+                            <td data-label="Correo">
+                                <span class="cell-value">{{ devoto.correo }}</span>
+                            </td>
+                            <td data-label="Teléfono">
+                                <span class="cell-value">{{ devoto.telefono }}</span>
+                            </td>
+                            <td data-label="Acciones">
+                                <div class="d-flex justify-content-md-center justify-content-end gap-2 action-column cell-value">
+                                    <a href="#" class="btn-icon edit btn-edit" title="Editar" data-devotoid="{{ devoto.id }}">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </a>
+                                    <a href="#" class="btn-icon delete btn-delete" title="Eliminar" data-devotoid="{{ devoto.id }}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No hay devotos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+            <div class="pagination-wrapper py-3 px-3 px-md-4">
+                <nav class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Primera</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Anterior</a>
                     {% endif %}
-                </td>
-                <td>{{ devoto.codigo }}</td>
-                <td>{{ devoto.cui_o_nit }}</td>
-                <td>{{ devoto.nombre }}</td>
-                <td>{{ devoto.correo }}</td>
-                <td>{{ devoto.telefono }}</td>
-                <td class="btn-container">
-                    <a href="#" class="btn-edit" title="Editar" data-devotoid="{{ devoto.id }}">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a href="#" class="btn-delete" title="Eliminar" data-devotoid="{{ devoto.id }}">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No hay devotos registrados.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    {% if is_paginated %}
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-            {% endif %}
+                    <span class="page-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
-            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Siguiente</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Última</a>
+                    {% endif %}
+                </nav>
+            </div>
             {% endif %}
         </div>
-    {% endif %}
-</div>
+    </div>
 </div>
 
-
+{# ==== JS ==== #}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     $(document).ready(function () {
 
+        // Crear devoto
         $("#crearDevoto").click(function () {
             var formularioSrc = "{% url 'devotos:crear_devoto' %}";
-
             Swal.fire({
                 title: 'Registro Nuevo Devoto',
-                html: `<iframe src="${formularioSrc}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                html: `<iframe src="${formularioSrc}"
+                               width="100%"
+                               height="520"
+                               frameborder="0"
+                               style="display:block;width:100%;border:0;"></iframe>`,
                 showCloseButton: true,
                 showConfirmButton: false,
                 customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
                 didClose: () => { location.reload(); },
+                width: 'min(500px, 95vw)'
             });
 
             window.addEventListener('message', function (event) {
@@ -240,6 +160,7 @@
             return false;
         });
 
+        // Editar devoto
         $(".btn-edit").click(function() {
             var devotoID = $(this).data("devotoid");
             if (!devotoID) { console.error("Error: ID del Devoto no definido."); return; }
@@ -247,11 +168,16 @@
 
             Swal.fire({
                 title: 'Editar Información',
-                html: `<iframe src="${formulario}" width="100%" height="500vh" frameborder="0" style="max-width: 100%;"></iframe>`,
+                html: `<iframe src="${formulario}"
+                               width="100%"
+                               height="520"
+                               frameborder="0"
+                               style="display:block;width:100%;border:0;"></iframe>`,
                 showCloseButton: true,
                 showConfirmButton: false,
                 customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
                 didClose: () => { location.reload(); },
+                width: 'min(500px, 95vw)'
             });
 
             window.addEventListener('message', function (event) {
@@ -261,6 +187,7 @@
             return false;
         });
 
+        // Eliminar devoto
         $(".btn-delete").click(function() {
             var devotoID = $(this).data("devotoid");
             if (!devotoID) { console.error("Error: ID del Devoto no definido."); return; }
@@ -268,12 +195,16 @@
 
             Swal.fire({
                 title: 'Eliminar Devoto',
-                html: `<iframe src="${formulario}" width="100%" height="400px" frameborder="0" style="max-width: 100%;"></iframe>`,
+                html: `<iframe src="${formulario}"
+                               width="100%"
+                               height="420"
+                               frameborder="0"
+                               style="display:block;width:100%;border:0;"></iframe>`,
                 showCloseButton: true,
                 showConfirmButton: false,
-                width: '600px',
                 customClass: { container: 'swal-container', popup: 'swal-popup my-custom-modal-class' },
                 didClose: () => { location.reload(); },
+                width: 'min(500px, 95vw)'
             });
 
             window.addEventListener('message', function(event) {
@@ -282,29 +213,288 @@
 
             return false;
         });
+
+        // Zoom de imagen al hacer clic
+        $(".foto-miniatura").click(function () {
+            const imagenUrl = $(this).data("src");
+            const nombre = $(this).data("nombre");
+
+            Swal.fire({
+                title: `Fotografía de ${nombre}`,
+                imageUrl: imagenUrl,
+                imageAlt: `Foto de ${nombre}`,
+                imageWidth: 420,
+                imageHeight: 420,
+                showCloseButton: true,
+                showConfirmButton: false,
+                background: '#f9f9f9',
+                customClass: {
+                    popup: 'rounded'
+                }
+            });
+        });
     });
-
-    // Zoom de imagen al hacer clic
-$(".foto-miniatura").click(function () {
-    const imagenUrl = $(this).data("src");
-    const nombre = $(this).data("nombre");
-
-    Swal.fire({
-        title: `Fotografía de ${nombre}`,
-        imageUrl: imagenUrl,
-        imageAlt: `Foto de ${nombre}`,
-        imageWidth: 400,
-        imageHeight: 400,
-        showCloseButton: true,
-        showConfirmButton: false,
-        background: '#f9f9f9',
-        customClass: {
-            popup: 'rounded'
-        }
-    });
-});
-
 </script>
 
+<style>
+    .page-title {
+        font-weight: 600;
+        font-size: 1.6rem;
+    }
 
+    .devotos-card {
+        background-color: #dee2e611;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    /* Botón principal */
+    .btn-main {
+        background: linear-gradient(135deg, #343a40, #495057);
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 0.55rem 1.3rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s ease-in-out;
+        font-size: 0.95rem;
+    }
+
+    .btn-main:hover {
+        background: linear-gradient(135deg, #212529, #343a40);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        color: #fff;
+    }
+
+    /* Buscador */
+    .search-form {
+        width: 100%;
+    }
+
+    .search-group .form-control {
+        border-radius: 999px 0 0 999px;
+    }
+
+    .search-group .input-group-text {
+        border-radius: 999px 0 0 999px;
+        background-color: #f8f9fa;
+        border-right: 0;
+    }
+
+    .btn-search {
+        border-radius: 0 999px 999px 0;
+        border: 1px solid #0d6efd;
+        background-color: #0d6efd;
+        color: #fff;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        transition: all .2s ease-in-out;
+    }
+
+    .btn-search:hover {
+        background-color: #0b5ed7;
+        border-color: #0b5ed7;
+    }
+
+    /* Foto */
+    .foto-miniatura {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: zoom-in;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,.12);
+    }
+
+    .foto-miniatura:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.18);
+    }
+
+    /* Tabla */
+    .devotos-table thead th {
+        border-bottom-width: 1px;
+        font-size: 0.85rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #b7bbbd;
+        font-weight: 600;
+        text-align: center;
+        background-color: #04132a;
+    }
+
+    .devotos-table tbody td {
+        vertical-align: middle;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 220px;
+    }
+
+    .devotos-table tbody td:nth-child(5),
+    .devotos-table tbody td:nth-child(6) {
+        max-width: 200px;
+    }
+
+    .devotos-table tbody tr:hover {
+        background-color: #f7f9fc;
+    }
+
+    .cell-value {
+        display: block;
+        overflow-wrap: anywhere;
+    }
+
+    /* Botones de acción */
+    .btn-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-icon.edit {
+        background-color: #f1f3f5;
+        color: #495057;
+    }
+
+    .btn-icon.edit:hover {
+        background-color: #0d6efd;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-icon.delete {
+        background-color: #fde8e8;
+        color: #c1121f;
+    }
+
+    .btn-icon.delete:hover {
+        background-color: #c1121f;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    /* Paginación */
+    .pagination-wrapper {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .pagination {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: .5rem;
+        margin: 0;
+    }
+
+    .pagination a {
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        font-size: 0.85rem;
+        color: #0d6efd;
+        transition: all .2s ease-in-out;
+        background-color: #fff;
+    }
+
+    .pagination a:hover {
+        background-color: #0d6efd;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .page-info {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* SweetAlert popup ancho */
+    .my-custom-modal-class {
+        padding: 0 !important;
+    }
+
+    .my-custom-modal-class .swal2-html-container {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Responsive: tabla -> cards en móvil */
+    @media (max-width: 767.98px) {
+        .devotos-table thead {
+            display: none;
+        }
+
+        .devotos-table,
+        .devotos-table tbody,
+        .devotos-table tr,
+        .devotos-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .devotos-table tr {
+            margin-bottom: 1rem;
+            background: #ffffff;
+            border-radius: 0.9rem;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .devotos-table td {
+            display: flex;
+            align-items: center;
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+            gap: 0.5rem;
+        }
+
+        .devotos-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #6c757d;
+            flex: 0 0 45%;
+            max-width: 50%;
+        }
+
+        .devotos-table td .cell-value {
+            flex: 1;
+            text-align: right;
+        }
+
+        .devotos-table td:first-child {
+            justify-content: space-between;
+        }
+
+        .action-column {
+            justify-content: flex-end;
+        }
+
+        .search-group .form-control {
+            border-radius: 999px;
+        }
+
+        .search-group .input-group-text {
+            display: none;
+        }
+    }
+</style>
 {% endblock %}

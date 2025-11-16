@@ -1,98 +1,200 @@
 {% extends "aplicacion/base.html" %}
 
 {% block content %}
-<h2 class="text-center">Gestión de Entrega de Turnos</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<form method="GET" class="mb-4">
-    <div class="row">
-        <div class="col-md-3 mt-2">
-            <input type="text" name="nombre" class="form-control" placeholder="Buscar por nombre" value="{{ request.GET.nombre }}">
-        </div>
-        <div class="col-md-3 mt-2">
-            <select name="entregados" class="form-select filtro-automatico">
-                <option value="false" {% if not filtro_entregados %}selected{% endif %}>Pendientes</option>
-                <option value="true" {% if filtro_entregados %}selected{% endif %}>Entregados</option>
-            </select>
-        </div>
-        <div class="col-md-3 mt-2">
-            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+<div class="container-fluid py-4 entrega-turnos-page">
+
+    <!-- ENCABEZADO -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="titulo mb-1">Gestión de Entrega de Turnos</h2>
+            <p class="text-muted small mb-0">
+                Busca devotos, filtra por estado de entrega y registra la entrega de turnos.
+            </p>
         </div>
     </div>
-</form>
 
-<table class="table table-bordered text-center">
-    <thead class="table-dark">
-        <tr>
-            <th>Devoto</th>
-            <th>Turno</th>
-            <th>Procesión</th>
-            <th>Fecha Inscripción</th>
-            <th>Fecha Entrega</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
+    <!-- FILTROS -->
+    <form method="GET" class="filtros-card card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="filtro-label">Nombre</label>
+                    <input type="text" name="nombre" class="form-control"
+                           placeholder="Buscar por nombre"
+                           value="{{ request.GET.nombre }}">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="filtro-label">Estado</label>
+                    <select name="entregados" class="form-select filtro-automatico">
+                        <option value="false" {% if not filtro_entregados %}selected{% endif %}>Pendientes</option>
+                        <option value="true" {% if filtro_entregados %}selected{% endif %}>Entregados</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mt-2 mt-md-0">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-filter me-1"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {# ========== TABLA ESCRITORIO ========== #}
+    <div class="contenedor-tabla d-none d-md-block">
+        <table class="tabla-macos table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="col-devoto">Devoto</th>
+                    <th>Turno</th>
+                    <th class="col-procesion">Procesión</th>
+                    <th>Fecha Inscripción</th>
+                    <th>Fecha Entrega</th>
+                    <th class="text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscripcion in inscripciones %}
+                <tr>
+                    <td class="text-start col-devoto">{{ inscripcion.devoto.nombre }}</td>
+                    <td>Turno {{ inscripcion.turno.numero_turno }}</td>
+                    <td class="text-start col-procesion">{{ inscripcion.turno.procesion.nombre }}</td>
+                    <td>{{ inscripcion.fecha_inscripcion|date:"d-m-Y" }}</td>
+                    <td>
+                        {% if inscripcion.fecha_entrega %}
+                            {{ inscripcion.fecha_entrega|date:"d-m-Y" }}
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td class="acciones-cell">
+                        <div class="acciones">
+                            {% if not inscripcion.entregado %}
+                                <button type="button"
+                                        class="btn-entregar" title="Entregar Turno"
+                                        data-id="{{ inscripcion.id }}">
+                                    ✅ Entregar
+                                </button>
+                            {% else %}
+                                <button type="button"
+                                        class="btn-imprimir" title="Imprimir Comprobante"
+                                        data-inscripcionid="{{ inscripcion.id }}">
+                                    <i class="fa-solid fa-print"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="sin-datos">No hay turnos pendientes de entrega.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ========== TARJETAS MÓVIL ========== #}
+    <div class="entrega-cards d-block d-md-none mt-3">
         {% for inscripcion in inscripciones %}
-        <tr>
-            <td class="text-start">{{ inscripcion.devoto.nombre }}</td>
-            <td>Turno {{ inscripcion.turno.numero_turno }}</td>
-            <td class="text-start">{{ inscripcion.turno.procesion.nombre }}</td>
-            <td>{{ inscripcion.fecha_inscripcion|date:"d-m-Y" }}</td>
-            <td>{{ inscripcion.fecha_entrega|date:"d-m-Y" }}</td>
-            <td>
+        <div class="entrega-card">
+            <div class="card-header-mobile">
+                <div class="devoto-nombre">
+                    {{ inscripcion.devoto.nombre }}
+                </div>
+                <span class="turno-pill">
+                    Turno {{ inscripcion.turno.numero_turno }}
+                </span>
+            </div>
+            <div class="card-body-mobile">
+                <div><strong>Procesión:</strong> {{ inscripcion.turno.procesion.nombre }}</div>
+                <div><strong>Inscripción:</strong> {{ inscripcion.fecha_inscripcion|date:"d-m-Y" }}</div>
+                <div>
+                    <strong>Entrega:</strong>
+                    {% if inscripcion.fecha_entrega %}
+                        {{ inscripcion.fecha_entrega|date:"d-m-Y" }}
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <strong>Estado:</strong>
+                    {% if inscripcion.entregado %}
+                        <span class="badge bg-success">Entregado</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Sin entregar</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-actions-mobile">
                 {% if not inscripcion.entregado %}
-                <button class="btn btn-success btn-entregar" data-id="{{ inscripcion.id }}">✅ Entregar</button>
+                    <button type="button"
+                            class="btn-mobile-action btn-entregar"
+                            data-id="{{ inscripcion.id }}">
+                        ✅
+                    </button>
                 {% else %}
-                <a href="#" class="btn btn-imprimir" title="Imprimir" data-inscripcionid="{{ inscripcion.id }}">
-                    <i class="fa-solid fa-print"></i> Imprimir
-                </a>
+                    <button type="button"
+                            class="btn-mobile-action btn-imprimir"
+                            data-inscripcionid="{{ inscripcion.id }}">
+                        <i class="fa-solid fa-print"></i>
+                    </button>
                 {% endif %}
-            </td>
-        </tr>
+            </div>
+        </div>
         {% empty %}
-        <tr>
-            <td colspan="6">No hay turnos pendientes de entrega.</td>
-        </tr>
+        <p class="text-center text-muted">No hay turnos pendientes de entrega.</p>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 
-<nav>
-    <ul class="pagination justify-content-center">
-        {% if inscripciones.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1{{ query_params }}">Primero</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ inscripciones.previous_page_number }}{{ query_params }}">Anterior</a>
-            </li>
-        {% endif %}
+    {# ========== PAGINACIÓN (COMÚN PARA TABLA Y TARJETAS) ========== #}
+    {% if inscripciones.paginator.num_pages > 1 %}
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            {% if inscripciones.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{{ query_params }}">Primero</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ inscripciones.previous_page_number }}{{ query_params }}">Anterior</a>
+                </li>
+            {% endif %}
 
-        <li class="page-item active">
-            <span class="page-link">{{ inscripciones.number }} de {{ inscripciones.paginator.num_pages }}</span>
-        </li>
+            <li class="page-item active">
+                <span class="page-link">
+                    {{ inscripciones.number }} de {{ inscripciones.paginator.num_pages }}
+                </span>
+            </li>
 
-        {% if inscripciones.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ inscripciones.next_page_number }}{{ query_params }}">Siguiente</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ inscripciones.paginator.num_pages }}{{ query_params }}">Último</a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
+            {% if inscripciones.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ inscripciones.next_page_number }}{{ query_params }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ inscripciones.paginator.num_pages }}{{ query_params }}">Último</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
     // Envío automático del filtro por select
-    document.querySelector(".filtro-automatico").addEventListener("change", function () {
-        this.form.submit();
-    });
+    const filtroAuto = document.querySelector(".filtro-automatico");
+    if (filtroAuto) {
+        filtroAuto.addEventListener("change", function () {
+            this.form.submit();
+        });
+    }
 
-    // Evento imprimir comprobante
+    // Evento imprimir comprobante (tabla + tarjetas)
     document.querySelectorAll(".btn-imprimir").forEach(button => {
         button.addEventListener("click", function () {
             const inscripcionID = this.getAttribute("data-inscripcionid");
@@ -112,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Evento entregar turno
+    // Evento entregar turno (tabla + tarjetas)
     document.querySelectorAll(".btn-entregar").forEach(button => {
         button.addEventListener("click", function () {
             const inscripcionId = this.getAttribute("data-id");
@@ -120,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
             Swal.fire({
                 title: "Ingrese Contraseña del Turno",
                 input: "text",
-                inputValue: "HSVD-",  // 👈 precargamos el prefijo
+                inputValue: "HSVD-",
                 inputPlaceholder: "Ingrese la Contraseña del Turno",
                 showCancelButton: true,
                 confirmButtonText: "Validar",
@@ -140,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             "X-CSRFToken": "{{ csrf_token }}",
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ id_inscripcion: idIngresado })  // 👈 aquí se envía completo
+                        body: JSON.stringify({ id_inscripcion: idIngresado })
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -169,20 +271,194 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <style>
-.btn-entregar, .btn-imprimir {
-    border-radius: 5px;
-    padding: 6px 10px;
-    margin: 5px;
+/* General */
+.entrega-turnos-page .titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
 }
 
+/* Filtros */
+.filtros-card .filtro-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/* Tabla escritorio */
+.contenedor-tabla {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+}
+
+.tabla-macos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+.tabla-macos thead {
+    background: linear-gradient(135deg, #154980, #152535);
+    color: #f8f9fa;
+}
+
+.tabla-macos th{
+    background-color: #05192c;
+    color: #c9cbcd;
+}
+
+.tabla-macos th,
+.tabla-macos td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Permitir varias líneas en columnas largas */
+.tabla-macos th.col-devoto,
+.tabla-macos td.col-devoto,
+.tabla-macos th.col-procesion,
+.tabla-macos td.col-procesion {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    word-wrap: break-word;
+}
+
+.tabla-macos tbody tr:hover {
+    background-color: #f5f7fb;
+    transition: background 0.2s ease-in-out;
+}
+
+.sin-datos {
+    text-align: center;
+    font-weight: 500;
+    color: #777;
+    padding: 1rem;
+}
+
+/* Botones acciones tabla */
+.acciones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-entregar,
 .btn-imprimir {
+    border-radius: 15px;
+    padding: 6px 12px; /* <-- evita que sea redondo */
+    width: auto;
+    height: auto;
+    border: none;
     background-color: #007bff;
-    color: white;
-    font-weight: bold;
+    color: #fff;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
 
+.btn-entregar {
+    background-color: #0becf8;
+    color: #152535;
+}
+
+.btn-entregar:hover,
 .btn-imprimir:hover {
-    background-color: #0056b3;
+    transform: translateY(-1px);
+    filter: brightness(0.9);
+}
+
+/* Tarjetas móvil */
+.entrega-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.entrega-card {
+    background: #ffffff;
+    border-radius: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.card-header-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.devoto-nombre {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.turno-pill {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: #154980;
+    color: #fdfdfd;
+    white-space: nowrap;
+}
+
+.card-body-mobile {
+    font-size: 0.85rem;
+}
+
+.card-actions-mobile {
+    margin-top: 0.6rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.btn-mobile-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.btn-mobile-action.btn-entregar {
+    background: #28a745;
+}
+
+.btn-mobile-action:hover {
+    filter: brightness(0.9);
+}
+
+/* Paginación */
+.pagination .page-link {
+    border-radius: 999px;
+    font-size: 0.85rem;
 }
 </style>
 {% endblock %}
