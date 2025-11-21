@@ -15,12 +15,14 @@
 
     <!-- Barra de acciones -->
     <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 mb-3">
+        {% if perms.establecimiento.crear_registro %}
         <div class="d-flex gap-2">
             <button id="crearDevoto" class="btn-main d-inline-flex align-items-center gap-2">
                 <i class='bx bx-user-plus'></i>
                 <span>Nuevo</span>
             </button>
         </div>
+       {% endif %}
 
         <div class="ms-lg-auto w-100 w-lg-50">
             <form method="get" class="search-form">
@@ -88,12 +90,16 @@
                             </td>
                             <td data-label="Acciones">
                                 <div class="d-flex justify-content-md-center justify-content-end gap-2 action-column cell-value">
+                                    {% if perms.establecimiento.editar_registro %}
                                     <a href="#" class="btn-icon edit btn-edit" title="Editar" data-devotoid="{{ devoto.id }}">
                                         <i class="fas fa-pen-to-square"></i>
                                     </a>
+                                   {% endif %}
+                                    {% if perms.establecimiento.inactivar_registro %}
                                     <a href="#" class="btn-icon delete btn-delete" title="Eliminar" data-devotoid="{{ devoto.id }}">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
+                                   {% endif %}
                                 </div>
                             </td>
                         </tr>

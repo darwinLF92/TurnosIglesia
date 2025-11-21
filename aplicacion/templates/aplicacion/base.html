@@ -22,123 +22,239 @@
     <div class="container-fluid p-0">
 
       <!-- NAVBAR SUPERIOR -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container-fluid">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
 
-          <!-- Logo / Home -->
-          <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
-            <img src="{% static 'logos/home.png' %}" alt="Inicio" width="50" height="50">
-            <span class="d-none d-sm-inline ms-2"></span>
-          </a>
+    <!-- Logo / Home -->
+    <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
+      <img src="{% static 'logos/home.png' %}" alt="Inicio" width="50" height="50">
+      <span class="d-none d-sm-inline ms-2"></span>
+    </a>
 
-          <!-- Botón hamburguesa -->
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#navbarContenido" aria-controls="navbarContenido"
-                  aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+    <!-- Botón hamburguesa -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarContenido" aria-controls="navbarContenido"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-          <!-- Contenido del menú -->
-          <div class="collapse navbar-collapse" id="navbarContenido">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <!-- Contenido del menú -->
+    <div class="collapse navbar-collapse" id="navbarContenido">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-              {% if user.is_authenticated %}
-                <!-- MANTENEDOR -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-cog me-1"></i> Mantenedor
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
-                    <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
-                  </ul>
-                </li>
+        {% if user.is_authenticated %}
 
-                <!-- ESTABLECIMIENTO -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-building-house me-1"></i> Establecimiento
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Datos generales</a></li>
-                    <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Configuración del Home</a></li>
-                  </ul>
-                </li>
+          {# MANTENEDOR #}
+          {% if perms.establecimiento.acceso_mantenedor %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bx bx-cog me-1"></i> Mantenedor
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
+              <li><a class="dropdown-item" href="{% url 'usuarios:lista_roles' %}">Roles</a></li>
+            </ul>
+          </li>
+          {% endif %}
 
-                <!-- PROCESIONES -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-church me-1"></i> Procesiones
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Listado de procesiones</a></li>
-                  </ul>
-                </li>
+          {# ESTABLECIMIENTO #}
+          {% if perms.establecimiento.acceso_establecimiento %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bx bx-building-house me-1"></i> Establecimiento
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'establecimiento:lista_establecimientos' %}">Datos generales</a></li>
+              <li><a class="dropdown-item" href="{% url 'aplicacion:configuracion_home_list' %}">Configuración del Home</a></li>
+            </ul>
+          </li>
+          {% endif %}
 
-                <!-- TURNOS -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-list-ol me-1"></i> Turnos
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Gestión de turnos</a></li>
-                  </ul>
-                </li>
-
-                <!-- DEVOTOS -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-user-circle me-1"></i> Devotos
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Listado de devotos</a></li>
-                  </ul>
-                </li>
-
-                <!-- INSCRIPCIONES -->
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-file me-1"></i> Inscripciones
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Gestión de inscripciones</a></li>
-                  </ul>
-                </li>
-
-                <!-- GESTIÓN TURNOS -->
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">
-                    <i class="bx bx-transfer-alt me-1"></i> Gestión de Entrega
-                  </a>
-                </li>
+          {# PROCESIONES #}
+          {% if perms.establecimiento.acceso_procesiones %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bx bx-church me-1"></i> Procesiones
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'procesiones:lista_procesiones' %}">Listado de procesiones</a></li>
+              {% if perms.establecimiento.acceso_turnos %}
+              <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Gestión de turnos</a></li>
               {% endif %}
             </ul>
+          </li>
+          {% endif %}
 
-            <!-- DERECHA: usuario / salir -->
-            <ul class="navbar-nav ms-auto align-items-lg-center">
-              {% if user.is_authenticated %}
-                <li class="nav-item me-2 d-none d-lg-block">
-                  <span class="navbar-text small">
-                    <i class="bx bx-user-circle me-1"></i>
-                    {{ user.first_name|default:user.username }}
-                  </span>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'aplicacion:logout' %}">
-                    <i class="bx bx-log-out"></i> Salir
-                  </a>
-                </li>
-              {% else %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'aplicacion:login' %}">
-                    <i class="bx bx-log-in"></i> Acceder
-                  </a>
-                </li>
-              {% endif %}
+
+          {# DEVOTOS #}
+          {% if perms.establecimiento.acceso_devotos %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bx bx-user-circle me-1"></i> Devotos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'devotos:lista_devotos' %}">Listado de devotos</a></li>
             </ul>
-          </div>
-        </div>
-      </nav>
+          </li>
+          {% endif %}
+
+          {# INSCRIPCIONES #}
+          {% if perms.establecimiento.acceso_inscripciones %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bx bx-file me-1"></i> Inscripciones
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_inscripciones' %}">Incribir Devotos</a></li>
+               {% if perms.establecimiento.acceso_gestion_entrega %}
+              <li><a class="dropdown-item" href="{% url 'gestion_turnos:lista_entrega_turnos' %}">Gestión de Entrega</a></li>
+               {% endif %}
+            </ul>
+          </li>
+          {% endif %}
+      {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'noticias:muro' %}">
+              <i class="bx bx-news me-1"></i> Noticias
+            </a>
+          </li>        
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <!-- CAMPANA DE NOTIFICACIONES -->
+<!-- CAMPANA DE NOTIFICACIONES -->
+<!-- CAMPANA DE NOTIFICACIONES -->
+<li class="nav-item dropdown notif-dropdown me-3">
+    <a class="nav-link position-relative"
+       href="#"
+       id="notifDropdown"
+       data-bs-toggle="dropdown"
+       aria-expanded="false">
+
+        <i class="bx bx-bell" style="font-size:22px;"></i>
+
+        {# contador solo de NO leídas #}
+        {% if notif_total_no_leidas > 0 %}
+            <span class="notif-badge">
+                {{ notif_total_no_leidas }}
+            </span>
+        {% endif %}
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end notif-menu shadow">
+        <li class="notif-header">Notificaciones</li>
+
+        {# 🔥 Si HAY no leídas, las mostramos #}
+        {% if notif_no_leidas %}
+            {% for n in notif_no_leidas %}
+            <li>
+                <a href="{% url 'noticias:leer_notificacion' n.id %}"
+                   class="dropdown-item notif-item notif-unread">
+                    {{ n.texto }}<br>
+                    <small class="notif-date">
+                        {{ n.creado_en|date:"d/m/Y H:i" }}
+                    </small>
+                </a>
+            </li>
+            {% endfor %}
+
+        {# ❌ Si NO hay ninguna no leída, mensaje vacío #}
+        {% else %}
+            <li class="dropdown-item notif-item notif-empty">
+                Sin notificaciones
+            </li>
+        {% endif %}
+
+        {% if notif_historial %}
+        <li><hr class="dropdown-divider"></li>
+       <li class="dropdown-header historial-notif small">Historial reciente</li>
+
+        {% for n in notif_historial %}
+        <li>
+            <a href="{% url 'noticias:leer_notificacion' n.id %}"
+               class="dropdown-item notif-item {% if not n.leido %}notif-unread{% else %}notif-read{% endif %}">
+                {{ n.texto }}<br>
+                <small class="notif-date">{{ n.creado_en|date:"d/m/Y H:i" }}</small>
+            </a>
+        </li>
+        {% endfor %}
+
+        {% endif %}
+    </ul>
+</li>
+
+
+
+
+      <!-- DERECHA: usuario / salir -->
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        {% if user.is_authenticated %}
+          <!-- MENU DESPLEGABLE DE USUARIO -->
+          <li class="nav-item dropdown me-2 d-none d-lg-block">
+
+            <a class="nav-link dropdown-toggle d-flex align-items-center"
+              href="#"
+              id="userDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+
+                {% if user.perfil.foto_perfil %}
+                  <img src="{{ user.perfil.foto_perfil.url }}"
+                      class="rounded-circle me-2"
+                      width="32" height="32">
+                {% else %}
+                  <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                      style="width:32px; height:32px;">
+                    {{ user.first_name|default:user.username|slice:":1" }}
+                  </div>
+                {% endif %}
+
+                <span class="small fw-semibold">
+                  {{ user.first_name|default:user.username }}
+                </span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                <li>
+                  <a class="dropdown-item" href="{% url 'cuentas:perfil' %}">
+                    <i class="bx bx-user me-2"></i> Ver mi perfil
+                  </a>
+                </li>
+
+                <li>
+                  <a class="dropdown-item" href="{% url 'cuentas:editar_perfil' %}">
+                    <i class="bx bx-edit me-2"></i> Editar perfil
+                  </a>
+                </li>
+
+                <li>
+                  <a class="dropdown-item" href="{% url 'cuentas:cambiar_password' %}">
+                    <i class="bx bx-key me-2"></i> Cambiar contraseña
+                  </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                  <a class="dropdown-item text-danger" href="{% url 'aplicacion:logout' %}">
+                    <i class="bx bx-log-out me-2"></i> Cerrar sesión
+                  </a>
+                </li>
+            </ul>
+          </li>
+
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'aplicacion:login' %}">
+              <i class="bx bx-log-in"></i> Acceder
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
 
       <!-- Carrusel a pantalla completa -->
       {% block carrusel_fullscreen %}{% endblock %}
@@ -306,6 +422,105 @@ document.addEventListener('DOMContentLoaded', () => {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+.dropdown-menu {
+    border-radius: 12px;
+    padding: 8px 0;
+    font-size: 0.95rem;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+    border-radius: 6px;
+}
+
+.dropdown-item:hover {
+    background: #f0f2f5;
+}
+
+
+/* ========================================== */
+/*         🔔 NOTIFICACIONES PERSONALIZADO    */
+/* ========================================== */
+
+/* Contenedor del badge rojo */
+.notif-badge {
+    background-color: #dc3545;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    right: -5px;
+}
+
+/* Menu de notificaciones */
+.notif-menu {
+    background: #1e1e1e !important;
+    width: 300px !important;
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0;
+}
+
+/* Título del dropdown */
+.notif-header {
+    font-weight: bold;
+    color: #fff;
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 15px;
+}
+
+/* Elemento de notificación */
+.notif-item {
+    padding: 10px 15px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    white-space: normal !important;
+}
+
+/* No leídas */
+.notif-unread {
+    font-weight: 600 !important;
+    color: #909ff7 !important;
+    background: rgba(255,255,255,0.06);
+}
+
+/* Leídas */
+.notif-read {
+    font-weight: 400 !important;
+    color: #bfbfbf !important;
+}
+
+/* Fecha */
+.notif-date {
+    color: #9c9c9c !important;
+}
+
+/* Mensaje vacío */
+.notif-empty {
+    color: #999 !important;
+}
+
+/* Hover */
+.notif-item:hover {
+    background: rgba(255,255,255,0.1) !important;
+    color: #fff !important;
+}
+
+/* Evitar blur heredado del carrusel */
+.notif-menu * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.historial-notif {
+    color: wheat
+    }
+
 
     </style>
 </body>

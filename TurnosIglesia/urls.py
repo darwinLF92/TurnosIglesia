@@ -27,6 +27,10 @@ urlpatterns = [
     path('', include('devotos.urls', namespace='devotos')),
     path('', include('gestion_turnos.urls', namespace='gestion_turnos')),
     path('', include('establecimiento.urls', namespace='establecimiento')),
+    path('', include('cuentas.urls', namespace='cuentas')),
+    path('', include('noticias.urls', namespace='noticias')),
+
+
     
 
 ]

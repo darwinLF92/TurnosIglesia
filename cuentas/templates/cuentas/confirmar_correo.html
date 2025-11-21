@@ -1,0 +1,444 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar correo</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Iconos (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark-1: #020617;
+            --bg-dark-2: #0b1120;
+            --accent-1: #2563eb;
+            --accent-2: #4f46e5;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem 0;
+            background:
+                radial-gradient(circle at top, #2e0b63 0, #020617 45%, #000 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #e5e7eb;
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .card-confirm {
+            border-radius: 1.5rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, .12), transparent 55%),
+                radial-gradient(circle at top right, rgba(129, 140, 248, .16), transparent 60%),
+                linear-gradient(145deg, rgba(15, 23, 42, .98), rgba(15, 23, 42, .98));
+            backdrop-filter: blur(18px);
+            box-shadow:
+                0 24px 60px rgba(15, 23, 42, .85),
+                0 0 0 1px rgba(15, 23, 42, .75);
+            overflow: hidden;
+        }
+
+        .card-hero {
+            padding: 1.8rem 1.6rem 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-hero-main {
+            flex: 1;
+        }
+
+        .card-hero .icon-lock {
+            width: 64px;
+            height: 64px;
+            border-radius: 999px;
+            border: 1px solid rgba(248, 250, 252, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(250, 250, 255, 0.22), transparent 55%),
+                rgba(15, 23, 42, 0.7);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, .7);
+        }
+
+        .card-hero .icon-lock i {
+            font-size: 1.7rem;
+            color: #facc15;
+        }
+
+        .pill-status {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .25rem .7rem;
+            border-radius: 999px;
+            font-size: .7rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.65);
+            color: #e5e7eb;
+        }
+
+        .pill-status i {
+            font-size: .8rem;
+        }
+
+        .card-hero h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: .35rem 0 .15rem;
+        }
+
+        .card-hero p {
+            margin: 0;
+            font-size: .86rem;
+            color: #9ca3af;
+        }
+
+        .card-body {
+            padding: 1.7rem 1.7rem 1.5rem;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, .96), var(--bg-dark-1));
+        }
+
+        .section-title {
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: #64748b;
+            margin-bottom: .6rem;
+        }
+
+        .form-label {
+            font-size: .85rem;
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        .form-control {
+            background-color: rgba(15, 23, 42, 0.96);
+            border-radius: .85rem;
+            border: 1px solid #1f2937;
+            color: #e5e7eb;
+            font-size: .9rem;
+            padding-top: .55rem;
+            padding-bottom: .55rem;
+        }
+
+        .form-control:focus {
+            background-color: rgba(15, 23, 42, 1);
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 .13rem rgba(37, 99, 235, .45);
+            color: #e5e7eb;
+        }
+
+        /* Correo deshabilitado */
+        .form-control[disabled],
+        .form-control:disabled {
+            background: rgba(15, 23, 42, 0.9);
+            color: #9ca3af;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+        .helper-text {
+            font-size: .8rem;
+            color: #9ca3af;
+        }
+
+        /* Password + botón ojo */
+        .password-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .password-toggle-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border: 1px solid #1e293b;
+            border-left: none;
+            background-color: rgba(15, 23, 42, 0.96);
+            color: #9ca3af;
+        }
+
+        .password-toggle-btn:hover {
+            background-color: rgba(15, 23, 42, 1);
+            color: #e5e7eb;
+        }
+
+        .btn-primary {
+            border-radius: .95rem;
+            padding: .65rem 1.2rem;
+            font-weight: 600;
+            letter-spacing: .02em;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            border: none;
+            box-shadow: 0 14px 32px rgba(37, 99, 235, 0.55);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #4338ca);
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.65);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-light-soft {
+            border-radius: .95rem;
+            padding: .6rem 1.1rem;
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            color: #e5e7eb;
+            background: transparent;
+        }
+
+        .btn-outline-light-soft:hover {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .alert {
+            border-radius: .85rem;
+        }
+
+        /* Light mode opcional */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: radial-gradient(circle at top, #e5edff 0, #dbeafe 35%, #eef2ff 100%);
+            }
+            .card-confirm {
+                background: #ffffff;
+                box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+            }
+            .card-body {
+                background: #ffffff;
+            }
+            .form-control {
+                background-color: #f9fafb;
+                border-color: #d1d5db;
+                color: #111827;
+            }
+            .form-control[disabled] {
+                background-color: #e5e7eb;
+                color: #4b5563;
+            }
+            .form-label {
+                color: #111827;
+            }
+            .helper-text {
+                color: #6b7280;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            body {
+                padding-inline: 1rem;
+            }
+            .card-hero {
+                padding: 1.4rem 1.3rem 1.1rem;
+            }
+            .card-body {
+                padding: 1.4rem 1.3rem 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="card card-confirm">
+        <div class="card-hero">
+            <div class="icon-lock">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="card-hero-main">
+                {% if estado == "error_confirmacion" %}
+                    <span class="pill-status">
+                        <i class="fa-solid fa-circle-exclamation"></i> Enlace inválido
+                    </span>
+                    <h1>Enlace no válido</h1>
+                    <p>Hubo un problema al confirmar tu correo.</p>
+                {% elif estado == "password_ok" %}
+                    <span class="pill-status">
+                        <i class="fa-solid fa-circle-check"></i> Cuenta activada
+                    </span>
+                    <h1>¡Todo listo!</h1>
+                    <p>Tu cuenta ha sido activada correctamente.</p>
+                {% else %}
+                    <span class="pill-status">
+                        <i class="fa-solid fa-envelope-circle-check"></i> Correo verificado
+                    </span>
+                    <h1>Crear contraseña</h1>
+                    <p>Tu correo ha sido verificado. Ahora define una contraseña segura.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            {% if estado == "error_confirmacion" %}
+                <p class="mb-3">{{ mensaje }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft">
+                        Volver al inicio
+                    </a>
+                </div>
+
+            {% elif estado == "password_ok" %}
+                <p class="mb-3">{{ mensaje }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'aplicacion:login' %}" class="btn btn-primary w-100">
+                        Ir al inicio de sesión
+                    </a>
+                    <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft w-100">
+                        Ir al inicio
+                    </a>
+                </div>
+
+            {% else %}
+                {% if errores %}
+                    <div class="alert alert-danger small mb-3">
+                        <ul class="mb-0">
+                            {% for campo, msgs in errores.items %}
+                                <li><strong>{{ campo }}:</strong> {{ msgs|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="section-title">Datos de acceso</div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="correo" value="{{ correo }}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" value="{{ correo }}" disabled>
+                        <div class="helper-text mt-1">
+                            Usaremos este correo como usuario principal de acceso.
+                        </div>
+                    </div>
+
+                    <!-- Contraseña nueva -->
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">Contraseña nueva</label>
+                        <div class="input-group password-group">
+                            <input type="password" id="password1" name="password1"
+                                   class="form-control" minlength="6" required>
+                            <button class="btn password-toggle-btn btn-toggle-password"
+                                    type="button"
+                                    data-target="password1"
+                                    aria-label="Mostrar u ocultar contraseña">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="helper-text mt-1">
+                            Mínimo 6 caracteres. Combina mayúsculas, minúsculas y números.
+                        </div>
+                    </div>
+
+                    <!-- Confirmar contraseña -->
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirmar contraseña</label>
+                        <div class="input-group password-group">
+                            <input type="password" id="password2" name="password2"
+                                   class="form-control" minlength="6" required>
+                            <button class="btn password-toggle-btn btn-toggle-password"
+                                    type="button"
+                                    data-target="password2"
+                                    aria-label="Mostrar u ocultar contraseña">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-1">
+                        Guardar contraseña
+                    </button>
+                </form>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const estado = "{{ estado }}";
+        const mensaje = "{{ mensaje|default:''|escapejs }}";
+        const hasErrors = {{ errores|default:False|yesno:"true,false" }};
+
+        // Error al validar el token / enlace
+        if (estado === "error_confirmacion") {
+            Swal.fire({
+                icon: "error",
+                title: "No se pudo confirmar tu correo",
+                text: mensaje || "El enlace de confirmación no es válido o ha expirado.",
+                confirmButtonText: "Entendido"
+            });
+        }
+
+        // Contraseña creada correctamente
+        if (estado === "password_ok") {
+            Swal.fire({
+                icon: "success",
+                title: "¡Contraseña creada!",
+                html: `
+                    <p>${mensaje || "Tu cuenta ya está lista para usar."}</p>
+                    <div class="mt-3 d-grid gap-2">
+                        <a href="{% url 'aplicacion:login' %}" class="btn btn-primary">Ir al inicio de sesión</a>
+                        <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft">Ir al inicio</a>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false
+            });
+        }
+
+        // Errores de validación del formulario
+        if (estado === "form_password" && hasErrors) {
+            Swal.fire({
+                icon: "warning",
+                title: "Revisa los datos",
+                text: "Hay errores en el formulario. Verifica los campos marcados en rojo.",
+                confirmButtonText: "Aceptar"
+            });
+        }
+
+        // Mostrar / ocultar contraseñas
+        document.querySelectorAll(".btn-toggle-password").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const targetId = btn.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                if (!input) return;
+
+                const icon = btn.querySelector("i");
+                const isVisible = input.type === "text";
+
+                input.type = isVisible ? "password" : "text";
+
+                if (icon) {
+                    icon.classList.toggle("fa-eye");
+                    icon.classList.toggle("fa-eye-slash");
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

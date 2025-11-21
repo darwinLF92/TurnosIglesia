@@ -1,0 +1,46 @@
+{# Comentario individual + sus respuestas en árbol #}
+<div class="fb-comment mb-1" data-comment-id="{{ comentario.id }}">
+    <strong>{{ comentario.autor.first_name|default:comentario.autor.username }}:</strong>
+    <span>{{ comentario.texto }}</span>
+    <small class="text-muted d-block">{{ comentario.creado_en|date:"d/m/Y H:i" }}</small>
+
+    <div class="d-flex align-items-center gap-3 mt-1 text-muted comment-actions">
+        <!-- Me gusta comentario -->
+        <button type="button"
+                class="btn btn-link btn-sm p-0 text-decoration-none btn-like-comment"
+                data-comment-id="{{ comentario.id }}">
+            <i class="fas fa-thumbs-up me-1 {% if user in comentario.likes.all %}text-primary{% endif %}"></i>
+            <span class="comment-like-text">
+                {% if user in comentario.likes.all %}Te gusta{% else %}Me gusta{% endif %}
+            </span>
+        </button>
+
+        <!-- contador likes comentario -->
+        <span class="comment-like-count" data-comment-id="{{ comentario.id }}">
+            {{ comentario.total_likes|default:0 }} me gusta
+        </span>
+
+        <!-- botón responder -->
+        <button type="button"
+                class="btn btn-link btn-sm p-0 text-decoration-none btn-reply-comment"
+                data-comment-id="{{ comentario.id }}">
+            Responder
+        </button>
+
+        {# contador de respuestas, se muestra si hay al menos 1 #}
+        {% if comentario.respuestas.count > 0 %}
+            <a href="#"
+               class="text-muted small ms-2 toggle-respuestas"
+               data-comment-id="{{ comentario.id }}">
+                Ver {{ comentario.respuestas.count }} respuesta{% if comentario.respuestas.count != 1 %}s{% endif %}
+            </a>
+        {% endif %}
+    </div>
+
+    {# Contenedor de respuestas (oculto por defecto) #}
+    <div class="respuesta-container mt-2 d-none">
+        {% for r in comentario.respuestas.all %}
+            {% include 'noticias/includes/comentario.html' with comentario=r %}
+        {% endfor %}
+    </div>
+</div>

@@ -182,7 +182,7 @@
 <div class="container mt-4">
     
     <div class="d-flex justify-content-between align-items-center mb-3">
-          {% if user|has_group:"Administrador" %}
+          {% if perms.establecimiento.crear_registro %}
         <h2 class="page-title mb-0">🎼 Marchas Fúnebres</h2>
         <a href="{% url 'aplicacion:subir_marcha' %}" class="btn btn-primary">
             <i class="bx bx-upload"></i> Subir nueva marcha
@@ -217,11 +217,12 @@
                     {% endif %}
                     
                     <span class="flex-grow-1">{{ marcha.titulo }}</span>
-                      {% if user|has_group:"Administrador" %}
+                      {% if perms.establecimiento.eliminar_registro %}
                     <a href="#" class="btn-delete" title="Eliminar" data-marchaid="{{ marcha.id }}">
                         <i class="fas fa-trash-alt"></i>
                     </a>
-
+                    {% endif %}
+                     {% if perms.establecimiento.editar_registro %}
                     <a href="#" class="editar-btn" title="Editar" data-marchaid="{{ marcha.id }}" onclick="event.stopPropagation();"><i class="fas fa-edit"></i></a>
                     {% endif %}
                     <button

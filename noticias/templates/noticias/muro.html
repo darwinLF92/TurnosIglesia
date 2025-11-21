@@ -1,0 +1,363 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+{# CSS propio del muro #}
+<link rel="stylesheet" href="{% static 'noticias/css/muro.css' %}">
+
+<div class="feed-container">
+
+  {% if request.user.is_authenticated %}
+  <!-- 📌 Caja para crear publicación (solo usuarios logueados) -->
+  <div class="card fb-post-box shadow-sm mb-4">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="d-flex mb-2">
+          {% if request.user.perfil.foto_perfil %}
+            <img src="{{ request.user.perfil.foto_perfil.url }}"
+                 class="rounded-circle me-2"
+                 width="45" height="45"
+                 style="object-fit: cover;">
+          {% else %}
+            <div class="avatar-inicial me-2">
+              {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+            </div>
+          {% endif %}
+
+          {{ form.contenido }}
+        </div>
+
+        <div class="fb-actions d-flex justify-content-between p-2 rounded">
+          <label class="fb-action-item">
+            <i class="fas fa-image text-success"></i> Foto
+            <input type="file" name="media" multiple accept="image/*,video/*" hidden>
+          </label>
+
+          <label class="fb-action-item">
+            <i class="fas fa-video text-danger"></i> Video
+            <input type="file" name="media" multiple accept="image/*,video/*" hidden>
+          </label>
+
+          <label class="fb-action-item">
+            <i class="fas fa-face-smile text-warning"></i> Sentimiento
+            <input hidden>
+          </label>
+        </div>
+
+        <button class="btn btn-primary w-100 mt-3 fw-bold" style="border-radius: 20px;">
+          Publicar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- 🚫 Mensaje cuando NO está logueado -->
+  <div class="card shadow-sm mb-4 p-4 text-center" style="border-radius: 20px;">
+    <h5 class="fw-bold mb-2">
+      <i class="fas fa-lock"></i> Para publicar en el muro
+    </h5>
+    <p class="text-secondary mb-4">
+      Necesitas tener una cuenta con nosotros o iniciar sesión.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{% url 'cuentas:registro_html' %}"
+         class="btn btn-success fw-semibold px-4 py-2"
+         style="border-radius: 12px; min-width: 160px;">
+        <i class="fas fa-user-plus me-2"></i>
+        Crear Cuenta
+      </a>
+
+      <a href="{% url 'aplicacion:login' %}"
+         class="btn btn-primary fw-semibold px-4 py-2"
+         style="border-radius: 12px; min-width: 160px;">
+        <i class="fas fa-sign-in-alt me-2"></i>
+        Iniciar Sesión
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⭐ LISTA DE PUBLICACIONES -->
+  {% for post in posts %}
+  <div id="post-{{ post.id }}" class="card fb-post {% if post.imagenes.count %}has-images{% endif %}">
+
+    <div class="card-body">
+
+      <!-- Cabecera del post -->
+      <div class="d-flex mb-2 position-relative">
+        <!-- Botón de menú (3 puntos) -->
+        <div class="dropdown ms-auto" style="position:absolute; right:12px; top:0;">
+          <button class="btn btn-light btn-sm border-0" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu post-menu-dropdown">
+            {% if post.autor == request.user %}
+                <li>
+                        <button class="dropdown-item btn-editar-post" data-post-id="{{ post.id }}" data-post-contenido="{{ post.contenido }}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item btn-eliminar-post" data-post-id="{{ post.id }}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Avatar con iniciales -->
+        <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-2 fb-avatar">
+          {% if post.autor.first_name and post.autor.last_name %}
+            {{ post.autor.first_name|slice:":1"|upper }}{{ post.autor.last_name|slice:":1"|upper }}
+          {% else %}
+            {{ post.autor.username|slice:":1"|upper }}
+          {% endif %}
+        </div>
+
+        <!-- Nombre completo -->
+        <div>
+          <strong>
+            {% if post.autor.first_name and post.autor.last_name %}
+              {{ post.autor.first_name }} {{ post.autor.last_name }}
+            {% else %}
+              {{ post.autor.username }}
+            {% endif %}
+          </strong><br>
+          <small class="text-muted">{{ post.creado_en|date:"d/m/Y H:i" }}</small>
+        </div>
+      </div>
+
+      <!-- Contenido -->
+      {% if post.contenido %}
+      <div class="mb-2">
+        <p class="post-text" id="post-text-{{ post.id }}">
+          {{ post.contenido|linebreaksbr }}
+        </p>
+
+        {% if post.contenido|length > 200 %}
+        <span class="ver-mas-btn" data-post-id="{{ post.id }}">Ver más…</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Medios -->
+      {% if post.medios.all %}
+        <div class="fb-mosaic" data-count="{{ post.medios.count }}">
+
+            {% for m in post.medios.all %}
+                {% if forloop.counter <= 5 %}
+
+                <div class="fb-mosaic-item {% if forloop.counter == 5 and post.medios.count > 5 %} fb-mosaic-more {% endif %}"
+                    onclick="openGalleryModal({{ post.id }}, {{ forloop.counter0 }})">
+
+                    {% if m.tipo == "imagen" %}
+                        <img src="{{ m.archivo.url }}" class="fb-mosaic-img">
+                    {% else %}
+                        <video class="fb-mosaic-img" muted>
+                            <source src="{{ m.archivo.url }}">
+                        </video>
+                    {% endif %}
+
+                    {% if forloop.counter == 5 and post.medios.count > 5 %}
+                        <div class="fb-mosaic-overlay">
+                            +{{ post.medios.count|add:"-5" }}
+                        </div>
+                    {% endif %}
+
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Likes y contador de comentarios -->
+      <div class="d-flex align-items-center justify-content-between mt-2">
+        <button class="btn btn-link btn-sm p-0 text-decoration-none btn-like"
+                data-post-id="{{ post.id }}">
+          <i class="fas fa-thumbs-up me-1 {% if user in post.likes.all %}text-primary{% endif %}"></i>
+          <span class="like-text">
+            {% if user in post.likes.all %}Te gusta{% else %}Me gusta{% endif %}
+          </span>
+        </button>
+
+        <small class="text-muted">
+          <span class="like-count"
+                data-post-id="{{ post.id }}"
+                style="cursor:pointer;"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="{% for u in post.likes.all|slice:':5' %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
+            {{ post.total_likes }} Me gusta
+          </span> •
+          <span class="comment-count"
+                data-post-id="{{ post.id }}"
+                style="cursor:pointer;"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="{% for c in post.comentarios.all|slice:':5' %}{{ c.autor.get_full_name|default:c.autor.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
+            {{ post.comentarios.count }} comentarios
+          </span>
+        </small>
+      </div>
+
+      <hr class="my-2">
+
+      <!-- Comentarios (solo 3 comentarios raíz visibles) -->
+      <div class="comentarios mt-2" data-post-id="{{ post.id }}">
+        {% for c in post.comentarios.all %}
+          {% if not c.padre %}
+          <div class="{% if forloop.counter > 1 %}d-none extra-comment{% endif %}">
+            {% include 'noticias/includes/comentario.html' with comentario=c %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if post.comentarios.count > 3 %}
+      <button type="button"
+              class="btn btn-link btn-sm p-0 mt-1 ver-todos-comentarios"
+              data-post-id="{{ post.id }}">
+        Ver todos los comentarios
+      </button>
+      {% endif %}
+
+      <!-- Nuevo comentario -->
+      <form method="post" action="{% url 'noticias:agregar_comentario' post.id %}" class="mt-2">
+        {% csrf_token %}
+        <div class="input-group input-group-sm">
+          {{ comentario_form.texto }}
+          <button class="btn btn-outline-primary" type="submit">Comentar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-muted">Aún no hay publicaciones.</p>
+  {% endfor %}
+</div>
+
+<!-- Modal likes -->
+<div class="modal fade" id="likesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content shadow-lg rounded-3 border-0">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-semibold">
+          <i class="fas fa-thumbs-up text-primary me-2"></i>
+          Personas a las que les gusta esto
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2" id="likesModalBody" style="max-height:350px; overflow-y:auto;"></div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: lista completa de comentarios -->
+<div class="modal fade" id="commentsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title mb-0">
+          <i class="fas fa-comments me-2"></i>Todos los comentarios
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="commentsModalBody" style="max-height:75vh; overflow-y:auto;"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar publicación -->
+<div class="modal fade" id="modalEditarPost" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar publicación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="formEditarPost" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label class="fw-semibold mb-1">Texto de la publicación</label>
+          <textarea id="editarContenido" class="form-control mb-3" rows="4"></textarea>
+
+          <label class="fw-semibold">Fotos y videos actuales</label>
+          <div id="editarMediaActual" class="row g-3 mb-3"></div>
+
+          <label class="fw-semibold">Agregar fotos o videos</label>
+          <input type="file" name="nuevo_media" id="nuevoMedia"
+                 class="form-control" multiple accept="image/*,video/*">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Swiper galería -->
+<div class="modal fade" id="modalSwiperGallery" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-dark">
+      <div class="modal-header border-0">
+        <button class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper" id="swiperContent"></div>
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+{# URLs dinámicas para usarlas en el JS estático #}
+<script>
+  window.NEWS_URLS = {
+    toggleLike: "{% url 'noticias:toggle_like' 0 %}",
+    listaLikes: "{% url 'noticias:lista_likes' 0 %}",
+    listaComentarios: "{% url 'noticias:lista_comentarios' 0 %}",
+    toggleLikeComentario: "{% url 'noticias:toggle_like_comentario' 0 %}",
+    responderComentario: "{% url 'noticias:responder_comentario' 0 %}"
+  };
+</script>
+
+<script src="{% static 'noticias/js/muro.js' %}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if (window.location.hash.startsWith("#post-")) {
+        const post = document.querySelector(window.location.hash);
+        if (post) {
+            post.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+});
+</script>
+
+{% endblock %}

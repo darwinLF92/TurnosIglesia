@@ -49,6 +49,12 @@ INSTALLED_APPS = [
     'establecimiento',
     'widget_tweaks',
     'django_cleanup.apps.CleanupConfig',
+    'rest_framework',
+    'cuentas',
+    'nucleo',
+    'notificaciones',
+    'rest_framework_simplejwt',
+    'noticias',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +83,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'aplicacion.context_processors.logo_establecimiento',
                 "aplicacion.context_processors.system_meta",
+                'aplicacion.context_processors.notificaciones_context',
             ],
         },
     },
@@ -173,3 +180,15 @@ SYSTEM_META = {
     "AUTHOR_LINK": config("AUTHOR_LINK", default="#"),
     "AUTHOR_PHONE": config("AUTHOR_PHONE", default=""),
 }
+
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = (os.getenv("EMAIL_USE_TLS", "True") == "True")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+EMAIL_TIMEOUT = 30
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

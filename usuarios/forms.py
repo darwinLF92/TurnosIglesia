@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.password_validation import password_validators_help_texts
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.contenttypes.models import ContentType
+from establecimiento.models import Establecimiento
 class UserForm(UserCreationForm):
     password1 = forms.CharField(
         label=_("Contraseña"),
@@ -145,11 +147,14 @@ class EditUserForm(UserChangeForm):
         return user
 
 
-    
+class PermissionMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """Muestra solo el nombre del permiso (Permission.name)."""
+    def label_from_instance(self, obj):
+        return obj.name          # 👈 solo el texto en español    
 
 class GroupPermissionForm(forms.ModelForm):
-    permissions = forms.ModelMultipleChoiceField(
-        queryset=Permission.objects.all(),
+    permissions = PermissionMultipleChoiceField(
+        queryset=Permission.objects.none(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label=_("Permisos")
@@ -164,5 +169,29 @@ class GroupPermissionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(GroupPermissionForm, self).__init__(*args, **kwargs)
-        if self.instance:
-            self.fields['permissions'].initial = self.instance.permissions.all()
+
+        # Solo permisos del modelo Establecimiento
+        ct = ContentType.objects.get_for_model(Establecimiento)
+
+        # codenames automáticos que queremos ocultar
+        model_name = Establecimiento._meta.model_name  # normalmente "establecimiento"
+        auto_codenames = [
+            f"add_{model_name}",
+            f"change_{model_name}",
+            f"delete_{model_name}",
+            f"view_{model_name}",
+        ]
+
+        qs = (
+            Permission.objects
+            .filter(content_type=ct)
+            .exclude(codename__in=auto_codenames)   # 👈 sin startswith
+            .order_by("name")
+        )
+
+        self.fields["permissions"].queryset = qs
+
+        if self.instance.pk:
+            self.fields["permissions"].initial = self.instance.permissions.filter(
+                content_type=ct
+            )

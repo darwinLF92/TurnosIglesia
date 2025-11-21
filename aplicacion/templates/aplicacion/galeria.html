@@ -23,7 +23,7 @@
   </ul>
 
   <!-- Botón arriba a la derecha -->
-  {% if request.user.is_authenticated %}
+  {% if perms.establecimiento.crear_registro %}
     <a href="{% url 'aplicacion:album_crear' %}" class="btn btn-success ms-3">
       Nuevo Álbum
     </a>
@@ -49,8 +49,10 @@
                 <p class="card-text text-muted">{{ a.descripcion|default:"" }}</p>
               </div>
               <div class="card-footer d-flex justify-content-between">
-                {% if request.user.is_authenticated %}
+                {% if perms.establecimiento.editar_registro %}
                   <a href="{% url 'aplicacion:album_editar' a.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                {% endif %}
+                {% if perms.establecimiento.eliminar_registro %}
                   <a href="{% url 'aplicacion:album_eliminar' a.pk %}" class="btn btn-sm btn-outline-secondary">Eliminar</a>
                 {% endif %}
               </div>
@@ -79,8 +81,10 @@
               </div>
               <div class="card-footer d-flex justify-content-between">
 
-                {% if request.user.is_authenticated %}
+                {% if perms.establecimiento.editar_registro %}
                   <a href="{% url 'aplicacion:album_editar' a.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                {% endif %}
+                {% if perms.establecimiento.eliminar_registro %}
                   <a href="{% url 'aplicacion:album_eliminar' a.pk %}" class="btn btn-sm btn-outline-secondary">Eliminar</a>
                 {% endif %}
               </div>

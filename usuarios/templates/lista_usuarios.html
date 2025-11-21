@@ -12,6 +12,10 @@
                 Administra los usuarios registrados, sus datos de contacto y roles dentro del sistema.
             </p>
         </div>
+        <button id="usuariosInactivos" class="btn btn-secondary d-inline-flex align-items-center gap-2">
+            <i class="bx bx-user-x"></i>
+            <span>Usuarios inactivos</span>
+        </button>
 
         <!-- Botón para abrir el modal -->
         <button id="crearUsuario" class="btn btn-custom d-inline-flex align-items-center gap-2">
@@ -161,6 +165,28 @@
 
             return false;
         });
+
+        $("#usuariosInactivos").click(function () {
+    const modalUrl = "{% url 'usuarios:lista_usuarios_inactivos_modal' %}";
+
+    Swal.fire({
+        title: 'Usuarios inactivos',
+        html: `<iframe src="${modalUrl}" width="100%" height="520" frameborder="0" style="max-width: 100%;"></iframe>`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            container: 'swal-container',
+            popup: 'swal-popup my-custom-modal-class',
+        },
+        width: 'min(900px, 95vw)',
+        didClose: () => {
+            location.reload();
+        }
+    });
+
+    return false;
+});
+
     });
 </script>
 

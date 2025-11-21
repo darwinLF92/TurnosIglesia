@@ -1,0 +1,15 @@
+{% if widget.is_initial %}
+    <!-- Mostrar preview actual (si quieres dejarlo aquí, pero ya lo manejas tú en la vista) -->
+{% endif %}
+
+<label class="btn-upload">
+    Subir nueva foto
+    <input type="file" name="{{ widget.name }}" accept="image/*">
+</label>
+
+{% if widget.is_initial and not widget.required %}
+    <label class="remove-photo">
+        <input type="checkbox" name="{{ widget.checkbox_name }}" style="display: none;">
+        Quitar foto de perfil
+    </label>
+{% endif %}

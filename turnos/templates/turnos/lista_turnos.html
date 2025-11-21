@@ -155,37 +155,54 @@
         </table>
     </div>
 
-    <!-- Turnos Disponibles -->
-    <div class="turnos-container">
-        {% if request.GET.procesion_id %}
+ <!-- Turnos Disponibles -->
+<div class="turnos-container">
+    {% if request.GET.procesion_id %}
         {% for procesion in procesiones %}
             {% if procesion.id|stringformat:"s" == request.GET.procesion_id %}
-                <h3 class="text-primary">Listado de turnos para la procesión: {{ procesion.nombre }}</h3>
+                <h3 class="text-primary">
+                    Listado de turnos para la procesión: {{ procesion.nombre }}
+                </h3>
             {% endif %}
         {% endfor %}
-        <a href="#" id="crearTurno" class="btn btn-primary mb-3" data-turno-id="{{ request.GET.procesion_id }}">
+
+        {% if perms.establecimiento.crear_registro %}
+        <a href="#" id="crearTurno" class="btn btn-primary mb-3"
+           data-turno-id="{{ request.GET.procesion_id }}">
             <i class="fas fa-plus"></i> Crear Turno
         </a>
+        {% endif %}
+
         <div class="grid-container">
         {% if turnos %}
             {% for turno in turnos %}
-            <div class="card-turno" data-turnoid="{{ turno.id }}" title="Ver Detalles">
+                <div class="card-turno" data-turnoid="{{ turno.id }}" title="Ver Detalles">
                     <span>Turno {{ turno.numero_turno }}</span>
                     <div class="turno-actions">
-                        <a href="#" class="editar-btn" data-turnoid="{{ turno.id }}" onclick="event.stopPropagation();"><i class="fas fa-edit"></i></a>
-                        <a href="#" class="eliminar-btn" data-turnoid="{{ turno.id }}" onclick="event.stopPropagation();"><i class="fas fa-trash-alt"></i></a>
+                        {% if perms.establecimiento.editar_registro %}
+                        <a href="#" class="editar-btn" data-turnoid="{{ turno.id }}"
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+                        {% if perms.establecimiento.inactivar_registro %}
+                        <a href="#" class="eliminar-btn" data-turnoid="{{ turno.id }}"
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
         {% else %}
             <div class="text-muted text-center">No hay turnos disponibles.</div>
         {% endif %}
-    </div>
+        </div>
     {% else %}
         <h4 class="text-muted">Seleccione una procesión para ver los turnos.</h4>
     {% endif %}
-    </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

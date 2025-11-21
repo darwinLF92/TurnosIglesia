@@ -1,85 +1,347 @@
-
 {% block content %}
-<h2>Editar Rol: {{ grupo.name }}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary btn-lg rounded">
-        <i class="fas fa-save"></i> Guardar
-    </button>
-</form>
+
+<div class="container-fluid py-2">
+    <div class="card card-rol border-0 shadow rounded-4">
+
+        <!-- Encabezado -->
+        <div class="card-header bg-gradient-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 encabezado">
+                        <i class="bx bx-lock-alt me-2"></i> Editando Informacion de: {{ grupo.name }}
+                    </h5>
+                </div>
+             </div>
+        </div>
+
+        <!-- Cuerpo del formulario -->
+        <div class="card-body">
+            <form method="post" id="form-rol">
+                {% csrf_token %}
+
+                <!-- Nombre del grupo -->
+                <div class="mb-4">
+                    <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold mb-1">
+                        Nombre del grupo
+                    </label>
+
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bx bx-group text-secondary"></i>
+                        </span>
+                        {{ form.name }}
+                    </div>
+
+                    <small class="text-muted">
+                        Usa un nombre claro, por ejemplo: <strong>Administrador</strong>, <strong>Usuario</strong>, <strong>Colaborador</strong>.
+                    </small>
+                </div>
+
+                <!-- Permisos -->
+                <div class="mb-2">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-2 gap-2">
+                        <div>
+                            <label class="form-label fw-semibold mb-0">
+                                Permisos:
+                                <span class="badge bg-primary-subtle text-primary-emphasis fw-semibold px-3 py-1"
+                                  id="contadorPermisos">
+                                0 seleccionados
+                                </span>
+                            </label>
+                            <div class="text-muted small">
+                                Marca los módulos o acciones a los que este rol tendrá acceso.
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 w-100 w-sm-auto">
+                            <div class="input-group input-group-sm flex-grow-1">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       id="buscarPermiso"
+                                       class="form-control border-start-0"
+                                       placeholder="Buscar permiso..." />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="permisos-scroll bg-light-subtle border rounded-3 p-2">
+                        {% for checkbox in form.permissions %}
+                            {% if "Can " not in checkbox.choice_label %}
+                            <label class="permiso-pill permiso-item mb-1">
+                                {{ checkbox.tag }}
+                                <span class="permiso-text">{{ checkbox.choice_label }}</span>
+                            </label>
+                            {% endif %}
+                        {% empty %}
+                            <p class="text-muted mb-0">No hay permisos configurados.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Botón guardar -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill w-100 py-2 shadow-sm">
+                        <i class="fas fa-save me-1"></i> Guardar cambios
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
 
 <style>
-    /* Mejoras visuales del modal */
-    .swal-popup {
-        width: 45vw !important; /* Ajustar el tamaño del modal */
-        max-width: 550px;
-    }
-    
-    .swal-container {
-        display: flex;
+    /* ---------- CARD ROL ---------- */
+    .encabezado {
+        font-size: 1.4rem;
         justify-content: center;
-        align-items: center;
+        text-align: center;
+        color: #161515;
     }
 
-    /* Ajustes para los inputs */
-    input[type="text"], 
-    input[type="email"],
-    input[type="password"],
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-        font-size: 16px;
-        background: #f8f9fa;
-        transition: all 0.3s ease-in-out;
+    .card-rol {
+        border-radius: 18px;
+        overflow: hidden;
+        background: #ffffff;
     }
 
-    input:focus, select:focus {
-        border-color: #007bff;
-        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+    .card-rol .bg-gradient-primary {
+        background: linear-gradient(135deg, #f8f8fa, #5b5085);
     }
 
-    /* Mejor estilo para el botón */
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        font-weight: bold;
-        padding: 12px;
+    .card-rol .card-header h5 {
+        font-size: 1.05rem;
+        margin-bottom: 0.1rem;
     }
 
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
+    .card-rol .card-header small {
+        font-size: 0.8rem;
     }
 
-    /* Bordes redondeados para el formulario */
-    .card {
+    /* Espaciado general dentro del body */
+    .card-rol .card-body {
+        padding: 1.5rem 1.75rem;
+    }
+
+    .card-rol .mb-4 {
+        margin-bottom: 1.25rem !important;
+    }
+
+    .card-rol .mb-2 {
+        margin-bottom: 1rem !important;
+    }
+
+    .card-rol label.form-label {
+        margin-bottom: 0.25rem;
+    }
+
+    .card-rol small {
+        display: block;
+        margin-top: 0.25rem;
+        line-height: 1.3;
+    }
+
+    /* Inputs genéricos dentro de la card */
+    .card-rol input[type="text"],
+    .card-rol input[type="email"],
+    .card-rol input[type="password"],
+    .card-rol select {
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 0.95rem;
+        background: #f8fafc;
+        border-color: #d0d7e2;
+        transition: all 0.2s ease-in-out;
     }
 
-    /* Fondo degradado para el encabezado */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
+    .card-rol input:focus,
+    .card-rol select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+        background: #ffffff;
     }
 
+    .card-rol .input-group-text {
+        border-radius: 10px 0 0 10px;
+        border-color: #d0d7e2;
+    }
+
+    /* Ajustar solo el campo nombre del grupo (sin add_class) */
+    .card-rol #id_name {
+        border-radius: 10px 10px 10px 10px;
+        border-color: #d0d7e2;
+        width: 100%;
+    }
+
+    .card-rol #buscarPermiso {
+        width: 100%;
+    }
+
+    /* Bloque permisos */
+    .card-rol .permisos-scroll {
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 0.6rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.6rem;   /* espacio entre chips */
+    }
+
+    /* Texto “X seleccionados” más separado */
+    #contadorPermisos {
+        font-size: 0.98rem;
+        color: rgb(0, 0, 0);
+        border-radius: 5px 5px 5px 5px;
+        background-color: #36d0db;
+        padding: 0px 6px;
+    }
+
+   /* Contenedor de permisos: columna con scrollS */
+.card-rol .permisos-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 0.75rem 0.85rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    display: block;          /* 👈 ya no flex */
+}
+
+/* Cada permiso en su propia fila */
+.card-rol .permiso-pill {
+    display: flex;           /* fila */
+    align-items: center;
+    gap: 8px;
+    width: 90%;             /* ocupa todo el ancho */
+    border-radius: 999px;
+    padding: 8px 12px;
+    margin-bottom: 6px;      /* separación entre permisos */
+    border: 1px solid #dde3f0;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #334155;
+    transition: all 0.15s ease-in-out;
+}
+
+.card-rol .permiso-pill input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #0d6efd;
+}
+
+.card-rol .permiso-pill:hover {
+    background: #e9f2ff;
+    border-color: #bfd3ff;
+}
+
+.card-rol .permiso-pill input[type="checkbox"]:checked ~ .permiso-text {
+    font-weight: 600;
+    color: #0b4bbf;
+}
+
+
+.btn-primary {
+    width: 100%;
+    border-radius: 50px;
+    padding: 12px 0;
+    background: linear-gradient(135deg, #444468, #1e1152);
+    color: #ffffff;
+    font-weight: 600; /* Hace la letra más gruesa */
+    text-transform: uppercase; /* Pone el texto en mayúsculas */
+    letter-spacing: 0.5px; /* Espacio sutil entre letras */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Una sombra ligera */
+    transition: all 0.3s ease; /* Suaviza todos los cambios */
+    cursor: pointer; /* Indica que es clickeable */
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #445e68, #085020); 
+    color: #fffdfd;
+    transform: scale(1.02); /* Crece 2% al pasar el ratón */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+}
+
+.btn-primary:active {
+    transform: translateY(2px); /* Se mueve 2px hacia abajo */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra de presionado */
+}
+
+
+    /* En pantallas medianas, que las filas queden más ordenadas */
+    @media (min-width: 576px) {
+        .card-rol .permisos-scroll {
+            justify-content: flex-start;
+        }
+    }
+
+    /* Ajuste del tamaño del modal SweetAlert2 */
+    .swal2-popup {
+        width: 46rem !important;
+        max-width: 96vw;
+        padding: 0;
+    }
+
+    .swal2-html-container {
+        margin: 0;
+        padding: 1.25rem;
+        width: 100%;
+    }
 </style>
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        {% if success %}
-            Swal.fire({
-                icon: 'success',
-                title: 'Rol Editado',
-                text: '{{ message }}',
-                confirmButtonColor: '#3085d6'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.parent.postMessage('closeModal', '*');
-                }
+    document.addEventListener("DOMContentLoaded", function () {
+        const buscador = document.getElementById('buscarPermiso');
+        const items = document.querySelectorAll('.permisos-scroll .permiso-item');
+        const contador = document.getElementById('contadorPermisos');
+
+        function actualizarContador() {
+            const seleccionados = document.querySelectorAll(
+                '.permisos-scroll .permiso-item input[type="checkbox"]:checked'
+            ).length;
+            if (contador) {
+                contador.textContent = seleccionados + (seleccionados === 1 ? " Seleccionado" : " Seleccionados");
+            }
+        }
+
+        // Filtro de permisos por texto
+        if (buscador) {
+            buscador.addEventListener('input', function () {
+                const term = this.value.toLowerCase();
+                items.forEach(function (item) {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(term) ? '' : 'none';
+                });
             });
+        }
+
+        // Actualizar contador al cargar y al hacer clic
+        actualizarContador();
+        items.forEach(function (item) {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.addEventListener('change', actualizarContador);
+            }
+        });
+
+        // SweetAlert de éxito
+        {% if success %}
+        Swal.fire({
+            icon: 'success',
+            title: 'Rol editado',
+            text: '{{ message }}',
+            confirmButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.parent.postMessage('closeModal', '*');
+            }
+        });
         {% endif %}
     });
 </script>

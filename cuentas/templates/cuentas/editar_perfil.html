@@ -1,0 +1,305 @@
+{% extends "aplicacion/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .card-modern {
+        border-radius: 18px;
+        padding: 30px;
+        border: none;
+        background: #ffffff;
+    }
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #34495e;
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 0.65rem 1rem;
+        border: 1px solid #ced4da;
+    }
+    .form-control:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+    }
+
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #e2e8f0;
+    }
+
+    input[type="file"] { display: none; }
+
+    .btn-upload {
+        border: 1px solid #1d4ed8;
+        color: #1d4ed8;
+        background: #ffffff;
+        padding: 8px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .btn-upload:hover {
+        background: #1d4ed8;
+        color: white;
+    }
+
+    .remove-photo {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #e63946;
+        cursor: pointer;
+        margin-left: 8px;
+    }
+
+    .btn-save {
+        background: #1d4ed8;
+        padding: 12px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+    }
+    .btn-save:hover {
+        background: #0f3cb3;
+    }
+</style>
+
+<div class="container py-4">
+    
+    <div class="card shadow card-modern">
+
+        <h3 class="mb-4 d-flex justify-content-between align-items-center">
+                Editar Perfil
+
+                <a href="{% url 'cuentas:perfil' %}" class="btn btn-outline-primary" 
+                style="border-radius: 10px; font-weight: 600;">
+                    <i class="bx bx-user"></i> Ir a mi Perfil
+                </a>
+            </h3>
+
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- DATOS -->
+            <div class="section-title">Datos del usuario</div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombre</label>
+                    {{ form_usuario.first_name }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Apellidos</label>
+                    {{ form_usuario.last_name }}
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Correo electrónico</label>
+                    {{ form_usuario.email }}
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- INFORMACIÓN PERSONAL -->
+            <div class="section-title">Información personal</div>
+
+            <div class="mb-4 text-center">
+
+                <label class="form-label d-block mb-2">Foto de perfil</label>
+
+                {% if form_perfil.instance.foto_perfil %}
+                    <img id="previewFotoPerfil" src="{{ form_perfil.instance.foto_perfil.url }}" class="profile-photo mb-2">
+                {% else %}
+                    <img id="previewFotoPerfil" src="{% static 'logos/avatar.png' %}" class="profile-photo mb-2">
+                {% endif %}
+
+                <div class="mt-2">
+                    {{ form_perfil.foto_perfil }}
+                </div>
+
+            </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const inputFoto = document.querySelector('input[type="file"][name="foto_perfil"]');
+    const preview = document.getElementById('previewFotoPerfil');
+    const clearCheck = document.querySelector('input[type="checkbox"][name$="clear"]');
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // SUBIR FOTO AUTOMÁTICO
+    if (inputFoto) {
+        inputFoto.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            preview.src = URL.createObjectURL(file);
+
+            const formData = new FormData();
+            formData.append("foto_perfil", file);
+            formData.append("upload_photo", "1");
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrf,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.image_url) {
+                    preview.src = data.image_url;
+                }
+            });
+
+            if (clearCheck) clearCheck.checked = false;
+        });
+    }
+
+    // QUITAR FOTO AUTOMÁTICO
+    if (clearCheck) {
+        clearCheck.addEventListener("change", function () {
+
+            if (!this.checked) return;
+
+            preview.src = "{% static 'logos/avatar.png' %}";
+            if (inputFoto) inputFoto.value = "";
+
+            const formData = new FormData();
+            formData.append("remove_photo", "1");
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrf,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(r => r.json());
+        });
+    }
+});
+</script>
+
+            <div class="row">
+
+                <!-- Nombres -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombres</label>
+                    <input 
+                        type="text" 
+                        name="nombres"
+                        value="{{ form_perfil.instance.nombres }}"
+                        class="form-control"
+                        required
+                    >
+                </div>
+
+                <!-- Apellidos -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Apellidos</label>
+                    <input 
+                        type="text" 
+                        name="apellidos"
+                        value="{{ form_perfil.instance.apellidos }}"
+                        class="form-control"
+                        required
+                    >
+                </div>
+
+                <!-- CUI -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">CUI</label>
+                    <input 
+                        type="text" 
+                        name="cui"
+                        value="{{ form_perfil.instance.cui }}"
+                        class="form-control"
+                        pattern="^[0-9]{13}$"
+                        minlength="13"
+                        maxlength="13"
+                        title="El CUI debe contener exactamente 13 dígitos numéricos."
+                        required
+                    >
+                </div>
+
+                <!-- Teléfono -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input 
+                        type="text" 
+                        name="telefono"
+                        value="{{ form_perfil.instance.telefono }}"
+                        class="form-control"
+                        pattern="^\+502 ?[0-9]{8}$"
+                        title="Formato válido: +502 12345678 (8 dígitos)."
+                        required
+                    >
+                </div>
+
+                <!-- Dirección -->
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Dirección</label>
+                    <input 
+                        type="text" 
+                        name="direccion"
+                        value="{{ form_perfil.instance.direccion }}"
+                        class="form-control"
+                        required
+                    >
+                </div>
+
+                <!-- Fecha nacimiento -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha de nacimiento</label>
+                    {{ form_perfil.fecha_nacimiento }}
+                </div>
+
+                <!-- Estatura -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Estatura (cm)</label>
+                    <input 
+                        type="number"
+                        name="estatura"
+                        value="{{ form_perfil.instance.estatura }}"
+                        class="form-control"
+                        min="100"
+                        max="250"
+                        maxlength="3"
+                        oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,3);"
+                        title="Ingrese una estatura válida entre 100 y 250 cm."
+                        required
+                    >
+                </div>
+
+            </div>
+
+            <button class="btn btn-primary btn-save w-100 mt-3">
+                Guardar cambios
+            </button>
+            
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

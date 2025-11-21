@@ -12,4 +12,12 @@ urlpatterns = [
     path('roles/nuevo/', views.CrearRolView.as_view(), name='crear_rol'),
     path('roles/editar/<int:pk>/', views.editar_role, name='editar_rol'),
     path('roles/inactivar/<int:pk>/', views.InactivarRolView.as_view(), name='inactivar_rol'),
+
+    path(
+    "usuarios/inactivos/modal/",
+    views.lista_usuarios_inactivos_modal,
+    name="lista_usuarios_inactivos_modal"
+),
+    path("usuarios/<int:user_id>/activar/", views.activar_usuario, name="activar_usuario"),
+    path("usuarios/<int:user_id>/eliminar/", views.eliminar_usuario, name="eliminar_usuario"),
 ]

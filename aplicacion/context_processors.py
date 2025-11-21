@@ -1,5 +1,6 @@
 from establecimiento.models import Establecimiento
 from django.conf import settings
+from noticias.models import Notificacion
 
 def logo_establecimiento(request):
     logo_url = None
@@ -22,3 +23,28 @@ def logo_establecimiento(request):
 def system_meta(request):
     # devuelve el diccionario tal cual a los templates
     return {"system_meta": settings.SYSTEM_META}
+
+
+def notificaciones_context(request):
+    if not request.user.is_authenticated:
+        return {}
+
+    notif_no_leidas = Notificacion.objects.filter(
+        usuario=request.user, leido=False
+    ).order_by("-creado_en")
+
+    notif_leidas = Notificacion.objects.filter(
+        usuario=request.user, leido=True
+    ).order_by("-creado_en")[:10]
+
+    # historial de las últimas 5 (sin importar si están leídas o no)
+    historial = Notificacion.objects.filter(
+        usuario=request.user
+    ).order_by("-creado_en")[:5]
+
+    return {
+        "notif_no_leidas": notif_no_leidas,
+        "notif_leidas": notif_leidas,
+        "notif_total_no_leidas": notif_no_leidas.count(),
+        "notif_historial": historial,
+    }

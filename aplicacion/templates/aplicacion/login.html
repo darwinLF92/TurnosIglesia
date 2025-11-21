@@ -121,20 +121,53 @@
       color: #333;
   }
 
-  .login-btn {
+.login-btn {
       background: #6c63ff;
       color: #fff;
-      padding: 10px 20px;
+      padding: 12px 20px;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 16px;
       transition: background 0.3s ease;
+      width: 100%;
+      display: block;
+      text-decoration: none;
+      margin-bottom: 15px;
   }
 
   .login-btn:hover {
       background: #5a54d8;
   }
+
+  .forgot-password {
+      text-align: center;
+      margin-top: 10px;
+  }
+
+  .forgot-link,
+  .registro-link {
+      color: #6c63ff;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+  }
+
+  .forgot-link:hover,
+  .registro-link:hover {
+      color: #5a54d8;
+      text-decoration: underline;
+  }
+
+  .secondary-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
 
   /* 📱 Móvil: logo arriba, layout limpio */
   @media (max-width: 768px) {
@@ -173,10 +206,26 @@
           background: #0e0d30c2;
       }
   }
+
+  /* Estilos para el botón del ojito dentro del input-group */
+.toggle-password{
+  background: transparent;
+  border: none;
+  color: #6c63ff;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.input-group { position: relative; }
+.toggle-password { margin-left: 8px; }
 </style>
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <div class="login-container">
     
   <div class="login-wrapper">
@@ -197,8 +246,27 @@
         <div class="input-group">
           <label for="password"><i class="fa fa-lock"></i></label>
           <input type="password" name="password" id="password" placeholder="Password" required>
+          <button type="button" class="toggle-password" aria-label="Mostrar contraseña">
+            <i class="fa fa-eye"></i>
+          </button>
         </div>
-        <button type="submit" class="login-btn">Acceder</button>
+
+
+    <button type="submit" class="login-btn">Acceder</button>
+
+ 
+    <div class="forgot-link mt-2">
+        <a href="{% url 'cuentas:registro_html' %}" class="forgot-link">
+            ¿No tienes cuenta? Registrate
+        </a>
+    </div>
+
+        <!-- 🔹 Enlace para restablecer contraseña -->
+    <div class="forgot-password mt-2">
+        <a href="{% url 'cuentas:olvide_password_html' %}" class="forgot-link">
+            ¿Olvidaste tu contraseña?
+        </a>
+    </div>
       </form>
     </div>
 
@@ -225,5 +293,30 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+
 {% endif %}
+
+<!-- Agregar script para toggle y CSS pequeño -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggle = document.querySelector('.toggle-password');
+  const input = document.getElementById('password');
+  if (toggle && input) {
+    toggle.addEventListener('click', function () {
+      const isPassword = input.getAttribute('type') === 'password';
+      input.setAttribute('type', isPassword ? 'text' : 'password');
+      const icon = this.querySelector('i');
+      if (icon) {
+        if (isPassword) {
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

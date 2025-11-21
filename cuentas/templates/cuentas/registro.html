@@ -1,0 +1,412 @@
+{% extends "cuentas/base_cuentas.html" %}
+
+{% block title %}Registro de usuario{% endblock %}
+
+{% block content %}
+<style>
+    
+    .card-registro {
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 18px 38px rgba(27, 27, 27, 0.616);
+        overflow: hidden;
+    }
+    .card-registro-header {
+        background: linear-gradient(135deg, #24074b, #121213);
+        color: #fff;
+        padding: 1.5rem 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+    .card-registro-header .icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        border: 2px solid rgba(255,255,255,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(38, 38, 39, 0.18);
+    }
+    .card-registro-header h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+    .card-registro-body {
+        background: #100331d0;
+        color: #e5e7eb;
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    .form-label {
+        font-size: .85rem;
+        font-weight: 500;
+        color: #e5e7eb;
+    }
+    .form-control {
+        background-color: #020617;
+        border-radius: .75rem;
+        border: 1px solid #1e293b;
+        color: #e5e7eb;
+        font-size: .9rem;
+    }
+    .form-control:focus {
+        background-color: #020617;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 .15rem rgba(59,130,246,.35);
+        color: #e5e7eb;
+    }
+    .helper-text {
+        font-size: .78rem;
+        color: #9ca3af;
+    }
+            .btn-primary {
+            border-radius: .8rem;
+            padding: .6rem 1.2rem;
+            font-weight: 600;
+            letter-spacing: .02em;
+            background: linear-gradient(135deg, #2563eb, #141142);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #4338ca);
+        }
+    body {
+        background: radial-gradient(circle at top, #2c1e5e 0, #020617 45%, #020617 100%);
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <div class="card card-registro">
+            <div class="card-registro-header">
+                <div class="icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0">Crear cuenta</h5>
+                    <small class="d-block opacity-75">Completa tus datos para registrarte</small>
+                </div>
+            </div>
+            <div class="card-registro-body">
+                <form id="registroForm" autocomplete="off">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="cui" class="form-label">CUI</label>
+                        <input type="text"
+                               class="form-control"
+                               id="cui"
+                               name="cui"
+                               required
+                               maxlength="13"
+                               inputmode="numeric"
+                               pattern="\d{13}">
+                        <div class="helper-text">13 dígitos, solo números.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="usuario" class="form-label">Usuario</label>
+                        <input type="text"
+                               class="form-control"
+                               id="usuario"
+                               name="usuario"
+                               required
+                               maxlength="16"
+                               pattern="[A-Za-z0-9]{1,16}">
+                        <div class="helper-text">Hasta 16 caracteres, solo letras y números, sin espacios.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombres" class="form-label">Nombres</label>
+                        <input type="text"
+                               class="form-control"
+                               id="nombres"
+                               name="nombres"
+                               required
+                               maxlength="50">
+                        <div class="helper-text">Solo letras (se permiten espacios y tildes), máximo 50.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="apellidos" class="form-label">Apellidos</label>
+                        <input type="text"
+                               class="form-control"
+                               id="apellidos"
+                               name="apellidos"
+                               required
+                               maxlength="50">
+                        <div class="helper-text">Solo letras (se permiten espacios y tildes), máximo 50.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text"
+                               class="form-control"
+                               id="direccion"
+                               name="direccion"
+                               maxlength="100">
+                        <div class="helper-text">Letras, números y caracteres especiales. Máximo 100.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+                        <input type="date"
+                               class="form-control"
+                               id="fecha_nacimiento"
+                               name="fecha_nacimiento">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estatura" class="form-label">Estatura (cm)</label>
+                        <input type="text"
+                               class="form-control"
+                               id="estatura"
+                               name="estatura"
+                               maxlength="3"
+                               inputmode="numeric"
+                               pattern="\d{1,3}">
+                        <div class="helper-text">Solo números, máximo 3 dígitos. Ejemplo: 160.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-slate-800 text-black">+502</span>
+                            <input type="text"
+                                   class="form-control"
+                                   id="telefono"
+                                   name="telefono"
+                                   maxlength="8"
+                                   inputmode="numeric"
+                                   pattern="\d{8}">
+                        </div>
+                        <div class="helper-text">8 dígitos, se almacenará como +502XXXXXXXX.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo electrónico</label>
+                        <input type="email"
+                               class="form-control"
+                               id="correo"
+                               name="correo"
+                               required
+                               maxlength="50">
+                        <div class="helper-text">Máximo 50 caracteres.</div>
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            Registrarme
+                        </button>
+                    </div>
+                </form>
+
+                <p class="mt-3 mb-0 helper-text">
+                    Después del registro te enviaremos un correo de confirmación para activar tu cuenta.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Font Awesome (para el icono) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// =======================
+// Helpers generales
+// =======================
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie("csrftoken");
+
+// =======================
+// Restricciones en tiempo real
+// =======================
+const cuiInput = document.getElementById("cui");
+const usuarioInput = document.getElementById("usuario");
+const nombresInput = document.getElementById("nombres");
+const apellidosInput = document.getElementById("apellidos");
+const direccionInput = document.getElementById("direccion");
+const estaturaInput = document.getElementById("estatura");
+const telefonoInput = document.getElementById("telefono");
+const correoInput = document.getElementById("correo");
+
+// Solo números, máx 13
+cuiInput.addEventListener("input", () => {
+    cuiInput.value = cuiInput.value.replace(/\D/g, "").slice(0, 13);
+});
+
+// Usuario: letras y números, sin espacios ni caracteres
+usuarioInput.addEventListener("input", () => {
+    usuarioInput.value = usuarioInput.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 16);
+});
+
+// Nombres / Apellidos: letras (incluye tildes y ñ) y espacios
+const soloLetrasRegex = /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g;
+nombresInput.addEventListener("input", () => {
+    nombresInput.value = nombresInput.value.replace(soloLetrasRegex, "").slice(0, 50);
+});
+apellidosInput.addEventListener("input", () => {
+    apellidosInput.value = apellidosInput.value.replace(soloLetrasRegex, "").slice(0, 50);
+});
+
+// Dirección: sólo limitar longitud
+direccionInput.addEventListener("input", () => {
+    direccionInput.value = direccionInput.value.slice(0, 100);
+});
+
+// Estatura: solo números, máx 3
+estaturaInput.addEventListener("input", () => {
+    estaturaInput.value = estaturaInput.value.replace(/\D/g, "").slice(0, 3);
+});
+
+// Teléfono: solo números, máx 8
+telefonoInput.addEventListener("input", () => {
+    telefonoInput.value = telefonoInput.value.replace(/\D/g, "").slice(0, 8);
+});
+
+// Correo: solo recortar longitud
+correoInput.addEventListener("input", () => {
+    correoInput.value = correoInput.value.slice(0, 50);
+});
+
+// =======================
+// Validación previa al envío
+// =======================
+function validarDatos(data) {
+    const errores = [];
+
+    if (!/^\d{13}$/.test(data.cui)) {
+        errores.push("El CUI debe tener exactamente 13 dígitos numéricos.");
+    }
+
+    if (!/^[A-Za-z0-9]{1,16}$/.test(data.usuario)) {
+        errores.push("El usuario solo puede contener letras y números (sin espacios), máximo 16 caracteres.");
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/.test(data.nombres)) {
+        errores.push("Nombres: solo letras y espacios, máximo 50 caracteres.");
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/.test(data.apellidos)) {
+        errores.push("Apellidos: solo letras y espacios, máximo 50 caracteres.");
+    }
+
+    if (data.direccion && data.direccion.length > 100) {
+        errores.push("La dirección no puede exceder 100 caracteres.");
+    }
+
+    if (data.estatura) {
+        if (!/^\d{1,3}$/.test(data.estatura)) {
+            errores.push("Estatura: solo números, máximo 3 dígitos. Ejemplo: 160.");
+        }
+    }
+
+    if (data.telefono && !/^\d{8}$/.test(data.telefono)) {
+        errores.push("El teléfono debe tener exactamente 8 dígitos.");
+    }
+
+    if (!data.correo) {
+        errores.push("El correo electrónico es obligatorio.");
+    } else if (data.correo.length > 50) {
+        errores.push("El correo electrónico no puede exceder 50 caracteres.");
+    }
+
+    return errores;
+}
+
+// =======================
+// Envío del formulario
+// =======================
+document.getElementById("registroForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const rawTelefono = telefonoInput.value.trim();
+
+    const data = {
+        cui: cuiInput.value.trim(),
+        usuario: usuarioInput.value.trim(),
+        nombres: nombresInput.value.trim(),
+        apellidos: apellidosInput.value.trim(),
+        direccion: direccionInput.value.trim(),
+        fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null,
+        estatura: estaturaInput.value.trim() || null,
+        telefono: rawTelefono,  // ✅ solo los 8 dígitos
+        correo: correoInput.value.trim(),
+    };
+
+
+    const errores = validarDatos(data);
+    if (errores.length > 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Revisa la información",
+            html: errores.join("<br>"),
+            confirmButtonText: "Corregir datos"
+        });
+        return;
+    }
+
+    try {
+        const resp = await fetch("{% url 'cuentas:api_registro' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (resp.ok) {
+            Swal.fire({
+                icon: "success",
+                title: "Registro exitoso",
+                text: "Revisa tu correo para confirmar tu cuenta.",
+                confirmButtonText: "Aceptar"
+            });
+            e.target.reset();
+        } else {
+            const errorData = await resp.json();
+            console.log(errorData);
+            let msg = "";
+            for (const campo in errorData) {
+                msg += `<strong>${campo}:</strong> ${errorData[campo]}<br>`;
+            }
+            Swal.fire({
+                icon: "error",
+                title: "No se pudo completar el registro",
+                html: msg || "Ocurrió un error al registrar tus datos.",
+                confirmButtonText: "Entendido"
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: "error",
+            title: "Error inesperado",
+            text: "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
+            confirmButtonText: "Entendido"
+        });
+    }
+});
+</script>
+{% endblock %}

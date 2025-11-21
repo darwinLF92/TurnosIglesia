@@ -12,7 +12,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-
+from usuarios.models import UserProfile
+from django.core.paginator import Paginator
 
 @login_required
 def crear_usuario(request):
@@ -83,15 +84,28 @@ def editar_usuario(request, user_id):
 class InactivarUsuarioView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'inactivar_usuario.html'
-    fields = ['is_active']  # Permitir la edición del estado
+    fields = ['is_active']
 
     def form_valid(self, form):
         usuario = form.save(commit=False)
+
+        # 1) Inactivar usuario base
         usuario.is_active = False
         usuario.save()
 
-        # 🔹 Agregar mensaje de éxito usando Django Messages
-        messages.success(self.request, f'El usuario {usuario.username} ha sido inactivado correctamente.')
+        # 2) Inactivar su perfil también
+        try:
+            perfil = UserProfile.objects.get(user=usuario)
+            perfil.estado = False
+            perfil.save()
+        except UserProfile.DoesNotExist:
+            # Si por alguna razón no tiene perfil, simplemente lo ignoramos
+            pass
+
+        messages.success(
+            self.request,
+            f'El usuario {usuario.username} ha sido inactivado correctamente.'
+        )
 
         return self.render_to_response(self.get_context_data(form=form, success=True))
 
@@ -176,3 +190,55 @@ class InactivarRolView(LoginRequiredMixin, UpdateView):
         return self.render_to_response(self.get_context_data(form=form, success=False))
 
     
+@login_required
+def lista_usuarios_inactivos_modal(request):
+    usuarios_inactivos = User.objects.filter(is_active=False).order_by("username")
+    paginator = Paginator(usuarios_inactivos, 5)  # 5 por página
+
+    page = request.GET.get("page")
+    usuarios = paginator.get_page(page)
+
+    return render(request, "usuarios_inactivos_modal.html", {
+        "usuarios": usuarios,
+    })
+
+
+@login_required
+def activar_usuario(request, user_id):
+    usuario = get_object_or_404(User, pk=user_id)
+
+    # 1) Activar el usuario base
+    usuario.is_active = True
+    usuario.save()
+
+    # 2) Activar también el perfil (si existe)
+    try:
+        perfil = UserProfile.objects.get(user=usuario)
+        perfil.estado = True
+        perfil.save()
+    except UserProfile.DoesNotExist:
+        pass
+
+    messages.success(
+        request,
+        f"El usuario {usuario.username} ha sido activado correctamente."
+    )
+
+    # 👇 Muy importante:
+    # Como esta vista se usa dentro del iframe del modal, lo mandamos
+    # de regreso a la lista de usuarios inactivos (la versión para modal)
+    return redirect("usuarios:lista_usuarios_inactivos_modal")
+
+@login_required
+def eliminar_usuario(request, user_id):
+    usuario = get_object_or_404(User, pk=user_id)
+    username = usuario.username
+
+    usuario.delete()  # elimina User y por CASCADE el UserProfile
+
+    messages.success(
+        request,
+        f"El usuario {username} ha sido eliminado definitivamente."
+    )
+
+    return redirect("usuarios:lista_usuarios_inactivos_modal")

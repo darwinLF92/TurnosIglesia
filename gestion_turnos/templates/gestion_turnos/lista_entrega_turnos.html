@@ -71,6 +71,7 @@
                         {% endif %}
                     </td>
                     <td class="acciones-cell">
+                        {% if perms.establecimiento.entregar_turnos %}
                         <div class="acciones">
                             {% if not inscripcion.entregado %}
                                 <button type="button"
@@ -86,6 +87,7 @@
                                 </button>
                             {% endif %}
                         </div>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
