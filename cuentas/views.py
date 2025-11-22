@@ -25,12 +25,16 @@ class RegistroView(generics.CreateAPIView):
     serializer_class = RegistroSerializer
 
     def create(self, request, *args, **kwargs):
-        ser = self.get_serializer(data=request.data)
-        if not ser.is_valid():
-            print("❌ Registro errores:", ser.errors)  # <-- log temporal
-            raise serializers.ValidationError(ser.errors)
-        self.perform_create(ser)
-        return Response(ser.data, status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        perfil = serializer.save()
+
+        return Response(
+            {"detail": "Registro exitoso. Revisa tu correo para confirmar tu cuenta."},
+            status=status.HTTP_201_CREATED
+        )
+
 
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])

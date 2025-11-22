@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.db import transaction, IntegrityError
@@ -15,22 +15,8 @@ Usuario = get_user_model()  # auth.User
 
 
 class RegistroSerializer(serializers.ModelSerializer):
-    # Estos vienen del modelo User relacionado
-    usuario = serializers.CharField(
-        source="user.username",
-        validators=[UniqueValidator(
-            queryset=Usuario.objects.all(),
-            message="Este nombre de usuario ya está en uso."
-        )]
-    )
-
-    correo = serializers.EmailField(
-        source="user.email",
-        validators=[UniqueValidator(
-            queryset=Usuario.objects.all(),
-            message="Este correo ya está registrado."
-        )]
-    )
+    usuario = serializers.CharField(source="user.username")
+    correo = serializers.EmailField(source="user.email")
 
     fecha_nacimiento = serializers.DateField(
         required=False,
@@ -39,67 +25,62 @@ class RegistroSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        # 👈 AHORA el modelo base es el perfil, no User
         model = UserProfile
         fields = (
             "cui", "usuario", "nombres", "apellidos", "direccion",
             "fecha_nacimiento", "estatura", "telefono", "correo"
         )
 
+    def validate(self, attrs):
+        user_data = attrs["user"]
+
+        username = user_data.get("username")
+        email = user_data.get("email")
+
+        # Validar usuario único
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({
+                "usuario": "Este nombre de usuario ya está en uso."
+            })
+
+        # Validar correo único
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({
+                "correo": "Este correo ya está registrado."
+            })
+
+        return attrs
+
+    @transaction.atomic
     def create(self, validated_data):
-        """
-        validated_data tiene esta forma:
-        {
-          'cui': ...,
-          'nombres': ...,
-          'apellidos': ...,
-          'direccion': ...,
-          'fecha_nacimiento': ...,
-          'estatura': ...,
-          'telefono': ...,
-          'user': {
-              'username': ...,
-              'email': ...
-          }
-        }
-        """
         user_data = validated_data.pop("user")
 
-        try:
-            with transaction.atomic():
-            # 1) Crear el User base
-             u = Usuario.objects.create(
-                username=user_data["username"],
-                email=user_data["email"],
-                first_name=validated_data.get("nombres", ""),   # 👈 aquí
-                last_name=validated_data.get("apellidos", ""),  # 👈 y aquí
-                is_active=True,
-            )
-            u.set_unusable_password()
-            u.save(update_fields=["username", "email", "password", "is_active", "first_name", "last_name"])
+        user = User.objects.create(
+            username=user_data["username"],
+            email=user_data["email"],
+            first_name=validated_data.get("nombres", ""),
+            last_name=validated_data.get("apellidos", ""),
+            is_active=True,
+        )
+        user.set_unusable_password()
+        user.save()
 
-            # 2) Crear el perfil
-            perfil = UserProfile.objects.create(
-                user=u,
-                **validated_data,
-                correo_verificado=False,
-                estado=True,
-             )
+        perfil = UserProfile.objects.create(
+            user=user,
+            **validated_data,
+            correo_verificado=False,
+            estado=True,
+        )
 
-                # 3) Asignar al grupo "Usuario"
-            grupo_usuario, _ = Group.objects.get_or_create(name="Usuario")
-            u.groups.add(grupo_usuario)
+        grupo, _ = Group.objects.get_or_create(name="Usuario")
+        user.groups.add(grupo)
 
-        except IntegrityError:
-            # Puede venir de la unique de cui o del email/username
-            raise serializers.ValidationError({"correo": "Este correo ya está registrado."})
+        # Correo de confirmación
+        token = make_email_token(user.id)
+        transaction.on_commit(lambda: enviar_confirmacion_correo(user, token))
 
-        # 4) Token de confirmación de correo
-        token = make_email_token(u.id)
-        transaction.on_commit(lambda: enviar_confirmacion_correo(u, token))
-
-        # 👈 Ojo: devolvemos el PERFIL, que es el model del serializer
         return perfil
+
 
 
 class ConfirmarCorreoSerializer(serializers.Serializer):

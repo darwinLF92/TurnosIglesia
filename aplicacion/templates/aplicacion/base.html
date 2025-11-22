@@ -31,12 +31,97 @@
       <span class="d-none d-sm-inline ms-2"></span>
     </a>
 
-    <!-- Botón hamburguesa -->
+<!-- 🔹 Contenedor móvil: Perfil + Menú -->
+<!-- 🔹 Contenedor móvil: Notificaciones + Perfil + Menú -->
+<div class="d-flex d-lg-none ms-auto align-items-center gap-3">
+
+    <!-- 🔔 NOTIFICACIONES EN MÓVIL -->
+    <div class="dropdown">
+        <a class="nav-link position-relative" href="#" id="mobileNotifDropdown"
+           data-bs-toggle="dropdown" aria-expanded="false">
+
+            <i class="bx bx-bell" style="font-size:22px;"></i>
+
+            {% if notif_total_no_leidas > 0 %}
+            <span class="notif-badge">
+                {{ notif_total_no_leidas }}
+            </span>
+            {% endif %}
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end notif-menu shadow"
+            aria-labelledby="mobileNotifDropdown">
+
+            <li class="notif-header">Notificaciones</li>
+
+            {% if notif_no_leidas %}
+                {% for n in notif_no_leidas %}
+                <li>
+                    <a href="{% url 'noticias:leer_notificacion' n.id %}"
+                       class="dropdown-item notif-item notif-unread">
+                        {{ n.texto }}<br>
+                        <small class="notif-date">{{ n.creado_en|date:"d/m/Y H:i" }}</small>
+                    </a>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="dropdown-item notif-item notif-empty">
+                    Sin notificaciones
+                </li>
+            {% endif %}
+
+            {% if notif_historial %}
+            <li><hr class="dropdown-divider"></li>
+            <li class="dropdown-header historial-notif small">Historial reciente</li>
+
+            {% for n in notif_historial %}
+            <li>
+                <a href="{% url 'noticias:leer_notificacion' n.id %}"
+                   class="dropdown-item notif-item {% if not n.leido %}notif-unread{% else %}notif-read{% endif %}">
+                    {{ n.texto }}<br>
+                    <small class="notif-date">{{ n.creado_en|date:"d/m/Y H:i" }}</small>
+                </a>
+            </li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- 👤 PERFIL EN MÓVIL -->
+    {% if user.is_authenticated %}
+    <div class="dropdown">
+        <a class="nav-link p-0" href="#" id="mobileUserDropdown" data-bs-toggle="dropdown">
+            {% if user.perfil.foto_perfil %}
+                <img src="{{ user.perfil.foto_perfil.url }}" class="rounded-circle"
+                     width="32" height="32" style="object-fit:cover;">
+            {% else %}
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                     style="width:32px; height:32px;">
+                    {{ user.first_name|default:user.username|slice:":1" }}
+                </div>
+            {% endif %}
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="mobileUserDropdown">
+            <li><a class="dropdown-item" href="{% url 'cuentas:perfil' %}"><i class="bx bx-user me-2"></i> Perfil</a></li>
+            <li><a class="dropdown-item" href="{% url 'cuentas:editar_perfil' %}"><i class="bx bx-edit me-2"></i> Editar perfil</a></li>
+            <li><a class="dropdown-item" href="{% url 'cuentas:cambiar_password' %}"><i class="bx bx-key me-2"></i> Cambiar contraseña</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'aplicacion:logout' %}">
+                <i class="bx bx-log-out me-2"></i> Cerrar sesión
+            </a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- 🍔 MENÚ HAMBURGUESA -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarContenido" aria-controls="navbarContenido"
-            aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+            data-bs-target="#navbarContenido">
+        <span class="navbar-toggler-icon"></span>
     </button>
+</div>
+
+
 
     <!-- Contenido del menú -->
     <div class="collapse navbar-collapse" id="navbarContenido">
@@ -124,7 +209,7 @@
         <!-- CAMPANA DE NOTIFICACIONES -->
 <!-- CAMPANA DE NOTIFICACIONES -->
 <!-- CAMPANA DE NOTIFICACIONES -->
-<li class="nav-item dropdown notif-dropdown me-3">
+<li class="nav-item dropdown notif-dropdown me-3 d-none d-lg-block"">
     <a class="nav-link position-relative"
        href="#"
        id="notifDropdown"
@@ -520,6 +605,50 @@ document.addEventListener('DOMContentLoaded', () => {
 .historial-notif {
     color: wheat
     }
+/* Alinear perfil + menú hamburguesa en móvil */
+/* Alinear bien iconos del menú móvil */
+/* --- CENTRAR DROPDOWN DE NOTIFICACIONES EN MOVIL --- */
+/* 💬 Notificaciones versión móvil: ancho más grande y centrado */
+@media (max-width: 768px) {
+
+    /* Notificaciones */
+    .notif-menu {
+        position: fixed !important;
+        top: 65px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 95% !important;
+        max-width: 500px !important;
+        border-radius: 12px !important;
+        z-index: 9999 !important;
+    }
+
+ .user-menu-mobile {
+        position: fixed !important;
+        top: 65px !important;
+        right: 10px !important;   /* Separa un poco del borde */
+        left: auto !important;    /* Quita el centrado */
+        transform: none !important;
+        width: 260px !important;  /* Ancho del menú */
+        border-radius: 12px !important;
+        z-index: 9999 !important;
+    }
+
+    /* El menú NO debe quedar pegado al toggler */
+    .navbar-nav.ms-auto {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Íconos móviles más grandes */
+    .navbar .nav-link.mobile-icon {
+        padding: 6px 10px !important;
+        font-size: 20px !important;
+    }
+
+}
+
 
 
     </style>
