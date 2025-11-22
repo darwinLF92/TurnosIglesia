@@ -204,7 +204,7 @@
             </a>
           </li>        
       </ul>
-
+{% if user.is_authenticated %}
       <ul class="navbar-nav ms-auto align-items-lg-center">
         <!-- CAMPANA DE NOTIFICACIONES -->
 <!-- CAMPANA DE NOTIFICACIONES -->
@@ -267,6 +267,7 @@
         {% endif %}
     </ul>
 </li>
+{% endif %}
 
 
 
