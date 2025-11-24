@@ -5,282 +5,238 @@
 
 {% block extra_css %}
 <style>
-  /* Ocultar navbar y footer SOLO en el login */
-  nav.navbar,
-  .site-footer {
-      display: none !important;
-  }
+/* Ocultar navbar y footer en login */
+nav.navbar,
+.site-footer {
+    display: none !important;
+}
 
-  /* Hacer que el main de base ocupe todo y no tenga márgenes de "container" */
-  main.container {
-      max-width: 100% !important;
-      padding: 0 !important;
-      margin: 0 !important;
-  }
+main.container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
 
-  body {
-      font-family: 'Arial', sans-serif;
-      background: #f4f4fc;
-      margin: 0;
-      padding: 0;
-  }
+body {
+    font-family: "Arial", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #0a0a18;
+}
 
-  .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      width: 100vw;
-      background: linear-gradient(120deg,  #16143b 50%, #06050e 50%);
-  }
+/* =============================== */
+/* CONTENEDOR PRINCIPAL            */
+/* =============================== */
 
-  .login-wrapper {
-      display: flex;
-      max-width: 1200px;
-      width: 100%;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      gap: 20px;
-  }
+.login-container {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(160deg, #10132f, #06060f);
+}
 
-  /* LOGO */
-  .login-image {
-      background:  #06050e  ;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: 450px;
-      height: 450px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      flex: 1;
-  }
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 25px 20px;
+    border-radius: 18px;
 
-  .login-image .logo-container {
-      background: #ffffff21;
-      padding: 20px;
-      border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  }
+    /* ESTILO GLASS EFFECT */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
-  .login-image img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 50%;
-  }
+    text-align: center;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.45);
+}
 
-  /* FORM */
-  .login-form {
-      background: #1d234e8f;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      flex: 1;
-  }
+/* =============================== */
+/* LOGO                            */
+/* =============================== */
 
-  .login-form h2 {
-      margin-bottom: 10px;
-      color: #ffffff;
-      font-weight: bold;
-  }
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
 
-  .login-form p {
-      color: #666;
-      margin-bottom: 20px;
-  }
+.logo-wrapper .logo-container {
+    background: #ffffff22;
+    padding: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
 
-  .input-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      background: #f9f9f9;
-  }
+.logo-wrapper img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+}
 
-  .input-group label {
-      color: #6c63ff;
-      margin-right: 10px;
-      font-size: 18px;
-  }
+/* =============================== */
+/* TÍTULO Y TEXTO                  */
+/* =============================== */
 
-  .input-group input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 16px;
-      color: #333;
-  }
+.login-card h2 {
+    color: #fff;
+    font-size: 20px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.login-card p {
+    color: #ccc;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* =============================== */
+/* INPUT GROUP                     */
+/* =============================== */
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f1f1;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    height: 50px;
+}
+
+.input-group label i {
+    font-size: 18px;
+    color: #444;
+    width: 20px;
+    text-align: center;
+}
+
+.input-group input {
+    flex: 1;
+    font-size: 16px;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: #222;
+}
+
+.toggle-password {
+    background: transparent;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 18px;
+    width: 25px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =============================== */
+/* BOTÓN LOGIN                     */
+/* =============================== */
 
 .login-btn {
-      background: #6c63ff;
-      color: #fff;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s ease;
-      width: 100%;
-      display: block;
-      text-decoration: none;
-      margin-bottom: 15px;
-  }
-
-  .login-btn:hover {
-      background: #5a54d8;
-  }
-
-  .forgot-password {
-      text-align: center;
-      margin-top: 10px;
-  }
-
-  .forgot-link,
-  .registro-link {
-      color: #6c63ff;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.3s ease;
-  }
-
-  .forgot-link:hover,
-  .registro-link:hover {
-      color: #5a54d8;
-      text-decoration: underline;
-  }
-
-  .secondary-links {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-
-  /* 📱 Móvil: logo arriba, layout limpio */
-  @media (max-width: 768px) {
-      .login-container {
-          background: #05040c;
-          padding-top: 0px; /* 👈 Ajusta la distancia del conjunto completo */
-      }
-
-      .login-wrapper {
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-      }
-
-      .login-image {
-          background: none;
-          box-shadow: none;
-          height: auto;
-          max-width: 160px;
-          padding: 0;
-          margin: -100px auto 0;
-          order: -1; /* logo primero */
-      }
-
-      .login-image .logo-container {
-          padding: 5px;
-          margin: 0 auto;
-          background: #ffffff21;;
-          border-radius: 50%;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      }
-
-      .login-form {
-          max-width: 90%;
-          padding: 25px 20px;
-          background: #0e0d30c2;
-      }
-  }
-
-  /* Estilos para el botón del ojito dentro del input-group */
-.toggle-password{
-  background: transparent;
-  border: none;
-  color: #6c63ff;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    background: #1a2cff;
+    color: #fff;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 8px;
+    margin-bottom: 18px;
+    cursor: pointer;
+    transition: 0.2s;
 }
-.input-group { position: relative; }
-.toggle-password { margin-left: 8px; }
+
+.login-btn:hover {
+    background: #1320c7;
+}
+
+/* =============================== */
+/* ENLACES REGISTRO / OLVIDASTE    */
+/* =============================== */
+
+.links-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.links-row a {
+    color: #d2d2ff;
+    text-decoration: none;
+}
+
+.links-row a:hover {
+    text-decoration: underline;
+}
+
+/* =============================== */
+/* MÓVIL                           */
+/* =============================== */
+
+@media (max-width: 768px) {
+    .login-wrapper { display: none; }
+
+    .login-card {
+        margin-top: -20px;
+    }
+}
 </style>
+
 {% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <div class="login-container">
-    
-  <div class="login-wrapper">
 
-    <!-- FORMULARIO -->
-    <div class="login-form">
-      {% if nombre_hermandad %}
-      <h2 class="text-center mt-3">{{ nombre_hermandad }}</h2>
-      {% endif %}
-      <p>Ingresa tus credenciales para continuar</p>
+  <div class="login-card">
 
-      <form method="post">
-        {% csrf_token %}
-        <div class="input-group">
-          <label for="username"><i class="fa fa-user"></i></label>
-          <input type="text" name="username" id="username" placeholder="Username" required>
-        </div>
-        <div class="input-group">
-          <label for="password"><i class="fa fa-lock"></i></label>
-          <input type="password" name="password" id="password" placeholder="Password" required>
-          <button type="button" class="toggle-password" aria-label="Mostrar contraseña">
-            <i class="fa fa-eye"></i>
-          </button>
-        </div>
-
-
-    <button type="submit" class="login-btn">Acceder</button>
-
- 
-    <div class="forgot-link mt-2">
-        <a href="{% url 'cuentas:registro_html' %}" class="forgot-link">
-            ¿No tienes cuenta? Registrate
-        </a>
-    </div>
-
-        <!-- 🔹 Enlace para restablecer contraseña -->
-    <div class="forgot-password mt-2">
-        <a href="{% url 'cuentas:olvide_password_html' %}" class="forgot-link">
-            ¿Olvidaste tu contraseña?
-        </a>
-    </div>
-      </form>
-    </div>
-
-    <!-- LOGO -->
-    <div class="login-image">
+    <div class="logo-wrapper">
       <div class="logo-container">
-        {% if logo_url %}
         <img src="{{ logo_url }}" alt="Logo Hermandad">
-        {% endif %}
       </div>
     </div>
-    
+
+    {% if nombre_hermandad %}
+    <h2>{{ nombre_hermandad }}</h2>
+    {% endif %}
+    <p>Ingresa tus credenciales para continuar</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="input-group">
+        <label><i class="fa fa-user"></i></label>
+        <input type="text" name="username" placeholder="Username" required>
+      </div>
+
+      <div class="input-group">
+        <label><i class="fa fa-lock"></i></label>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+        <button type="button" class="toggle-password"><i class="fa fa-eye"></i></button>
+      </div>
+
+      <button class="login-btn">Acceder</button>
+
+      <div class="links-row">
+        <a href="{% url 'cuentas:registro_html' %}">Registrate</a>
+        <a href="{% url 'cuentas:olvide_password_html' %}">¿Olvidaste tu contraseña?</a>
+      </div>
+
+    </form>
+
   </div>
+
 </div>
+
 
 {% if error_message %}
 <script>
