@@ -208,6 +208,19 @@ def editar_perfil(request):
 
     perfil, created = UserProfile.objects.get_or_create(user=request.user)
 
+    # =====================================================
+    # 🟦 NORMALIZAR TELÉFONO ANTES DE CARGAR EL FORMULARIO
+    # =====================================================
+    if perfil.telefono:
+        tel = perfil.telefono.strip().replace(" ", "")
+
+        # Si NO inicia con +502, lo corregimos al volado
+        if not tel.startswith("+502"):
+            # Tomamos solo los últimos 8 dígitos para evitar errores
+            digitos = tel[-8:]
+            perfil.telefono = f"+502 {digitos}"
+            perfil.save()
+
     # ------------------------------------------------------
     #   🟦 MANEJO DE PETICIONES AJAX (subir / eliminar foto)
     # ------------------------------------------------------
@@ -239,7 +252,6 @@ def editar_perfil(request):
                     "image_url": perfil.foto_perfil.url
                 })
 
-        # Acción desconocida
         return JsonResponse({"success": False, "error": "Acción no válida"})
 
     # ------------------------------------------------------
@@ -250,8 +262,16 @@ def editar_perfil(request):
         form_perfil = PerfilForm(request.POST, request.FILES, instance=perfil)
 
         if form_usuario.is_valid() and form_perfil.is_valid():
+
+            # 🟩 Normalizar teléfono al guardar (doble seguridad)
+            telefono = form_perfil.cleaned_data.get("telefono", "").strip().replace(" ", "")
+            if not telefono.startswith("+502"):
+                telefono = "+502 " + telefono[-8:]
+            perfil.telefono = telefono
+
             form_usuario.save()
-            form_perfil.save()
+            perfil.save()
+
             messages.success(request, "Perfil actualizado correctamente")
             return redirect("cuentas:perfil")
 
