@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from usuarios.models import UserProfile
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 @login_required
 def crear_usuario(request):
@@ -40,15 +41,40 @@ def crear_usuario(request):
 
 @login_required
 def lista_usuarios(request):
-    usuarios_list = User.objects.filter(is_active=True).order_by('username')
+    search = request.GET.get('search', '')
+    grupo = request.GET.get('grupo', '')
 
-    paginator = Paginator(usuarios_list, 10)  # 🔥 10 usuarios por página
+    usuarios_list = User.objects.filter(is_active=True)
+
+    # 🔍 Filtro por texto
+    if search:
+        usuarios_list = usuarios_list.filter(
+            Q(username__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(email__icontains=search)
+        )
+
+    # 🎯 Filtro por grupo
+    if grupo:
+        usuarios_list = usuarios_list.filter(groups__name=grupo)
+
+    usuarios_list = usuarios_list.order_by('username')
+
+    paginator = Paginator(usuarios_list, 10)
     page_number = request.GET.get('page')
     usuarios = paginator.get_page(page_number)
 
+    # Para cargar grupos únicos
+    grupos = Group.objects.all().order_by('name')
+
     return render(request, 'lista_usuarios.html', {
         'usuarios': usuarios,
+        'grupos': grupos,
+        'search': search,
+        'grupo': grupo,
     })
+
 
 @login_required
 def editar_usuario(request, user_id):
