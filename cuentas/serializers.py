@@ -3,13 +3,14 @@ from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.db import transaction, IntegrityError
-
+import re
 from usuarios.models import UserProfile
 from .tokens import make_email_token, read_email_token, make_reset_password_token
 from nucleo.correos import enviar_confirmacion_correo
 from django.core.signing import BadSignature, SignatureExpired
 from django.contrib.auth.password_validation import validate_password
 from nucleo.correos import enviar_reset_password_correo
+from datetime import date
 
 Usuario = get_user_model()  # auth.User
 
@@ -31,26 +32,74 @@ class RegistroSerializer(serializers.ModelSerializer):
             "fecha_nacimiento", "estatura", "telefono", "correo"
         )
 
-    def validate(self, attrs):
-        user_data = attrs["user"]
+    # -------------------------
+    # VALIDACIONES POR CAMPO
+    # -------------------------
 
-        username = user_data.get("username")
-        email = user_data.get("email")
+    def validate_cui(self, value):
+        if not re.match(r"^\d{13}$", value):
+            raise serializers.ValidationError("El CUI debe tener exactamente 13 dígitos numéricos.")
 
-        # Validar usuario único
+        if UserProfile.objects.filter(cui=value).exists():
+            raise serializers.ValidationError("El CUI ya está registrado.")
+
+        return value
+
+    def validate_usuario(self, value):
+        username = value  # <-- CORRECCIÓN
+
+        if not re.match(r"^[A-Za-z0-9]{1,16}$", username):
+            raise serializers.ValidationError("El usuario solo puede contener letras y números (máx. 16).")
+
         if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({
-                "usuario": "Este nombre de usuario ya está en uso."
-            })
+            raise serializers.ValidationError("Este usuario ya está en uso.")
 
-        # Validar correo único
+        return value
+
+    def validate_correo(self, value):
+        email = value  # <-- CORRECCIÓN
+
+        if len(email) > 50:
+            raise serializers.ValidationError("El correo no puede exceder 50 caracteres.")
+
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError({
-                "correo": "Este correo ya está registrado."
-            })
+            raise serializers.ValidationError("Este correo ya está registrado.")
 
-        return attrs
+        return value
 
+    def validate_nombres(self, value):
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$", value):
+            raise serializers.ValidationError("Nombres inválidos.")
+        return value
+
+    def validate_apellidos(self, value):
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$", value):
+            raise serializers.ValidationError("Apellidos inválidos.")
+        return value
+
+    def validate_direccion(self, value):
+        if value and len(value) > 100:
+            raise serializers.ValidationError("La dirección no puede exceder 100 caracteres.")
+        return value
+
+    def validate_estatura(self, value):
+        if value is not None and (value < 50 or value > 250):
+            raise serializers.ValidationError("Estatura fuera de rango (50–250).")
+        return value
+
+    def validate_telefono(self, value):
+        if value and not re.match(r"^\d{8}$", value):
+            raise serializers.ValidationError("El teléfono debe tener 8 dígitos.")
+        return value
+
+    def validate_fecha_nacimiento(self, value):
+        if value and value > date.today():
+            raise serializers.ValidationError("La fecha no puede ser futura.")
+        return value
+
+    # -------------------------
+    # CREATE
+    # -------------------------
     @transaction.atomic
     def create(self, validated_data):
         user_data = validated_data.pop("user")
@@ -75,7 +124,6 @@ class RegistroSerializer(serializers.ModelSerializer):
         grupo, _ = Group.objects.get_or_create(name="Usuario")
         user.groups.add(grupo)
 
-        # Correo de confirmación
         token = make_email_token(user.id)
         transaction.on_commit(lambda: enviar_confirmacion_correo(user, token))
 

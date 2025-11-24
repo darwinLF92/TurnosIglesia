@@ -213,22 +213,22 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Font Awesome (para el icono) -->
+<!-- Font Awesome -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 // =======================
-// Helpers generales
+// CSRF
 // =======================
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
         const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
@@ -239,100 +239,36 @@ function getCookie(name) {
 const csrftoken = getCookie("csrftoken");
 
 // =======================
-// Restricciones en tiempo real
+// Inputs
 // =======================
 const cuiInput = document.getElementById("cui");
 const usuarioInput = document.getElementById("usuario");
-const nombresInput = document.getElementById("nombres");
-const apellidosInput = document.getElementById("apellidos");
-const direccionInput = document.getElementById("direccion");
-const estaturaInput = document.getElementById("estatura");
 const telefonoInput = document.getElementById("telefono");
-const correoInput = document.getElementById("correo");
+const estaturaInput = document.getElementById("estatura");
 
-// Solo números, máx 13
+// =======================
+// Limitaciones de UX (no seguridad)
+// =======================
+
+// Solo números – CUI
 cuiInput.addEventListener("input", () => {
     cuiInput.value = cuiInput.value.replace(/\D/g, "").slice(0, 13);
 });
 
-// Usuario: letras y números, sin espacios ni caracteres
+// Usuario solo letras y números
 usuarioInput.addEventListener("input", () => {
     usuarioInput.value = usuarioInput.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 16);
 });
 
-// Nombres / Apellidos: letras (incluye tildes y ñ) y espacios
-const soloLetrasRegex = /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g;
-nombresInput.addEventListener("input", () => {
-    nombresInput.value = nombresInput.value.replace(soloLetrasRegex, "").slice(0, 50);
-});
-apellidosInput.addEventListener("input", () => {
-    apellidosInput.value = apellidosInput.value.replace(soloLetrasRegex, "").slice(0, 50);
-});
-
-// Dirección: sólo limitar longitud
-direccionInput.addEventListener("input", () => {
-    direccionInput.value = direccionInput.value.slice(0, 100);
-});
-
-// Estatura: solo números, máx 3
-estaturaInput.addEventListener("input", () => {
-    estaturaInput.value = estaturaInput.value.replace(/\D/g, "").slice(0, 3);
-});
-
-// Teléfono: solo números, máx 8
+// Teléfono solo números
 telefonoInput.addEventListener("input", () => {
     telefonoInput.value = telefonoInput.value.replace(/\D/g, "").slice(0, 8);
 });
 
-// Correo: solo recortar longitud
-correoInput.addEventListener("input", () => {
-    correoInput.value = correoInput.value.slice(0, 50);
+// Estatura solo números
+estaturaInput.addEventListener("input", () => {
+    estaturaInput.value = estaturaInput.value.replace(/\D/g, "").slice(0, 3);
 });
-
-// =======================
-// Validación previa al envío
-// =======================
-function validarDatos(data) {
-    const errores = [];
-
-    if (!/^\d{13}$/.test(data.cui)) {
-        errores.push("El CUI debe tener exactamente 13 dígitos numéricos.");
-    }
-
-    if (!/^[A-Za-z0-9]{1,16}$/.test(data.usuario)) {
-        errores.push("El usuario solo puede contener letras y números (sin espacios), máximo 16 caracteres.");
-    }
-
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/.test(data.nombres)) {
-        errores.push("Nombres: solo letras y espacios, máximo 50 caracteres.");
-    }
-
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/.test(data.apellidos)) {
-        errores.push("Apellidos: solo letras y espacios, máximo 50 caracteres.");
-    }
-
-    if (data.direccion && data.direccion.length > 100) {
-        errores.push("La dirección no puede exceder 100 caracteres.");
-    }
-
-    if (data.estatura) {
-        if (!/^\d{1,3}$/.test(data.estatura)) {
-            errores.push("Estatura: solo números, máximo 3 dígitos. Ejemplo: 160.");
-        }
-    }
-
-    if (data.telefono && !/^\d{8}$/.test(data.telefono)) {
-        errores.push("El teléfono debe tener exactamente 8 dígitos.");
-    }
-
-    if (!data.correo) {
-        errores.push("El correo electrónico es obligatorio.");
-    } else if (data.correo.length > 50) {
-        errores.push("El correo electrónico no puede exceder 50 caracteres.");
-    }
-
-    return errores;
-}
 
 // =======================
 // Envío del formulario
@@ -340,31 +276,30 @@ function validarDatos(data) {
 document.getElementById("registroForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const rawTelefono = telefonoInput.value.trim();
-
     const data = {
         cui: cuiInput.value.trim(),
         usuario: usuarioInput.value.trim(),
-        nombres: nombresInput.value.trim(),
-        apellidos: apellidosInput.value.trim(),
-        direccion: direccionInput.value.trim(),
+        nombres: document.getElementById("nombres").value.trim(),
+        apellidos: document.getElementById("apellidos").value.trim(),
+        direccion: document.getElementById("direccion").value.trim(),
         fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null,
         estatura: estaturaInput.value.trim() || null,
-        telefono: rawTelefono,  // ✅ solo los 8 dígitos
-        correo: correoInput.value.trim(),
+        telefono: telefonoInput.value.trim(),
+        correo: document.getElementById("correo").value.trim(),
     };
 
-
-    const errores = validarDatos(data);
-    if (errores.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Revisa la información",
-            html: errores.join("<br>"),
-            confirmButtonText: "Corregir datos"
-        });
-        return;
-    }
+    // =======================
+    // Mostrar SweetAlert "Solicitando Registro..."
+    // =======================
+    Swal.fire({
+        title: "Solicitando Registro...",
+        text: "Por favor espera",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
     try {
         const resp = await fetch("{% url 'cuentas:api_registro' %}", {
@@ -376,6 +311,8 @@ document.getElementById("registroForm").addEventListener("submit", async functio
             body: JSON.stringify(data),
         });
 
+        const result = await resp.json();
+
         if (resp.ok) {
             Swal.fire({
                 icon: "success",
@@ -383,30 +320,30 @@ document.getElementById("registroForm").addEventListener("submit", async functio
                 text: "Revisa tu correo para confirmar tu cuenta.",
                 confirmButtonText: "Aceptar"
             });
+
             e.target.reset();
         } else {
-            const errorData = await resp.json();
-            console.log(errorData);
-            let msg = "";
-            for (const campo in errorData) {
-                msg += `<strong>${campo}:</strong> ${errorData[campo]}<br>`;
+            let errores = "";
+            for (const campo in result) {
+                errores += `<strong>${campo}:</strong> ${result[campo]}<br>`;
             }
+
             Swal.fire({
                 icon: "error",
                 title: "No se pudo completar el registro",
-                html: msg || "Ocurrió un error al registrar tus datos.",
-                confirmButtonText: "Entendido"
+                html: errores || "Ocurrió un error al registrar tus datos.",
             });
         }
-    } catch (err) {
-        console.error(err);
+
+    } catch (error) {
         Swal.fire({
             icon: "error",
             title: "Error inesperado",
-            text: "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
-            confirmButtonText: "Entendido"
+            text: "Ocurrió un error. Intenta de nuevo más tarde.",
         });
     }
 });
+
+
 </script>
 {% endblock %}
