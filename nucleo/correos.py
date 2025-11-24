@@ -3,8 +3,24 @@ from django.conf import settings
 from django.core.mail import send_mail
 from urllib.parse import urlencode
 from django.template.loader import render_to_string
+import base64
+from pathlib import Path
 # Dirección desde la cual se enviarán todos los correos
 FROM_NO_REPLY = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@hermandadelingeniero.com.gt")
+
+
+# ============================================
+#  🔥 Función: cargar logo como Base64
+# ============================================
+def cargar_logo_base64():
+    ruta_logo = Path(settings.BASE_DIR) / "staticfiles" / "home" / "logo_hermandad.png"
+
+    if not ruta_logo.exists():
+        return None
+
+    with open(ruta_logo, "rb") as img:
+        encoded = base64.b64encode(img.read()).decode("utf-8")
+        return f"data:image/png;base64,{encoded}"
 
 def obtener_nombre_completo(usuario):
     nombre = getattr(usuario, "first_name", "") or ""
@@ -40,7 +56,7 @@ def enviar_confirmacion_correo(usuario, token):
         "titulo_correo": "Registro de datos",
         "nombre_completo": obtener_nombre_completo(usuario),
         "enlace": enlace,
-        "logo_url": f"{settings.FRONTEND_URL}/static/img/logo.png",
+        "logo_base64": cargar_logo_base64(),
     }
 
     enviar_correo_template(
@@ -60,7 +76,7 @@ def enviar_reset_password_correo(user, token):
         "titulo_correo": "Restablecer contraseña",
         "nombre_completo": obtener_nombre_completo(user),
         "enlace": enlace,
-        "logo_url": f"{settings.FRONTEND_URL}/static/img/logo.png",
+        "logo_base64": cargar_logo_base64(),
     }
 
     enviar_correo_template(
