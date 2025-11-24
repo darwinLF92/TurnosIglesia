@@ -4,213 +4,223 @@
 
 {% block content %}
 <style>
-    
-    .card-registro {
-        border: none;
-        border-radius: 1.25rem;
-        box-shadow: 0 18px 38px rgba(27, 27, 27, 0.616);
-        overflow: hidden;
-    }
-    .card-registro-header {
-        background: linear-gradient(135deg, #24074b, #121213);
-        color: #fff;
-        padding: 1.5rem 1.75rem;
-        display: flex;
-        align-items: center;
-        gap: .75rem;
-    }
-    .card-registro-header .icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 999px;
-        border: 2px solid rgba(255,255,255,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(38, 38, 39, 0.18);
-    }
-    .card-registro-header h5 {
-        margin: 0;
-        font-weight: 600;
-    }
-    .card-registro-body {
-        background: #100331d0;
-        color: #e5e7eb;
-        padding: 1.75rem 1.75rem 1.5rem;
-    }
-    .form-label {
-        font-size: .85rem;
-        font-weight: 500;
-        color: #e5e7eb;
-    }
-    .form-control {
-        background-color: #020617;
-        border-radius: .75rem;
-        border: 1px solid #1e293b;
-        color: #e5e7eb;
-        font-size: .9rem;
-    }
-    .form-control:focus {
-        background-color: #020617;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 .15rem rgba(59,130,246,.35);
-        color: #e5e7eb;
-    }
-    .helper-text {
-        font-size: .78rem;
-        color: #9ca3af;
-    }
-            .btn-primary {
-            border-radius: .8rem;
-            padding: .6rem 1.2rem;
-            font-weight: 600;
-            letter-spacing: .02em;
-            background: linear-gradient(135deg, #2563eb, #141142);
-            border: none;
-        }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #4338ca);
-        }
-    body {
-        background: radial-gradient(circle at top, #2c1e5e 0, #020617 45%, #020617 100%);
-    }
+/* ===== ESTILO DEL LOGIN APLICADO AL REGISTRO ===== */
+
+body {
+    background: linear-gradient(160deg, #10132f, #06060f);
+    font-family: "Arial", sans-serif;
+}
+
+.registro-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.registro-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 25px 25px 35px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+/* ===== LOGO ===== */
+.registro-logo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.registro-logo-wrapper .logo-container {
+    background: #ffffff22;
+    padding: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 255, 255, .18);
+}
+
+.registro-logo-wrapper img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+/* ===== TITULOS ===== */
+.registro-card h2 {
+    color: #fff;
+    font-size: 22px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.registro-card p {
+    color: #ccc;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* ===== INPUTS ===== */
+.form-control,
+.input-group-text {
+    background: rgba(255,255,255,0.15) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    border-radius: 10px !important;
+}
+
+/* ===== LABELS A LA IZQUIERDA ===== */
+.form-label {
+    color: #e2e2e2 !important;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-align: left !important;   /* 👈 fuerza alineación a la izquierda */
+    display: block;                /* 👈 evita centrado por contenedor */
+    width: 100%;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #c8c8c8;
+}
+
+/* Input-group contenedor */
+.input-group {
+    width: 100%;
+}
+
+/* Teléfono: input recto a la derecha */
+.input-group .form-control {
+    border-radius: 0 10px 10px 0 !important;
+}
+
+/* Prefijo +502 */
+.input-group-text {
+    border-radius: 10px 0 0 10px !important;
+    font-weight: bold;
+}
+
+
+/* ===== BOTÓN REGISTRO FULL WIDTH ===== */
+.btn-primary {
+    background: #1a2cff;
+    border: none;
+    width: 100%;                /* 👈 full width real */
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    background: #1320c7;
+}
+
+/* ===== BOTÓN REGRESAR FULL WIDTH ===== */
+.btn-regresar {
+    display: block;
+    width: 100%;               /* 👈 full width */
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-top: 12px;
+    text-align: center;
+    color: #ccc;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.btn-regresar:hover {
+    background: rgba(255,255,255,0.18);
+    color: white;
+}
+
 </style>
 
-<div class="row justify-content-center">
-    <div class="col-lg-6 col-md-8">
-        <div class="card card-registro">
-            <div class="card-registro-header">
-                <div class="icon">
-                    <i class="fa-solid fa-user-plus"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">Crear cuenta</h5>
-                    <small class="d-block opacity-75">Completa tus datos para registrarte</small>
-                </div>
-            </div>
-            <div class="card-registro-body">
-                <form id="registroForm" autocomplete="off">
-                    {% csrf_token %}
+<div class="registro-container">
+    <div class="registro-card">
 
-                    <div class="mb-3">
-                        <label for="cui" class="form-label">CUI</label>
-                        <input type="text"
-                               class="form-control"
-                               id="cui"
-                               name="cui"
-                               required
-                               maxlength="13"
-                               inputmode="numeric"
-                               pattern="\d{13}">
-                        <div class="helper-text">13 dígitos, solo números.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="usuario" class="form-label">Usuario</label>
-                        <input type="text"
-                               class="form-control"
-                               id="usuario"
-                               name="usuario"
-                               required
-                               maxlength="16"
-                               pattern="[A-Za-z0-9]{1,16}">
-                        <div class="helper-text">Hasta 16 caracteres, solo letras y números, sin espacios.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nombres" class="form-label">Nombres</label>
-                        <input type="text"
-                               class="form-control"
-                               id="nombres"
-                               name="nombres"
-                               required
-                               maxlength="50">
-                        <div class="helper-text">Solo letras (se permiten espacios y tildes), máximo 50.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="apellidos" class="form-label">Apellidos</label>
-                        <input type="text"
-                               class="form-control"
-                               id="apellidos"
-                               name="apellidos"
-                               required
-                               maxlength="50">
-                        <div class="helper-text">Solo letras (se permiten espacios y tildes), máximo 50.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text"
-                               class="form-control"
-                               id="direccion"
-                               name="direccion"
-                               maxlength="100">
-                        <div class="helper-text">Letras, números y caracteres especiales. Máximo 100.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
-                        <input type="date"
-                               class="form-control"
-                               id="fecha_nacimiento"
-                               name="fecha_nacimiento">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="estatura" class="form-label">Estatura (cm)</label>
-                        <input type="text"
-                               class="form-control"
-                               id="estatura"
-                               name="estatura"
-                               maxlength="3"
-                               inputmode="numeric"
-                               pattern="\d{1,3}">
-                        <div class="helper-text">Solo números, máximo 3 dígitos. Ejemplo: 160.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="telefono" class="form-label">Teléfono</label>
-                        <div class="input-group">
-                            <span class="input-group-text border-0 bg-slate-800 text-black">+502</span>
-                            <input type="text"
-                                   class="form-control"
-                                   id="telefono"
-                                   name="telefono"
-                                   maxlength="8"
-                                   inputmode="numeric"
-                                   pattern="\d{8}">
-                        </div>
-                        <div class="helper-text">8 dígitos, se almacenará como +502XXXXXXXX.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="correo" class="form-label">Correo electrónico</label>
-                        <input type="email"
-                               class="form-control"
-                               id="correo"
-                               name="correo"
-                               required
-                               maxlength="50">
-                        <div class="helper-text">Máximo 50 caracteres.</div>
-                    </div>
-
-                    <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-primary">
-                            Registrarme
-                        </button>
-                    </div>
-                </form>
-
-                <p class="mt-3 mb-0 helper-text">
-                    Después del registro te enviaremos un correo de confirmación para activar tu cuenta.
-                </p>
+        <!-- Logo -->
+        <div class="registro-logo-wrapper">
+            <div class="logo-container">
+                <img src="{{ logo_url }}" alt="Logo">
             </div>
         </div>
+
+        <h2>Crear cuenta</h2>
+        <p>Completa tus datos para registrarte</p>
+
+        <form id="registroForm" autocomplete="off">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">CUI</label>
+                <input type="text" class="form-control" id="cui" name="cui" required maxlength="13" inputmode="numeric">
+                <div class="helper-text">13 dígitos, solo números.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="usuario" name="usuario" required maxlength="16">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Nombres</label>
+                <input type="text" class="form-control" id="nombres" name="nombres" required maxlength="50">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Apellidos</label>
+                <input type="text" class="form-control" id="apellidos" name="apellidos" required maxlength="50">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" maxlength="100">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Estatura (cm)</label>
+                <input type="text" class="form-control" id="estatura" name="estatura" maxlength="3">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <div class="input-group">
+                    <span class="input-group-text">+502</span>
+                    <input type="text" class="form-control" id="telefono" name="telefono" maxlength="8">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" class="form-control" id="correo" name="correo" required maxlength="50">
+            </div>
+
+            <button class="btn btn-primary">Registrarme</button>
+
+            <a href="{% url 'aplicacion:login' %}" class="btn-regresar">← Regresar</a>
+
+            <p class="mt-3 helper-text">Después del registro te enviaremos un correo de confirmación.</p>
+
+        </form>
+
     </div>
 </div>
+
 {% endblock %}
+
 
 {% block extra_js %}
 <!-- Font Awesome -->

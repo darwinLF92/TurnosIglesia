@@ -93,49 +93,60 @@ body {
     margin-bottom: 20px;
 }
 
-/* =============================== */
-/* INPUT GROUP                     */
-/* =============================== */
+/* ============================= */
+/*   INPUT GROUP UNIVERSAL GRID  */
+/* ============================= */
 
 .input-group {
+    display: grid;
+    grid-template-columns: 28px 1fr 32px; /* icono | input | ojito */
+    align-items: center;
+
+    background: #f1f1f1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    height: 52px;
+    margin-bottom: 15px;
+}
+
+.input-group label {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: #f1f1f1;
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    height: 50px;
+    justify-content: center;
 }
 
 .input-group label i {
     font-size: 18px;
     color: #444;
-    width: 20px;
-    text-align: center;
 }
 
+/* Input */
 .input-group input {
-    flex: 1;
-    font-size: 16px;
     border: none;
     background: transparent;
     outline: none;
+    font-size: 16px;
     color: #222;
+    width: 100%;
+    padding: 0;
+    height: 100%;
 }
 
+/* Ojito PERFECTAMENTE alineado */
 .toggle-password {
-    background: transparent;
-    border: none;
-    color: #444;
-    cursor: pointer;
-    font-size: 18px;
-    width: 25px;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #444;
+    font-size: 18px;
 }
+
 
 /* =============================== */
 /* BOTÓN LOGIN                     */
@@ -215,12 +226,12 @@ body {
 
       <div class="input-group">
         <label><i class="fa fa-user"></i></label>
-        <input type="text" name="username" placeholder="Username" required>
+        <input type="text" name="username" id="username" placeholder="Nombre Usuario" required>
       </div>
 
       <div class="input-group">
         <label><i class="fa fa-lock"></i></label>
-        <input type="password" name="password" id="password" placeholder="Password" required>
+        <input type="password" name="password" id="password" placeholder="Contraseña" required>
         <button type="button" class="toggle-password"><i class="fa fa-eye"></i></button>
       </div>
 
@@ -275,4 +286,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const usernameField = document.getElementById("username");
+    if (usernameField) {
+        usernameField.focus();
+    }
+});
+</script>
+
 {% endblock %}
