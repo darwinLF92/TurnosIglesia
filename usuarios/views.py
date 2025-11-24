@@ -40,8 +40,15 @@ def crear_usuario(request):
 
 @login_required
 def lista_usuarios(request):
-    usuarios = User.objects.filter(is_active=True)
-    return render(request, 'lista_usuarios.html', {'usuarios': usuarios})
+    usuarios_list = User.objects.filter(is_active=True).order_by('username')
+
+    paginator = Paginator(usuarios_list, 10)  # 🔥 10 usuarios por página
+    page_number = request.GET.get('page')
+    usuarios = paginator.get_page(page_number)
+
+    return render(request, 'lista_usuarios.html', {
+        'usuarios': usuarios,
+    })
 
 @login_required
 def editar_usuario(request, user_id):
