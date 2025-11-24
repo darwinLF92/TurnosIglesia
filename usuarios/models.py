@@ -5,6 +5,11 @@ from django.db import models
 
 
 class UserProfile(models.Model):
+    GENEROS = (
+        ("M", "Masculino"),
+        ("F", "Femenino"),
+        ("O", "Otro"),
+    )
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -29,6 +34,15 @@ class UserProfile(models.Model):
         blank=True,
         null=True,
         verbose_name="Foto de perfil"
+    )
+
+     # 👉 NUEVO CAMPO
+    genero = models.CharField(
+        "Género",
+        max_length=1,
+        choices=GENEROS,
+        blank=True,
+        null=True
     )
 
     def __str__(self):

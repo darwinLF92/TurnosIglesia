@@ -2,77 +2,72 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from urllib.parse import urlencode
-
+from django.template.loader import render_to_string
 # Dirección desde la cual se enviarán todos los correos
 FROM_NO_REPLY = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@hermandadelingeniero.com.gt")
 
+def obtener_nombre_completo(usuario):
+    nombre = getattr(usuario, "first_name", "") or ""
+    apellido = getattr(usuario, "last_name", "") or ""
 
-def enviar_correo(asunto, mensaje, para):
-    if not para:
-        raise ValueError("Destinatario vacío al enviar correo.")
+    nombre_completo = f"{nombre} {apellido}".strip()
 
-    # Siempre enviará con no-reply
+    return nombre_completo if nombre_completo else usuario.username
+
+
+
+def enviar_correo_template(asunto, para, template, context):
+    html_message = render_to_string(template, context)
+    mensaje_texto = f"Por favor abre este correo usando un cliente compatible con HTML.\n\nEnlace: {context.get('enlace','')}"
+    
     send_mail(
         asunto,
-        mensaje,
+        mensaje_texto,
         FROM_NO_REPLY,
         [para],
-        fail_silently=False
+        html_message=html_message,
+        fail_silently=False,
     )
 
 
 def enviar_confirmacion_correo(usuario, token):
-    correo = getattr(usuario, "correo", None) or getattr(usuario, "email", None)
-    if not correo:
-        raise ValueError("El usuario no tiene correo.")
+    correo = usuario.email
 
-    # Construcción del enlace con parámetros
     params = urlencode({"token": token, "correo": correo})
     enlace = f"{settings.FRONTEND_URL}/auth/confirmar?{params}"
 
-    # Debug opcional
-    print("DEBUG TOKEN  :", token)
-    print("DEBUG ENLACE :", enlace)
+    context = {
+        "titulo_correo": "Registro de datos",
+        "nombre_completo": obtener_nombre_completo(usuario),
+        "enlace": enlace,
+        "logo_url": f"{settings.FRONTEND_URL}/static/img/logo.png",
+    }
 
-    nombre_usuario = getattr(usuario, "nombres", "") or getattr(usuario, "username", "")
+    enviar_correo_template(
+        "Validación de registro - Hermandad Aldea El Ingeniero",
+        correo,
+        "nucleo/confirmacion.html",
+        context
+    )
 
-    asunto = "Confirma tu cuenta - Hermandad A. El Ingeniero"
-    mensaje = f"""
-Hola {nombre_usuario},
-
-Gracias por registrarte en Hermandad de la Aldea El Ingeniero, Chiquimula.
-
-Confirma tu correo y crea tu contraseña aquí:
-{enlace}
-
-⚠️ Este correo es automático. Por favor NO responder.
-"""
-
-    enviar_correo(asunto, mensaje, correo)
 
 
 def enviar_reset_password_correo(user, token):
-    """
-    Envía un correo con enlace para restablecer contraseña.
-    """
     params = urlencode({"token": token})
-
     enlace = f"{settings.FRONTEND_URL}/cuentas/confirmar-password/?{params}"
 
-    asunto = "Restablecer contraseña"
-    mensaje = (
-        f"Hola {user.username},\n\n"
-        "Has solicitado restablecer tu contraseña.\n"
-        "Haz clic en el siguiente enlace para definir una nueva contraseña:\n\n"
-        f"{enlace}\n\n"
-        "Si no realizaste esta solicitud, puedes ignorar este correo.\n\n"
-        "⚠️ Este correo es automático. Por favor NO responder."
+    context = {
+        "titulo_correo": "Restablecer contraseña",
+        "nombre_completo": obtener_nombre_completo(user),
+        "enlace": enlace,
+        "logo_url": f"{settings.FRONTEND_URL}/static/img/logo.png",
+    }
+
+    enviar_correo_template(
+        "Restablecer contraseña",
+        user.email,
+        "nucleo/reset_password.html",
+        context
     )
 
-    send_mail(
-        asunto,
-        mensaje,
-        FROM_NO_REPLY,  # <-- SIEMPRE NO-REPLY
-        [user.email],
-        fail_silently=False,
-    )
+

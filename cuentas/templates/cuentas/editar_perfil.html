@@ -4,75 +4,106 @@
 {% block content %}
 
 <style>
-    .card-modern {
-        border-radius: 18px;
-        padding: 30px;
-        border: none;
-        background: #ffffff;
-    }
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-    .form-label {
-        font-weight: 600;
-        color: #34495e;
-    }
-    .form-control {
-        border-radius: 10px;
-        padding: 0.65rem 1rem;
-        border: 1px solid #ced4da;
-    }
-    .form-control:focus {
-        border-color: #4a90e2;
-        box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
-    }
+.card-modern {
+    border-radius: 18px;
+    padding: 30px;
+    border: none;
+    background: #ffffff;
+}
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+.form-label {
+    font-weight: 600;
+    color: #34495e;
+}
+.form-control {
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    border: 1px solid #ced4da;
+}
+.form-control:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+}
 
-    .profile-photo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #e2e8f0;
-    }
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e2e8f0;
+}
 
-    input[type="file"] { display: none; }
+input[type="file"] { 
+    display: none; 
+}
 
-    .btn-upload {
-        border: 1px solid #1d4ed8;
-        color: #1d4ed8;
-        background: #ffffff;
-        padding: 8px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 600;
-        display: inline-block;
-    }
-    .btn-upload:hover {
-        background: #1d4ed8;
-        color: white;
-    }
+.btn-upload {
+    border: 1px solid #1d4ed8;
+    color: #1d4ed8;
+    background: #ffffff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.btn-upload:hover {
+    background: #1d4ed8;
+    color: white;
+}
 
-    .remove-photo {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #e63946;
-        cursor: pointer;
-        margin-left: 8px;
-    }
+.remove-photo {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e63946;
+    cursor: pointer;
+    margin-left: 8px;
+}
 
-    .btn-save {
-        background: #1d4ed8;
-        padding: 12px;
-        font-size: 1.1rem;
-        border-radius: 10px;
-    }
-    .btn-save:hover {
-        background: #0f3cb3;
-    }
+.btn-save {
+    background: #1d4ed8;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+.btn-save:hover {
+    background: #0f3cb3;
+}
+
+/* Avatar por género */
+.avatar-genero {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    font-size: 42px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+/* Colores por género */
+.avatar-m { background: #2563eb; }  /* Masculino */
+.avatar-f { background: #d946ef; }  /* Femenino */
+.avatar-o { background: #22c55e; }  /* Otro */
+
+/* Centrado perfecto */
+.avatar-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 </style>
 
 <div class="container py-4">
@@ -117,21 +148,35 @@
             <!-- INFORMACIÓN PERSONAL -->
             <div class="section-title">Información personal</div>
 
-            <div class="mb-4 text-center">
+            <div class="mb-4">
 
-                <label class="form-label d-block mb-2">Foto de perfil</label>
+                <label class="form-label d-block mb-2 text-center">Foto de perfil</label>
 
-                {% if form_perfil.instance.foto_perfil %}
-                    <img id="previewFotoPerfil" src="{{ form_perfil.instance.foto_perfil.url }}" class="profile-photo mb-2">
-                {% else %}
-                    <img id="previewFotoPerfil" src="{% static 'logos/avatar.png' %}" class="profile-photo mb-2">
-                {% endif %}
+                <div class="avatar-wrapper mb-3">
 
-                <div class="mt-2">
+                    {% if form_perfil.instance.foto_perfil %}
+                        <img id="previewFotoPerfil" src="{{ form_perfil.instance.foto_perfil.url }}" 
+                            class="profile-photo">
+                    {% else %}
+                        <div id="previewFotoPerfil"
+                            class="avatar-genero
+                                {% if form_perfil.instance.genero == 'M' %} avatar-m
+                                {% elif form_perfil.instance.genero == 'F' %} avatar-f
+                                {% else %} avatar-o
+                                {% endif %}
+                            ">
+                            {{ form_usuario.first_name.value|slice:":1"|upper }}
+                            {{ form_usuario.last_name.value|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="text-center">
                     {{ form_perfil.foto_perfil }}
                 </div>
 
             </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -141,13 +186,31 @@ document.addEventListener("DOMContentLoaded", function () {
     const clearCheck = document.querySelector('input[type="checkbox"][name$="clear"]');
     const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // SUBIR FOTO AUTOMÁTICO
+    // 🟦 FUNCION AUXILIAR → Cambiar preview según el tipo de elemento
+    function actualizarPreview(url) {
+        if (preview.tagName === "IMG") {
+            preview.src = url;
+        } else {
+            // Si es div del avatar por género, lo convertimos a IMG
+            const img = document.createElement("img");
+            img.className = "profile-photo";
+            img.id = "previewFotoPerfil";
+            img.src = url;
+
+            preview.replaceWith(img);
+            // 🔄 actualizar referencia al nuevo elemento IMG
+            preview = img;
+        }
+    }
+
+    // 🟦 SUBIR FOTO AUTOMÁTICAMENTE
     if (inputFoto) {
         inputFoto.addEventListener("change", function () {
             const file = this.files[0];
             if (!file) return;
 
-            preview.src = URL.createObjectURL(file);
+            // Vista previa temporal
+            actualizarPreview(URL.createObjectURL(file));
 
             const formData = new FormData();
             formData.append("foto_perfil", file);
@@ -164,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(r => r.json())
             .then(data => {
                 if (data.success && data.image_url) {
-                    preview.src = data.image_url;
+                    actualizarPreview(data.image_url);
                 }
             });
 
@@ -172,14 +235,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // QUITAR FOTO AUTOMÁTICO
+    // 🟥 QUITAR FOTO AUTOMÁTICO
     if (clearCheck) {
         clearCheck.addEventListener("change", function () {
-
             if (!this.checked) return;
-
-            preview.src = "{% static 'logos/avatar.png' %}";
-            if (inputFoto) inputFoto.value = "";
 
             const formData = new FormData();
             formData.append("remove_photo", "1");
@@ -192,7 +251,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: formData
             })
-            .then(r => r.json());
+            .then(r => r.json())
+            .then(() => {
+                actualizarPreview("{% static 'logos/avatar.png' %}");
+                if (inputFoto) inputFoto.value = "";
+            });
         });
     }
 });
@@ -266,28 +329,34 @@ document.addEventListener("DOMContentLoaded", function () {
                     >
                 </div>
 
-                <!-- Fecha nacimiento -->
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Fecha de nacimiento</label>
-                    {{ form_perfil.fecha_nacimiento }}
-                </div>
+ <!-- Fecha nacimiento -->
+    <div class="col-md-4 mb-3">
+        <label class="form-label">Fecha de nacimiento</label>
+        {{ form_perfil.fecha_nacimiento }}
+    </div>
 
-                <!-- Estatura -->
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Estatura (cm)</label>
-                    <input 
-                        type="number"
-                        name="estatura"
-                        value="{{ form_perfil.instance.estatura }}"
-                        class="form-control"
-                        min="100"
-                        max="250"
-                        maxlength="3"
-                        oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,3);"
-                        title="Ingrese una estatura válida entre 100 y 250 cm."
-                        required
-                    >
-                </div>
+    <!-- Género -->
+    <div class="col-md-4 mb-3">
+        <label class="form-label">Género</label>
+        {{ form_perfil.genero }}
+    </div>
+
+    <!-- Estatura -->
+    <div class="col-md-4 mb-3">
+        <label class="form-label">Estatura (cm)</label>
+        <input 
+            type="number"
+            name="estatura"
+            value="{{ form_perfil.instance.estatura }}"
+            class="form-control"
+            min="100"
+            max="250"
+            maxlength="3"
+            oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,3);"
+            title="Ingrese una estatura válida entre 100 y 250 cm."
+            required
+        >
+    </div>
 
             </div>
 

@@ -11,6 +11,11 @@ body {
     background: linear-gradient(160deg, #10132f, #06060f);
     font-family: "Arial", sans-serif;
 }
+    /* Opcional: ocultar navbar completo */
+    .navbar {
+        display: none !important;
+    }
+
 
 .registro-container {
     min-height: 100vh;
@@ -140,6 +145,32 @@ body {
     background: rgba(255,255,255,0.18);
     color: white;
 }
+/* ----- ESTILO DEL SELECT CERRADO (Glass) ----- */
+select.form-control {
+    background: rgba(255,255,255,0.15) !important;
+    backdrop-filter: blur(10px);
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.25) !important;
+    border-radius: 10px !important;
+}
+
+/* ----- ESTILO DEL TEXTO SELECCIONADO (placeholder) ----- */
+select.form-control option {
+    background-color: #1a1d2c !important;
+    color: #000 !important; /* ESTE CAMBIO LO HACE LEGIBLE */
+}
+
+/* ----- CUANDO EL SELECT ESTÁ ABIERTO (dropdown) ----- */
+select.form-control:focus option {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+/* ----- FORZAR VISUALIZACIÓN LEGIBLE EN EL DESPLEGABLE ----- */
+select option {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
 
 </style>
 
@@ -153,7 +184,7 @@ body {
             </div>
         </div>
 
-        <h2>Crear cuenta</h2>
+        <h2>Registro de Usuario</h2>
         <p>Completa tus datos para registrarte</p>
 
         <form id="registroForm" autocomplete="off">
@@ -191,9 +222,20 @@ body {
             </div>
 
             <div class="mb-3">
+                <label class="form-label">Género</label>
+                <select class="form-control" id="genero" name="genero" required>
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="O">Otro / Prefiero no decirlo</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Estatura (cm)</label>
                 <input type="text" class="form-control" id="estatura" name="estatura" maxlength="3">
             </div>
+
 
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
@@ -293,6 +335,7 @@ document.getElementById("registroForm").addEventListener("submit", async functio
         apellidos: document.getElementById("apellidos").value.trim(),
         direccion: document.getElementById("direccion").value.trim(),
         fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null,
+        genero: document.getElementById("genero").value,
         estatura: estaturaInput.value.trim() || null,
         telefono: telefonoInput.value.trim(),
         correo: document.getElementById("correo").value.trim(),

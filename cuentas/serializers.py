@@ -29,7 +29,7 @@ class RegistroSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = (
             "cui", "usuario", "nombres", "apellidos", "direccion",
-            "fecha_nacimiento", "estatura", "telefono", "correo"
+            "fecha_nacimiento","genero", "estatura", "telefono", "correo"
         )
 
     # -------------------------
@@ -59,7 +59,7 @@ class RegistroSerializer(serializers.ModelSerializer):
     def validate_correo(self, value):
         email = value  # <-- CORRECCIÓN
 
-        if len(email) > 50:
+        if len(email) > 100:
             raise serializers.ValidationError("El correo no puede exceder 50 caracteres.")
 
         if User.objects.filter(email=email).exists():
@@ -96,6 +96,11 @@ class RegistroSerializer(serializers.ModelSerializer):
         if value and value > date.today():
             raise serializers.ValidationError("La fecha no puede ser futura.")
         return value
+    
+    def validate_genero(self, value):
+        if value not in ["M", "F", "O"]:
+            raise serializers.ValidationError("Género inválido.")
+        return value
 
     # -------------------------
     # CREATE
@@ -104,30 +109,44 @@ class RegistroSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop("user")
 
-        user = User.objects.create(
-            username=user_data["username"],
-            email=user_data["email"],
-            first_name=validated_data.get("nombres", ""),
-            last_name=validated_data.get("apellidos", ""),
-            is_active=True,
-        )
-        user.set_unusable_password()
-        user.save()
+        try:
+            # 1. Crear usuario
+            user = User.objects.create(
+                username=user_data["username"],
+                email=user_data["email"],
+                first_name=validated_data.get("nombres", ""),
+                last_name=validated_data.get("apellidos", ""),
+                is_active=True,
+            )
+            user.set_unusable_password()
+            user.save()
 
-        perfil = UserProfile.objects.create(
-            user=user,
-            **validated_data,
-            correo_verificado=False,
-            estado=True,
-        )
+            # 2. Crear perfil
+            perfil = UserProfile.objects.create(
+                user=user,
+                **validated_data,
+                correo_verificado=False,
+                estado=True,
+            )
 
-        grupo, _ = Group.objects.get_or_create(name="Usuario")
-        user.groups.add(grupo)
+            # 3. Asignar grupo
+            grupo, _ = Group.objects.get_or_create(name="Usuario")
+            user.groups.add(grupo)
 
-        token = make_email_token(user.id)
-        transaction.on_commit(lambda: enviar_confirmacion_correo(user, token))
+            # 4. Generar token
+            token = make_email_token(user.id)
+
+            # 5. Enviar correo dentro del TRY (si falla → rollback)
+            enviar_confirmacion_correo(user, token)
+
+        except Exception as e:
+            # Cualquier falla genera rollback total
+            raise serializers.ValidationError(
+                {"detalle": f"Error al registrar usuario: {str(e)}"}
+            )
 
         return perfil
+
 
 
 

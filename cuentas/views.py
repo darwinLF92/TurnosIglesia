@@ -208,21 +208,43 @@ def editar_perfil(request):
 
     perfil, created = UserProfile.objects.get_or_create(user=request.user)
 
-    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest" and "remove_photo" in request.POST:
-        perfil.foto_perfil.delete(save=True)
-        return JsonResponse({"success": True, "action": "removed"})
+    # ------------------------------------------------------
+    #   🟦 MANEJO DE PETICIONES AJAX (subir / eliminar foto)
+    # ------------------------------------------------------
+    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest":
 
-    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest" and "upload_photo" in request.POST:
-        file = request.FILES.get("foto_perfil")
-        if file:
-            perfil.foto_perfil = file
+        # ELIMINAR FOTO
+        if "remove_photo" in request.POST:
+            if perfil.foto_perfil:
+                perfil.foto_perfil.delete(save=False)
+            perfil.foto_perfil = None
             perfil.save()
+
             return JsonResponse({
                 "success": True,
-                "action": "uploaded",
-                "image_url": perfil.foto_perfil.url
+                "action": "removed",
+                "image_url": None
             })
 
+        # SUBIR FOTO
+        if "upload_photo" in request.POST:
+            file = request.FILES.get("foto_perfil")
+            if file:
+                perfil.foto_perfil = file
+                perfil.save()
+
+                return JsonResponse({
+                    "success": True,
+                    "action": "uploaded",
+                    "image_url": perfil.foto_perfil.url
+                })
+
+        # Acción desconocida
+        return JsonResponse({"success": False, "error": "Acción no válida"})
+
+    # ------------------------------------------------------
+    #   🟧 PETICIÓN POST NORMAL (guardar formulario)
+    # ------------------------------------------------------
     if request.method == "POST":
         form_usuario = UsuarioForm(request.POST, instance=request.user)
         form_perfil = PerfilForm(request.POST, request.FILES, instance=perfil)
@@ -233,6 +255,9 @@ def editar_perfil(request):
             messages.success(request, "Perfil actualizado correctamente")
             return redirect("cuentas:perfil")
 
+    # ------------------------------------------------------
+    #   🟩 PETICIÓN GET → cargar formularios
+    # ------------------------------------------------------
     else:
         form_usuario = UsuarioForm(instance=request.user)
         form_perfil = PerfilForm(instance=perfil)
@@ -241,6 +266,7 @@ def editar_perfil(request):
         "form_usuario": form_usuario,
         "form_perfil": form_perfil
     })
+
 
 @login_required
 def cambiar_password(request):

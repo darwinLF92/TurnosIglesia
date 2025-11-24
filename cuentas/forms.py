@@ -41,6 +41,7 @@ class PerfilForm(forms.ModelForm):
             "cui",
             "direccion",
             "fecha_nacimiento",
+            "genero",
             "estatura",
             "telefono",
         ]
@@ -51,6 +52,7 @@ class PerfilForm(forms.ModelForm):
             "cui": "CUI",
             "direccion": "Dirección",
             "fecha_nacimiento": "Fecha de nacimiento",
+            "genero": "Género",
             "estatura": "Estatura (cm)",
             "telefono": "Teléfono",
         }
@@ -62,6 +64,7 @@ class PerfilForm(forms.ModelForm):
             "fecha_nacimiento": forms.DateInput(
                 attrs={"class": "form-control", "type": "date"}
             ),
+            "genero": forms.Select(attrs={"class": "form-control"}),
             "estatura": forms.NumberInput(attrs={"class": "form-control", "min": 100, "max": 250}),
             "telefono": forms.TextInput(attrs={"class": "form-control"}),
         }

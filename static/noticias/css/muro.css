@@ -1,9 +1,42 @@
 /* Contenedor principal del feed */
+body[data-page="muro"] footer {
+    display: none !important;
+}
+
 .feed-container {
     max-width: 700px;
     margin: 0 auto;
     padding: 0 10px; /* para que no pegue al borde */
 }
+/* Espaciado suave entre secciones */
+/* Reducir espacio entre el formulario de publicar y el buscador */
+.fb-post-box {
+    margin-bottom: 6px !important;
+}
+
+/* Reducir espacio del buscador */
+.feed-container form {
+    margin-bottom: 6px !important;
+}
+
+/* Separación entre posts */
+#posts-container .fb-post {
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Quitar padding interno que genera salto */
+.feed-container {
+    padding-top: 0 !important;
+}
+
+/* Mantener compacto en móvil */
+@media (max-width: 768px) {
+    .feed-container {
+        padding-top: 4px !important;
+    }
+}
+
 
 /* Avatar inicial cuando no hay foto */
 .avatar-inicial {
@@ -74,6 +107,21 @@
   padding: 12px 14px;
 }
 
+/* Avatar dinámico por género */
+.avatar-m {
+  background: #2563eb !important; /* Azul */
+  color: #fff !important;
+}
+
+.avatar-f {
+  background: #d946ef !important; /* Fucsia */
+  color: #fff !important;
+}
+
+.avatar-o {
+  background: #22c55e !important; /* Verde */
+  color: #fff !important;
+}
 
 
 /* ===========================
@@ -342,7 +390,7 @@
 .post-menu-dropdown .dropdown-item {
     font-size: 0.95rem;
     padding: 10px 16px;
-    color: #333 !important;
+    color: #080808 !important;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -356,5 +404,47 @@
 
 /* Hover */
 .post-menu-dropdown .dropdown-item:hover {
-    background: #f0f2f5 !important;
+    background: #050505a2 !important;
+    color: #f7f7f7;
 }
+
+#skeleton-loader .skeleton {
+    background: linear-gradient(90deg, #ececec 25%, #e0e0e0 50%, #ececec 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card {
+    border-radius: 14px;
+}
+
+.skeleton.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+}
+
+.skeleton.line {
+    height: 12px;
+    border-radius: 4px;
+}
+
+.skeleton.line.small {
+    height: 8px;
+    width: 70%;
+}
+
+.skeleton.line.short {
+    width: 40%;
+}
+
+.skeleton.media {
+    height: 200px;
+    border-radius: 12px;
+}
+
+@keyframes shimmer {
+    0% { background-position-x: -200%; }
+    100% { background-position-x: 200%; }
+}
+

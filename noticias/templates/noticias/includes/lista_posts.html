@@ -1,0 +1,173 @@
+{% load static %}
+
+{% for post in posts %}
+  <div id="post-{{ post.id }}" class="card fb-post {% if post.imagenes.count %}has-images{% endif %}">
+    <div class="card-body">
+
+      <!-- Cabecera -->
+      <div class="d-flex mb-2 position-relative">
+
+        <!-- Botón de menú -->
+        <div class="dropdown ms-auto" style="position:absolute; right:12px; top:0;">
+          <button class="btn btn-light btn-sm border-0" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+
+          <ul class="dropdown-menu post-menu-dropdown">
+            {% if perms.establecimiento.eliminar_publicacion or request.user.groups.first.name == "Administrador" %}
+              <li>
+                <button class="dropdown-item btn-editar-post"
+                        data-post-id="{{ post.id }}"
+                        data-post-contenido="{{ post.contenido }}">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+              </li>
+            {% endif %}
+
+            {% if perms.establecimiento.eliminar_publicacion or request.user.groups.first.name == "Administrador" %}
+              <li>
+                <button class="dropdown-item btn-eliminar-post"
+                        data-post-id="{{ post.id }}">
+                  <i class="fas fa-trash"></i> Eliminar
+                </button>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Avatar con iniciales -->
+        {% with gen=post.autor.perfil.genero %}
+        <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-2 fb-avatar
+          {% if gen == 'M' %} avatar-m
+          {% elif gen == 'F' %} avatar-f
+          {% else %} avatar-o
+          {% endif %}
+        ">
+        {% endwith %}
+          {% if post.autor.first_name and post.autor.last_name %}
+            {{ post.autor.first_name|slice:":1"|upper }}{{ post.autor.last_name|slice:":1"|upper }}
+          {% else %}
+            {{ post.autor.username|slice:":1"|upper }}
+          {% endif %}
+        </div>
+
+        <!-- Nombre y fecha -->
+        <div>
+          <strong>
+            {% if post.autor.first_name and post.autor.last_name %}
+              {{ post.autor.first_name }} {{ post.autor.last_name }}
+            {% else %}
+              {{ post.autor.username }}
+            {% endif %}
+          </strong><br>
+          <small class="text-muted">{{ post.creado_en|date:"d/m/Y H:i" }}</small>
+        </div>
+
+      </div>
+
+      <!-- Contenido -->
+      {% if post.contenido %}
+      <div class="mb-2">
+        <p class="post-text" id="post-text-{{ post.id }}">
+          {{ post.contenido|linebreaksbr }}
+        </p>
+
+        {% if post.contenido|length > 200 %}
+        <span class="ver-mas-btn" data-post-id="{{ post.id }}">Ver más…</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Medios -->
+      {% if post.medios.all %}
+        <div class="fb-mosaic" data-count="{{ post.medios.count }}">
+          {% for m in post.medios.all %}
+            {% if forloop.counter <= 5 %}
+              <div class="fb-mosaic-item {% if forloop.counter == 5 and post.medios.count > 5 %} fb-mosaic-more {% endif %}"
+                   onclick="openGalleryModal({{ post.id }}, {{ forloop.counter0 }})">
+
+                {% if m.tipo == "imagen" %}
+                  <img src="{{ m.archivo.url }}" class="fb-mosaic-img">
+                {% else %}
+                  <video class="fb-mosaic-img" muted>
+                    <source src="{{ m.archivo.url }}">
+                  </video>
+                {% endif %}
+
+                {% if forloop.counter == 5 and post.medios.count > 5 %}
+                <div class="fb-mosaic-overlay">
+                  +{{ post.medios.count|add:"-5" }}
+                </div>
+                {% endif %}
+
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Likes y comentarios -->
+      <div class="d-flex align-items-center justify-content-between mt-2">
+        <button class="btn btn-link btn-sm p-0 text-decoration-none btn-like"
+                data-post-id="{{ post.id }}">
+          <i class="fas fa-thumbs-up me-1 {% if user in post.likes.all %}text-primary{% endif %}"></i>
+          <span class="like-text">
+            {% if user in post.likes.all %}Te gusta{% else %}Me gusta{% endif %}
+          </span>
+        </button>
+
+        <small class="text-muted">
+          <span class="like-count"
+                data-post-id="{{ post.id }}"
+                style="cursor:pointer;"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="{% for u in post.likes.all|slice:':5' %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
+            {{ post.total_likes }} Me gusta
+          </span> •
+          <span class="comment-count"
+                data-post-id="{{ post.id }}"
+                style="cursor:pointer;"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="{% for c in post.comentarios.all|slice:':5' %}{{ c.autor.get_full_name|default:c.autor.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
+            {{ post.comentarios.count }} comentarios
+          </span>
+        </small>
+      </div>
+
+      <hr class="my-2">
+
+      <!-- Comentarios (3 visibles) -->
+      <div class="comentarios mt-2" data-post-id="{{ post.id }}">
+        {% for c in post.comentarios.all %}
+          {% if not c.padre %}
+          <div class="{% if forloop.counter > 1 %}d-none extra-comment{% endif %}">
+            {% include 'noticias/includes/comentario.html' with comentario=c %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if post.comentarios.count > 3 %}
+        <button type="button"
+                class="btn btn-link btn-sm p-0 mt-1 ver-todos-comentarios"
+                data-post-id="{{ post.id }}">
+          Ver todos los comentarios
+        </button>
+      {% endif %}
+
+      <!-- Nuevo comentario -->
+      <form method="post" action="{% url 'noticias:agregar_comentario' post.id %}" class="mt-2">
+        {% csrf_token %}
+        <div class="input-group input-group-sm">
+          {{ comentario_form.texto }}
+          <button class="btn btn-outline-primary" type="submit">Comentar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+{% empty %}
+  <p class="text-muted text-center">Aún no hay publicaciones.</p>
+{% endfor %}

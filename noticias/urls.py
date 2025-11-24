@@ -18,6 +18,8 @@ path("noticias/media/<int:post_id>/", views.obtener_media_post, name="media_post
 path("noticias/eliminar-media/<int:media_id>/", views.eliminar_media, name="eliminar_media"),
 path("notificacion/<int:notif_id>/", views.leer_notificacion, name="leer_notificacion"),
 path("notificaciones/historial/", views.historial_notificaciones, name="historial_notificaciones"),
+path("buscar/", views.buscar_publicaciones, name="buscar_publicaciones"),
+
 
 
 

@@ -11,16 +11,30 @@ from .utils_notificaciones import (
     crear_notificacion_like,
     crear_notificacion_comentario
 )
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.template.loader import render_to_string
 
 
 def muro_noticias(request):
 
-    # ⚠ BLOQUEA POST SI NO ESTÁ LOGUEADO
+    # ============================================================
+    # 🔐 VALIDAR POST: SOLO USUARIOS LOGUEADOS
+    # ============================================================
     if request.method == 'POST' and not request.user.is_authenticated:
         messages.warning(request, "Debes iniciar sesión para publicar.")
         return redirect('noticias:muro')
 
-    # ✔ Crear publicación si está logueado
+    # ============================================================
+    # 🔐 VALIDAR PERMISO PARA PUBLICAR
+    # ============================================================
+    if request.method == 'POST' and not request.user.has_perm('establecimiento.crear_publicacion'):
+        messages.error(request, "No tienes permiso para crear publicaciones.")
+        return redirect('noticias:muro')
+
+    # ============================================================
+    # 📝 CREAR PUBLICACIÓN
+    # ============================================================
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -32,6 +46,7 @@ def muro_noticias(request):
             archivos = request.FILES.getlist('media')
             for i, archivo in enumerate(archivos):
                 ext = archivo.name.split('.')[-1].lower()
+
                 if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
                     tipo = 'imagen'
                 elif ext in ['mp4', 'webm', 'mov', 'avi', 'mkv']:
@@ -48,17 +63,22 @@ def muro_noticias(request):
 
             messages.success(request, "¡Tu publicación ha sido creada!")
             return redirect('noticias:muro')
+
     else:
         form = PostForm()
 
-    posts = Post.objects.filter(activo=True).select_related('autor').prefetch_related('medios', 'comentarios', 'likes')
+    # ============================================================
+    # 🚫 YA NO SE HACE BÚSQUEDA NI PAGINACIÓN AQUÍ
+    #     → Todo se maneja por AJAX (buscar_publicaciones)
+    # ============================================================
 
     contexto = {
         'form': form,
-        'posts': posts,
         'comentario_form': ComentarioForm(),
     }
+
     return render(request, 'noticias/muro.html', contexto)
+
 
 
 
@@ -215,30 +235,31 @@ def responder_comentario(request, comentario_id):
 
 @login_required
 def editar_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id, autor=request.user)
+    post = get_object_or_404(Post, id=post_id)
+
+    # 🔐 Validación: solo autor o administrador
+    es_autor = (post.autor == request.user)
+    es_admin = request.user.groups.filter(name="Administrador").exists()
+
+    if not (es_autor or es_admin):
+        return HttpResponseForbidden("No tienes permiso para editar esta publicación.")
 
     if request.method == "POST":
         contenido = request.POST.get("contenido", "").strip()
-
-        # Archivos nuevos
         nuevos_archivos = request.FILES.getlist("nuevo_media")
-
-        # IDs de medios eliminados
         eliminar = request.POST.getlist("eliminar_media[]")
 
-        # Actualizar texto
+        # ✔ Actualizar contenido
         post.contenido = contenido
         post.save()
 
-        # Eliminar medios marcados
+        # ✔ Eliminar medios marcados
         if eliminar:
             PostMedia.objects.filter(id__in=eliminar, post=post).delete()
 
-        # Agregar nuevos medios
+        # ✔ Agregar nuevos medios
         for archivo in nuevos_archivos:
-            tipo = "imagen"
-            if archivo.content_type.startswith("video"):
-                tipo = "video"
+            tipo = "video" if archivo.content_type.startswith("video") else "imagen"
 
             PostMedia.objects.create(
                 post=post,
@@ -256,13 +277,21 @@ def editar_post(request, post_id):
 
 
 @login_required
-@require_POST
 def eliminar_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id, autor=request.user)
+    post = get_object_or_404(Post, id=post_id)
 
-    post.delete()
+    # 🔐 Validación: solo autor o admin
+    es_autor = (post.autor == request.user)
+    es_admin = request.user.groups.filter(name="Administrador").exists()
 
-    return JsonResponse({"success": True})
+    if not (es_autor or es_admin):
+        return HttpResponseForbidden("No tienes permiso para eliminar esta publicación.")
+
+    if request.method == "POST":
+        post.delete()
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False})
 
 
 def obtener_media_post(request, post_id):
@@ -309,3 +338,26 @@ def historial_notificaciones(request):
         "historial": historial
     })
 
+def buscar_publicaciones(request):
+    q = request.GET.get("q", "").strip()
+    page = request.GET.get("page", 1)
+    infinite = request.GET.get("infinite", "0") == "1"
+
+    posts = Post.objects.all().order_by("-creado_en")
+
+    if q:
+        posts = posts.filter(contenido__icontains=q)
+
+    paginator = Paginator(posts, 5)  # 🔥 5 posts por carga (puedes ajustar)
+    page_obj = paginator.get_page(page)
+
+    html = render_to_string(
+        "noticias/includes/lista_posts.html",
+        {"posts": page_obj.object_list, "user": request.user, "comentario_form": ComentarioForm()}
+    )
+
+    return JsonResponse({
+        "html": html,
+        "has_next": page_obj.has_next(),
+        "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
+    })

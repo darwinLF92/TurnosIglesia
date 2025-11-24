@@ -1,0 +1,37 @@
+{% extends "nucleo/base_correo.html" %}
+{% block contenido %}
+
+<p>
+  Estimado devoto: <strong>{{ nombre_completo }}</strong>
+</p>
+
+<p>
+  Hemos recibido tu solicitud para registrarte en nuestro sistema.
+  Para validar tus datos y completar tu registro, por favor haz clic en el siguiente botón:
+</p>
+
+<!-- BOTÓN -->
+<div style="text-align: center; margin: 25px 0;">
+  <a href="{{ enlace }}" style="
+        background-color: #009b5a;
+        color: #ffffff;
+        text-decoration: none;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        display: inline-block;
+      ">
+    VALIDAR
+  </a>
+</div>
+
+<p>
+  Si el botón no funciona, haz clic o copia el siguiente enlace en tu navegador:
+</p>
+
+<p style="color: #0070c9; word-break: break-all;">
+  {{ enlace }}
+</p>
+
+{% endblock %}
