@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'notificaciones',
     'rest_framework_simplejwt',
     'noticias',
+    'inscripciones_online',
 ]
 
 MIDDLEWARE = [
@@ -192,3 +193,8 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 EMAIL_TIMEOUT = 30
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
+TWILIO_WHATSAPP_TEMPLATE_SID = os.getenv("TWILIO_WHATSAPP_TEMPLATE_SID")

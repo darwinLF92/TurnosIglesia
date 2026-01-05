@@ -29,9 +29,8 @@ urlpatterns = [
     path('', include('establecimiento.urls', namespace='establecimiento')),
     path('', include('cuentas.urls', namespace='cuentas')),
     path('', include('noticias.urls', namespace='noticias')),
+    path('', include('inscripciones_online.urls', namespace='inscripciones_online')),
 
-
-    
 
 ]
 

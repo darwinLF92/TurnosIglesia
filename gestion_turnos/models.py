@@ -2,8 +2,21 @@ from django.db import models
 from django.utils import timezone
 from devotos.models import Devoto
 from turnos.models import Turno
+from decimal import Decimal
 
 class RegistroInscripcion(models.Model):
+
+    TIPO_INSCRIPCION_CHOICES = (
+        ("online", "En línea"),
+        ("presencial", "Presencial"),
+    )
+
+    tipo_inscripcion = models.CharField(
+        max_length=12,
+        choices=TIPO_INSCRIPCION_CHOICES,
+        default="presencial"
+    )
+    
     codigo = models.CharField(max_length=20, unique=True, editable=False, null=True, blank=True)  # ← Nuevo campo personalizado
 
     devoto = models.ForeignKey(Devoto, on_delete=models.CASCADE, related_name='inscripciones')
@@ -13,8 +26,8 @@ class RegistroInscripcion(models.Model):
     entregado = models.BooleanField(default=False)
     fecha_entrega = models.DateTimeField(blank=True, null=True)
     valor_turno = models.DecimalField(max_digits=6, decimal_places=2)
-    monto_pagado = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
-    cambio = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    monto_pagado = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
+    cambio = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
     fecha_entrega_estimada = models.DateTimeField(blank=True, null=True)
     lugar_entrega = models.CharField(max_length=255, blank=True, null=True)
 
@@ -22,8 +35,15 @@ class RegistroInscripcion(models.Model):
         return self.codigo if self.codigo else f'{self.devoto.nombre} - Turno {self.turno.id}'
 
     def calcular_cambio(self):
-        self.cambio = max(self.monto_pagado - self.valor_turno, 0)
+        monto = Decimal(self.monto_pagado)
+        valor = Decimal(self.valor_turno)
+
+        self.cambio = max(
+            monto - valor,
+            Decimal('0.00')
+        )
         return self.cambio
+
 
     def save(self, *args, **kwargs):
         if self.turno:

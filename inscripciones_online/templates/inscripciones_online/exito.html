@@ -1,0 +1,40 @@
+{% extends 'aplicacion/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <div class="alert alert-success mb-4">
+        <h4 class="mb-2">¡Inscripción realizada con éxito!</h4>
+
+        <p><strong>Código:</strong> {{ insc.codigo }}</p>
+        <p><strong>Procesión:</strong> {{ insc.turno.procesion.nombre }}</p>
+        <p><strong>Fecha:</strong> {{ insc.turno.procesion.fecha|date:"d/m/Y" }}</p>
+        <p><strong>Turno:</strong> {{ insc.turno.numero_turno }}</p>
+        <p><strong>Valor:</strong> Q{{ insc.valor_turno }}</p>
+      </div>
+
+      <div class="d-flex flex-column flex-md-row gap-3">
+
+        <!-- 📄 Descargar comprobante -->
+        <a href="{% url 'inscripciones_online:comprobante_imagen' insc.codigo %}"
+           class="btn btn-outline-primary">
+          <i class="fas fa-file-pdf me-1"></i>
+          Descargar comprobante
+        </a>
+
+        <!-- 🔙 Volver -->
+        <a href="{% url 'inscripciones_online:inscripcion_online' insc.turno.procesion.id %}"
+           class="btn btn-secondary">
+          Volver
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -29,41 +29,74 @@ from django.db.models.functions import ExtractYear
 from openpyxl.utils import get_column_letter
 from openpyxl import Workbook
 import io
-
+from django.db import transaction
 
 @login_required
 def inscribir_devoto(request):
+    """
+    Inscripción PRESENCIAL de devotos (uso administrativo)
+    """
+
     if request.method == 'POST':
-        
-        form = InscripcionForm(request.POST)
+        # 🔑 PASAMOS EL USER AL FORM
+        form = InscripcionForm(request.POST, user=request.user)
+
         if form.is_valid():
-            inscripcion = form.save(commit=False)
-            inscripcion.inscrito = True  # Marca como inscrito
+            try:
+                with transaction.atomic():
+                    inscripcion = form.save(commit=False)
 
-            # ✅ Obtener el valor del turno antes de guardar
-            if inscripcion.turno:
-                inscripcion.valor_turno = inscripcion.turno.valor  # Verifica que sea el campo correcto en el modelo
+                    # 🔹 Campos de control
+                    inscripcion.inscrito = True
+                    inscripcion.tipo_inscripcion = "presencial"
 
-            inscripcion.save()
-            return redirect(reverse('gestion_turnos:lista_inscripciones'))
+                    # 🔹 Asegurar valor del turno
+                    if inscripcion.turno:
+                        inscripcion.valor_turno = inscripcion.turno.valor
+
+                    # 🔹 Calcular cambio
+                    inscripcion.cambio = inscripcion.calcular_cambio()
+
+                    inscripcion.save()
+
+                messages.success(
+                    request,
+                    "Inscripción registrada correctamente."
+                )
+                return redirect(
+                    reverse('gestion_turnos:lista_inscripciones')
+                )
+
+            except Exception as e:
+                messages.error(
+                    request,
+                    f"Ocurrió un error al registrar la inscripción: {str(e)}"
+                )
+
         else:
-            print("🚨 ERRORES EN EL FORMULARIO:", form.errors)
-            error_message = form.non_field_errors()
-            return render(request, 'gestion_turnos/crear_inscripcion.html', {
-                'form': form,
-                'error_message': error_message,
-            })
-    else:
-        form = InscripcionForm()
+            # ❌ Errores del formulario
+            messages.error(
+                request,
+                "No se pudo registrar la inscripción. Verifique los datos."
+            )
 
-    # Agregar la lista de devotos activos y procesiones activas al contexto
-    devotos_activos = Devoto.objects.filter(activo=True).order_by('nombre')
-    procesiones = Procesion.objects.filter(activo=True).order_by('nombre')  # Suponiendo que hay un campo `activo`
+    else:
+        # GET
+        form = InscripcionForm(user=request.user)
+
+    # 🔹 Datos auxiliares para la vista
+    devotos_activos = Devoto.objects.filter(
+        activo=True
+    ).order_by('nombre')
+
+    procesiones = Procesion.objects.filter(
+        activo=True
+    ).order_by('nombre')
 
     return render(request, 'gestion_turnos/crear_inscripcion.html', {
         'form': form,
         'devotos_activos': devotos_activos,
-        'procesiones': procesiones  # ✅ Se pasa al contexto
+        'procesiones': procesiones,
     })
 
 @login_required
@@ -128,10 +161,23 @@ class ListaInscripciones(ListView):
 @login_required
 def load_turnos(request):
     procesion_id = request.GET.get('procesion_id')
-    if procesion_id:
-        turnos = Turno.objects.filter(procesion_id=procesion_id).values('id', 'numero_turno', 'referencia')
-        return JsonResponse(list(turnos), safe=False)
-    return JsonResponse([], safe=False)
+
+    turnos = Turno.objects.filter(
+        procesion_id=procesion_id,
+        activo=True
+    ).order_by('numero_turno')
+
+    data = []
+    for turno in turnos:
+        data.append({
+            "id": turno.id,
+            "numero_turno": turno.numero_turno,
+            "referencia": turno.referencia or "",
+            "valor": str(turno.valor),
+            "reservado": turno.reservado_hermandad,  # 👈 CLAVE
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required
 def ajax_devotos_activos(request):

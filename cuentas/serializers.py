@@ -10,7 +10,9 @@ from nucleo.correos import enviar_confirmacion_correo
 from django.core.signing import BadSignature, SignatureExpired
 from django.contrib.auth.password_validation import validate_password
 from nucleo.correos import enviar_reset_password_correo
-from datetime import date
+from datetime import date, timezone
+from devotos.models import Devoto
+
 
 Usuario = get_user_model()  # auth.User
 
@@ -128,6 +130,34 @@ class RegistroSerializer(serializers.ModelSerializer):
                 correo_verificado=False,
                 estado=True,
             )
+
+                    # 3️⃣ Crear o reutilizar DEVOTO
+            nombre_completo = f"{perfil.nombres or ''} {perfil.apellidos or ''}".strip()
+
+            devoto, creado = Devoto.objects.get_or_create(
+                cui_o_nit=perfil.cui,
+                defaults={
+                    "nombre": nombre_completo,
+                    "correo": user.email,
+                    "telefono": perfil.telefono or "",
+                    "direccion": perfil.direccion or "",
+                    "fecha_nacimiento": perfil.fecha_nacimiento,
+                    "activo": True,
+                    "usuario_registro": user,
+                }
+            )
+
+            # Si ya existía, opcionalmente sincronizar datos
+            if not creado:
+                devoto.nombre = nombre_completo
+                devoto.correo = user.email
+                devoto.telefono = perfil.telefono or devoto.telefono
+                devoto.direccion = perfil.direccion or devoto.direccion
+                devoto.fecha_nacimiento = perfil.fecha_nacimiento
+                devoto.usuario_modificacion = user
+                devoto.fecha_modificacion = timezone.now()
+                devoto.save()
+
 
             # 3. Asignar grupo
             grupo, _ = Group.objects.get_or_create(name="Usuario")

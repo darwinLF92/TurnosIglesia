@@ -1,0 +1,99 @@
+{% extends 'aplicacion/base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="container py-4">
+  <div class="mb-3">
+    <h3 class="mb-1">Inscripción en línea</h3>
+    <div class="text-muted">
+      Procesión: <strong>{{ procesion.nombre }}</strong> | Fecha: <strong>{{ procesion.fecha }}</strong>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form id="formInscripcion" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="confirmado" id="confirmado" value="0">
+
+        <div class="mb-3">
+          <label class="form-label">Seleccione su turno</label>
+          {{ form.turno }}
+          {% if form.turno.errors %}
+            <div class="text-danger small mt-1">{{ form.turno.errors }}</div>
+          {% endif %}
+        </div>
+
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const select = document.getElementById("id_turno");
+            const turnosReservados = {{ form.turnos_reservados|safe }};
+
+            Array.from(select.options).forEach(option => {
+                if (turnosReservados.includes(option.value)) {
+                    option.disabled = true;
+                    option.style.color = "#999";
+                    option.style.fontStyle = "italic";
+                }
+            });
+        });
+        </script>
+
+
+        <button type="submit" class="btn btn-primary">
+          Continuar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if resumen %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const resumenHtml = `
+      <div style="text-align:left">
+        <p><b>Procesión:</b> {{ resumen.procesion }}</p>
+        <p><b>Fecha:</b> {{ resumen.fecha }}</p>
+        <p><b>Turno:</b> {{ resumen.turno }}</p>
+        <p><b>Valor:</b> Q{{ resumen.valor }}</p>
+      </div>
+    `;
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Confirmar inscripción',
+      html: resumenHtml,
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById('confirmado').value = "1";
+        document.getElementById('formInscripcion').submit();
+      } else {
+        // si cancela, no hace nada
+      }
+    });
+  });
+</script>
+{% endif %}
+
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  {% for message in messages %}
+    Swal.fire({
+      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+      title: "{% if message.tags == 'success' %}Éxito{% elif message.tags == 'warning' %}Atención{% else %}Error{% endif %}",
+      text: "{{ message|escapejs }}",
+      confirmButtonText: "Aceptar"
+    });
+  {% endfor %}
+});
+</script>
+{% endif %}
+
+{% endblock %}

@@ -12,6 +12,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
+
+
+
+
 @method_decorator(login_required, name='dispatch')
 class CrearTurnoView(CreateView):
     model = Turno
@@ -20,44 +24,63 @@ class CrearTurnoView(CreateView):
 
     def get_initial(self):
         """
-        Inicializa el formulario con la procesión seleccionada en la vista de detalles.
+        Inicializa el formulario con:
+        - la procesión seleccionada
+        - el siguiente número de turno disponible
         """
         initial = super().get_initial()
         procesion_id = self.request.GET.get('procesion_id')
+
         if procesion_id:
-            initial['procesion'] = get_object_or_404(Procesion, id=procesion_id)
+            procesion = get_object_or_404(Procesion, id=procesion_id)
+            initial['procesion'] = procesion
+
+            # 🔹 Buscar el último turno creado para esa procesión
+            ultimo_turno = (
+                Turno.objects
+                .filter(procesion=procesion)
+                .order_by('-numero_turno')
+                .first()
+            )
+
+            # 🔹 Sugerir el siguiente número
+            if ultimo_turno:
+                initial['numero_turno'] = ultimo_turno.numero_turno + 1
+            else:
+                initial['numero_turno'] = 1
+
         return initial
 
     def get_context_data(self, **kwargs):
-        """
-        Agrega la procesión seleccionada al contexto de la plantilla.
-        """
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Crear Turno'
+
         procesion_id = self.request.GET.get('procesion_id')
         if procesion_id:
-            context['procesion_seleccionada'] = get_object_or_404(Procesion, id=procesion_id)
+            context['procesion_seleccionada'] = get_object_or_404(
+                Procesion, id=procesion_id
+            )
+
         return context
 
     def form_valid(self, form):
-        """
-        Si el formulario es válido, guarda el turno y muestra un mensaje de éxito.
-        """
         messages.success(self.request, "¡Turno creado exitosamente!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        """
-        Si el formulario tiene errores, muestra un mensaje de error.
-        """
-        messages.error(self.request, "Hubo un error al crear el turno. Verifique los datos ingresados.")
+        messages.error(
+            self.request,
+            "Hubo un error al crear el turno. Verifique los datos ingresados."
+        )
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_success_url(self):
         """
-        Redirige nuevamente al formulario de creación manteniendo la procesión seleccionada.
+        Redirige nuevamente al formulario manteniendo la procesión seleccionada
+        y permitiendo seguir creando turnos en secuencia.
         """
-        return reverse('turnos:crear_turno') + f"?procesion_id={self.request.GET.get('procesion_id', '')}"
+        procesion_id = self.request.GET.get('procesion_id', '')
+        return reverse('turnos:crear_turno') + f"?procesion_id={procesion_id}"
 
 @login_required    
 def lista_turnos(request):

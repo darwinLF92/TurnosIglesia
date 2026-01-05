@@ -1,0 +1,144 @@
+{% extends "aplicacion/base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="container py-4">
+
+  <h3 class="mb-3">Mis inscripciones</h3>
+
+  <!-- 🔍 BUSCADOR -->
+  <form method="get" class="mb-3">
+    <div class="input-group">
+      <input type="text"
+             name="q"
+             class="form-control"
+             placeholder="Buscar por procesión o turno..."
+             value="{{ query }}">
+      <button class="btn btn-primary" type="submit">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+  </form>
+
+  {% if sin_devoto %}
+    <div class="alert alert-warning">
+      No se encontró información de devoto asociada a tu cuenta.
+    </div>
+  {% elif page_obj.object_list %}
+
+  <!-- ================= DESKTOP (TABLA) ================= -->
+  <div class="table-responsive d-none d-md-block">
+    <table class="table table-hover align-middle shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>Código</th>
+          <th>Procesión</th>
+          <th>Fecha</th>
+          <th>Turno</th>
+          <th>Valor</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for insc in page_obj %}
+        <tr>
+          <td>{{ insc.codigo }}</td>
+          <td>{{ insc.turno.procesion.nombre }}</td>
+          <td>{{ insc.turno.procesion.fecha|date:"d/m/Y" }}</td>
+          <td>Turno {{ insc.turno.numero_turno }}</td>
+          <td>Q{{ insc.valor_turno }}</td>
+          <td>
+            {% if insc.entregado %}
+              <span class="badge bg-success">Entregado</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'inscripciones_online:comprobante_imagen' insc.codigo %}" title="Descargar Comprobante"
+               class="btn btn-sm btn-outline-primary">
+              <i class="fa-solid fa-download"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= MÓVIL (TARJETAS) ================= -->
+  <div class="d-md-none">
+    {% for insc in page_obj %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="mb-1">{{ insc.turno.procesion.nombre }}</h6>
+        <div class="small text-muted mb-2">
+          {{ insc.turno.procesion.fecha|date:"d/m/Y" }}
+        </div>
+
+        <p class="mb-1"><strong>Turno:</strong> {{ insc.turno.numero_turno }}</p>
+        <p class="mb-1"><strong>Valor:</strong> Q{{ insc.valor_turno }}</p>
+        <p class="mb-2">
+          <strong>Estado:</strong>
+          {% if insc.entregado %}
+            <span class="badge bg-success">Entregado</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          {% endif %}
+        </p>
+
+        <a href="{% url 'inscripciones_online:comprobante_imagen' insc.codigo %}"
+           class="btn btn-sm btn-outline-primary w-100">
+          <i class="fa-solid fa-download"></i> Descargar comprobante
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ================= PAGINACIÓN ================= -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center flex-wrap">
+
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1&q={{ query }}">«</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">‹</a>
+        </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+        {% elif num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">›</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}">»</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  {% else %}
+    <div class="alert alert-info">
+      No se encontraron inscripciones.
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

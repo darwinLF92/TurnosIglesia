@@ -278,12 +278,25 @@
                         var turnoSelect = document.getElementById("id_turno");
                         turnoSelect.innerHTML = '<option value="">Seleccionar</option>';
 
-                        data.forEach(function (item) {
+                     data.forEach(function (item) {
                             var option = document.createElement('option');
                             option.value = item.id;
-                            option.text = "Turno " + item.numero_turno + " - " + item.referencia;
+
+                            option.text =
+                                "Turno " + item.numero_turno +
+                                (item.referencia ? " - " + item.referencia : "") +
+                                " - Q" + item.valor;
+
+                            if (item.reservado) {
+                                option.disabled = true;
+                                option.style.color = "#999";
+                                option.style.fontStyle = "italic";
+                                option.text += " (Reservado)";
+                            }
+
                             turnoSelect.appendChild(option);
                         });
+
                     })
                     .catch(error => {
                         console.error("Error al cargar los turnos:", error);
@@ -318,7 +331,7 @@
         document.getElementById('id_cambio').value = cambio.toFixed(2);
         });
 
-        // ✅ Este es el nuevo código que necesitas:
+   
         document.getElementById('id_monto_pagado').addEventListener('focus', function () {
             if (this.value === "0.00") {
                 this.value = "";
