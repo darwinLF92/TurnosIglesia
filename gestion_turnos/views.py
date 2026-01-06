@@ -30,85 +30,153 @@ from openpyxl.utils import get_column_letter
 from openpyxl import Workbook
 import io
 from django.db import transaction
+from nucleo.correos import enviar_confirmacion_inscripcion_correo
+
 
 @login_required
 def inscribir_devoto(request):
-    """
-    Inscripción PRESENCIAL de devotos (uso administrativo)
-    """
+    can_turno_reservado = request.user.has_perm('establecimiento.turno_reservado')
+
+    devotos_activos = Devoto.objects.filter(activo=True).order_by('nombre')
+    procesiones = Procesion.objects.filter(activo=True).order_by('nombre')
 
     if request.method == 'POST':
-        # 🔑 PASAMOS EL USER AL FORM
         form = InscripcionForm(request.POST, user=request.user)
 
-        if form.is_valid():
-            try:
-                with transaction.atomic():
-                    inscripcion = form.save(commit=False)
+        if not form.is_valid():
+            # 👇 IMPORTANTE: aquí no redirigimos, mostramos errores
+# Captura errores reales del form (incluye __all__)
+            errores = form.errors.get_json_data()
 
-                    # 🔹 Campos de control
-                    inscripcion.inscrito = True
-                    inscripcion.tipo_inscripcion = "presencial"
+            # Construir un texto amigable con todos los mensajes
+            lista = []
+            for campo, errores_campo in errores.items():
+                for e in errores_campo:
+                    # campo == '__all__' -> error general
+                    if campo == '__all__':
+                        lista.append(e.get("message"))
+                    else:
+                        lista.append(f"{campo}: {e.get('message')}")
 
-                    # 🔹 Asegurar valor del turno
-                    if inscripcion.turno:
-                        inscripcion.valor_turno = inscripcion.turno.valor
+            mensaje = "<br>".join([m for m in lista if m]) or "No se pudo registrar la inscripción. Verifique los datos."
 
-                    # 🔹 Calcular cambio
-                    inscripcion.cambio = inscripcion.calcular_cambio()
+            messages.error(request, mensaje)
 
-                    inscripcion.save()
+            return render(request, 'gestion_turnos/crear_inscripcion.html', {
+                'form': form,
+                'devotos_activos': devotos_activos,
+                'procesiones': procesiones,
+                'can_turno_reservado': can_turno_reservado,
+            })
 
-                messages.success(
-                    request,
-                    "Inscripción registrada correctamente."
-                )
-                return redirect(
-                    reverse('gestion_turnos:lista_inscripciones')
-                )
 
-            except Exception as e:
-                messages.error(
-                    request,
-                    f"Ocurrió un error al registrar la inscripción: {str(e)}"
-                )
+        try:
+            with transaction.atomic():
+                inscripcion = form.save(commit=False)
 
-        else:
-            # ❌ Errores del formulario
-            messages.error(
-                request,
-                "No se pudo registrar la inscripción. Verifique los datos."
-            )
+                # 🔒 Turno reservado sin permiso -> NO redirigir, solo mostrar error
+                if (
+                    inscripcion.turno
+                    and getattr(inscripcion.turno, "reservado_hermandad", False)
+                    and not can_turno_reservado
+                ):
+                    messages.error(request, "No tiene permiso para inscribir en turnos reservados.")
+                    return render(request, 'gestion_turnos/crear_inscripcion.html', {
+                        'form': form,
+                        'devotos_activos': devotos_activos,
+                        'procesiones': procesiones,
+                        'can_turno_reservado': can_turno_reservado,
+                    })
 
-    else:
-        # GET
-        form = InscripcionForm(user=request.user)
+                # ✅ Tomar valores ya validados del form
+                fecha_estimada = form.cleaned_data.get("fecha_entrega_estimada")
+                lugar_entrega = (form.cleaned_data.get("lugar_entrega") or "").strip()
 
-    # 🔹 Datos auxiliares para la vista
-    devotos_activos = Devoto.objects.filter(
-        activo=True
-    ).order_by('nombre')
+                if fecha_estimada and settings.USE_TZ and timezone.is_naive(fecha_estimada):
+                    fecha_estimada = timezone.make_aware(fecha_estimada, timezone.get_current_timezone())
 
-    procesiones = Procesion.objects.filter(
-        activo=True
-    ).order_by('nombre')
+                # ✅ Guardar SIEMPRE en inscripción
+                inscripcion.fecha_entrega_estimada = fecha_estimada
+                inscripcion.lugar_entrega = lugar_entrega or None
 
+                # ✅ Guardar en Turno solo si está vacío y el usuario ingresó
+                if inscripcion.turno:
+                    turno_obj = inscripcion.turno
+                    actualizar_turno = False
+
+                    if not turno_obj.fecha_entrega and fecha_estimada:
+                        turno_obj.fecha_entrega = fecha_estimada
+                        actualizar_turno = True
+
+                    if not turno_obj.lugar_entrega and lugar_entrega:
+                        turno_obj.lugar_entrega = lugar_entrega
+                        actualizar_turno = True
+
+                    if actualizar_turno:
+                        turno_obj.save(update_fields=["fecha_entrega", "lugar_entrega"])
+
+                # Control
+                inscripcion.inscrito = True
+                inscripcion.tipo_inscripcion = "presencial"
+
+                if inscripcion.turno:
+                    inscripcion.valor_turno = inscripcion.turno.valor
+
+                inscripcion.cambio = inscripcion.calcular_cambio()
+                inscripcion.save()
+
+            messages.success(request, "Inscripción registrada correctamente.")
+            return redirect(reverse('gestion_turnos:lista_inscripciones'))
+
+        except Exception as e:
+      
+            messages.error(request, f"Ocurrió un error al registrar la inscripción: {str(e)}")
+            return render(request, 'gestion_turnos/crear_inscripcion.html', {
+                'form': form,
+                'devotos_activos': devotos_activos,
+                'procesiones': procesiones,
+                'can_turno_reservado': can_turno_reservado,
+            })
+
+    # GET
+    form = InscripcionForm(user=request.user)
     return render(request, 'gestion_turnos/crear_inscripcion.html', {
         'form': form,
         'devotos_activos': devotos_activos,
         'procesiones': procesiones,
+        'can_turno_reservado': can_turno_reservado,
     })
+
 
 @login_required
 def obtener_precio_turno(request):
     turno_id = request.GET.get('turno_id')
-    if turno_id:
-        try:
-            turno = Turno.objects.get(id=turno_id)
-            return JsonResponse({'precio': float(turno.valor)})  # Retorna el precio en JSON
-        except Turno.DoesNotExist:
-            return JsonResponse({'error': 'Turno no encontrado'}, status=404)
-    return JsonResponse({'error': 'ID de turno no proporcionado'}, status=400)
+
+    if not turno_id:
+        return JsonResponse({"error": "turno_id requerido"}, status=400)
+
+    try:
+        turno = Turno.objects.get(id=turno_id, activo=True)
+    except Turno.DoesNotExist:
+        return JsonResponse({"error": "Turno no encontrado"}, status=404)
+
+    fecha = turno.fecha_entrega  # DateTimeField
+
+    # ✅ Formato para <input type="datetime-local"> -> "YYYY-MM-DDTHH:MM"
+    if fecha:
+        if timezone.is_aware(fecha):
+            fecha = timezone.localtime(fecha)
+        # si es naive, la dejamos tal cual
+        fecha_str = fecha.strftime("%Y-%m-%dT%H:%M")
+    else:
+        fecha_str = ""
+
+    return JsonResponse({
+        "precio": str(turno.valor),
+        "fecha_entrega": fecha_str,
+        "lugar_entrega": turno.lugar_entrega or "",
+        "reservado": bool(turno.reservado_hermandad),
+    })
 
 @method_decorator(login_required, name='dispatch')
 class ListaInscripciones(ListView): 
@@ -162,6 +230,9 @@ class ListaInscripciones(ListView):
 def load_turnos(request):
     procesion_id = request.GET.get('procesion_id')
 
+    # 🔐 Permiso para turnos reservados
+    can_turno_reservado = request.user.has_perm('establecimiento.turno_reservado')
+
     turnos = Turno.objects.filter(
         procesion_id=procesion_id,
         activo=True
@@ -169,12 +240,19 @@ def load_turnos(request):
 
     data = []
     for turno in turnos:
+        es_reservado = bool(turno.reservado_hermandad)  # ✅ tu campo real
+
         data.append({
             "id": turno.id,
             "numero_turno": turno.numero_turno,
             "referencia": turno.referencia or "",
             "valor": str(turno.valor),
-            "reservado": turno.reservado_hermandad,  # 👈 CLAVE
+            "reservado": es_reservado,
+            "habilitado": (not es_reservado) or can_turno_reservado,
+
+            # 👇 DEBUG (quita luego)
+            "debug_perm": can_turno_reservado,
+            "debug_reservado": es_reservado,
         })
 
     return JsonResponse(data, safe=False)
@@ -363,9 +441,11 @@ class ListaEntregaTurnos(View):
         nombre = request.GET.get("nombre", "").strip()
 
         # Filtrar inscripciones por entregados y nombre de devoto
-        inscripciones = RegistroInscripcion.objects.filter(
-            inscrito=True, entregado=entregados
-        ).select_related("devoto", "turno")
+        inscripciones = (
+            RegistroInscripcion.objects.filter(inscrito=True, entregado=entregados)
+            .select_related("devoto", "turno")
+            .order_by("-fecha_inscripcion")  # ✅ más reciente -> más antiguo
+        )
 
         if nombre:
             inscripciones = inscripciones.filter(devoto__nombre__icontains=nombre)
@@ -701,3 +781,32 @@ def exportar_inscripciones_excel(request):
     )
     response['Content-Disposition'] = 'attachment; filename="reporte_inscripciones.xlsx"'
     return response
+
+
+@login_required
+def reenviar_correo_inscripcion(request, inscripcion_id):
+    inscripcion = get_object_or_404(RegistroInscripcion, id=inscripcion_id)
+
+    try:
+        enviado = enviar_confirmacion_inscripcion_correo(
+            inscripcion,
+            usuario=request.user
+        )
+
+        if enviado:
+            return JsonResponse({
+                "ok": True,
+                "message": "📧 Correo reenviado correctamente."
+            })
+        else:
+            return JsonResponse({
+                "ok": False,
+                "message": "No se encontró un correo válido para enviar."
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            "ok": False,
+            "message": "Ocurrió un error al reenviar el correo.",
+            "error": str(e)
+        }, status=500)

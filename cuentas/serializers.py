@@ -12,6 +12,9 @@ from django.contrib.auth.password_validation import validate_password
 from nucleo.correos import enviar_reset_password_correo
 from datetime import date, timezone
 from devotos.models import Devoto
+from inscripciones_online.models import DevotoCuenta  # ajusta import según tu app
+from django.db import IntegrityError
+
 
 
 Usuario = get_user_model()  # auth.User
@@ -112,7 +115,9 @@ class RegistroSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop("user")
 
         try:
-            # 1. Crear usuario
+            # -------------------------------------------------
+            # 1. Crear USUARIO
+            # -------------------------------------------------
             user = User.objects.create(
                 username=user_data["username"],
                 email=user_data["email"],
@@ -123,7 +128,9 @@ class RegistroSerializer(serializers.ModelSerializer):
             user.set_unusable_password()
             user.save()
 
-            # 2. Crear perfil
+            # -------------------------------------------------
+            # 2. Crear PERFIL
+            # -------------------------------------------------
             perfil = UserProfile.objects.create(
                 user=user,
                 **validated_data,
@@ -131,7 +138,9 @@ class RegistroSerializer(serializers.ModelSerializer):
                 estado=True,
             )
 
-                    # 3️⃣ Crear o reutilizar DEVOTO
+            # -------------------------------------------------
+            # 3. Crear o reutilizar DEVOTO
+            # -------------------------------------------------
             nombre_completo = f"{perfil.nombres or ''} {perfil.apellidos or ''}".strip()
 
             devoto, creado = Devoto.objects.get_or_create(
@@ -147,7 +156,7 @@ class RegistroSerializer(serializers.ModelSerializer):
                 }
             )
 
-            # Si ya existía, opcionalmente sincronizar datos
+            # 🔁 Si ya existía, sincronizamos datos
             if not creado:
                 devoto.nombre = nombre_completo
                 devoto.correo = user.email
@@ -158,23 +167,40 @@ class RegistroSerializer(serializers.ModelSerializer):
                 devoto.fecha_modificacion = timezone.now()
                 devoto.save()
 
+            # -------------------------------------------------
+            # 4. Crear DEVOTOCUENTA (PUENTE CLAVE)
+            # -------------------------------------------------
+            try:
+                DevotoCuenta.objects.get_or_create(
+                    user=user,
+                    defaults={"devoto": devoto}
+                )
+            except IntegrityError:
+                # El devoto ya está ligado a otra cuenta
+                raise serializers.ValidationError({
+                    "detalle": "Este devoto ya está asociado a otra cuenta. "
+                            "Verifique CUI o correo."
+                })
 
-            # 3. Asignar grupo
+            # -------------------------------------------------
+            # 5. Asignar GRUPO
+            # -------------------------------------------------
             grupo, _ = Group.objects.get_or_create(name="Usuario")
             user.groups.add(grupo)
 
-            # 4. Generar token
+            # -------------------------------------------------
+            # 6. Generar TOKEN y enviar CORREO
+            # -------------------------------------------------
             token = make_email_token(user.id)
-
-            # 5. Enviar correo dentro del TRY (si falla → rollback)
             enviar_confirmacion_correo(user, token)
 
         except Exception as e:
-            # Cualquier falla genera rollback total
-            raise serializers.ValidationError(
-                {"detalle": f"Error al registrar usuario: {str(e)}"}
-            )
+            # ❌ Cualquier error → rollback total
+            raise serializers.ValidationError({
+                "detalle": f"Error al registrar usuario: {str(e)}"
+            })
 
+        # Se retorna el perfil (como antes)
         return perfil
 
 

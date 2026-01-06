@@ -11,8 +11,14 @@ class Turno(models.Model):
         ('caballeros', 'Caballeros'),
         ('damas', 'Damas'),
         ('infantil', 'Infantil'),
+        ('mixto', 'Mixto'),
     )
 
+    # 🔹 NATURALEZA DEL TURNO
+    CLASE_TURNO_CHOICES = (
+        ('ordinario', 'Ordinario'),
+        ('extraordinario', 'Extraordinario'),
+    )
 
     procesion = models.ForeignKey(
         Procesion,
@@ -57,5 +63,30 @@ class Turno(models.Model):
         null=True
     )
 
+     # 👉 QUÉ TIPO DE EVENTO ES
+    clase_turno = models.CharField(
+        max_length=20,
+        choices=CLASE_TURNO_CHOICES,
+        default='ordinario'
+    )
+
     def __str__(self):
         return f'Turno {self.numero_turno} - {self.procesion.nombre}'
+    
+    def reservado_con_nombre(self):
+        return self.reservado_hermandad and bool((self.nombre_hermandad_visitante or "").strip())
+
+    def reservado_sin_nombre(self):
+        return self.reservado_hermandad and not (self.nombre_hermandad_visitante or "").strip()
+
+    def label_select(self):
+        base = f"Turno {self.numero_turno}"
+
+        if self.reservado_con_nombre():
+            return f"{base} Reservado (Hermandades Invitadas)"
+
+        if self.reservado_sin_nombre():
+            return f"{base} Reservado (Extraordinario)"
+
+        # No reservado: usa el campo clase_turno
+        return f"{base} ({self.get_clase_turno_display()})"

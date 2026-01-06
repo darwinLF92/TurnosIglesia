@@ -203,6 +203,15 @@
         </div>
 
         <div class="form-group">
+            <label for="id_clase_turno">Clase de Turno:</label>
+            {{ form.clase_turno }}
+            {% if form.clase_turno.errors %}
+                <div class="form-error">{{ form.clase_turno.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+
+        <div class="form-group">
             <label for="id_fecha_entrega">Fecha de entrega:</label>
             {{ form.fecha_entrega }}
             {% if form.fecha_entrega.errors %}

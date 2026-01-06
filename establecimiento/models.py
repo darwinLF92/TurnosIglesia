@@ -45,6 +45,7 @@ class Establecimiento(models.Model):
                 ("crear_publicacion", "Puede crear publicaciones"),
                 ("editar_publicacion", "Puede editar publicaciones"),
                 ("eliminar_publicacion", "Puede eliminar publicaciones"),
+                ("turno_reservado", "Puede inscribir en turnos reservados"),
             ]
         
             def __str__(self):

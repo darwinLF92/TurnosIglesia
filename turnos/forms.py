@@ -12,6 +12,7 @@ class TurnoForm(forms.ModelForm):
             'capacidad',
             'valor',
             'tipo_turno',
+            'clase_turno',
             'fecha_entrega',      
             'lugar_entrega',     
             'reservado_hermandad',
@@ -32,7 +33,9 @@ class TurnoForm(forms.ModelForm):
             'tipo_turno': forms.Select(attrs={
                 'class': 'form-control'
             }),
-
+            'clase_turno': forms.Select(attrs={
+                'class': 'form-control'
+            }),
             'reservado_hermandad': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'nombre_hermandad_visitante': forms.TextInput(attrs={'class': 'form-control'}),
 
@@ -54,32 +57,23 @@ class TurnoForm(forms.ModelForm):
         procesion = cleaned_data.get('procesion')
         numero_turno = cleaned_data.get('numero_turno')
 
-        if procesion and numero_turno:
-            qs = Turno.objects.filter(
-                procesion=procesion,
-                numero_turno=numero_turno
-            )
+        reservado = cleaned_data.get("reservado_hermandad")
+        nombre = (cleaned_data.get("nombre_hermandad_visitante") or "").strip()
 
+        # 1) Validar turno único por procesión
+        if procesion and numero_turno:
+            qs = Turno.objects.filter(procesion=procesion, numero_turno=numero_turno)
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
-
             if qs.exists():
-                self.add_error(
-                    'numero_turno',
-                    f"Ya existe un turno número {numero_turno} para esta procesión."
-                )
+                self.add_error('numero_turno', f"Ya existe un turno número {numero_turno} para esta procesión.")
 
-        return cleaned_data
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        reservado = cleaned_data.get("reservado_hermandad")
-        nombre = cleaned_data.get("nombre_hermandad_visitante")
-
-        if reservado and not nombre:
-            self.add_error(
-                'nombre_hermandad_visitante',
-                'Debe indicar el nombre de la hermandad visitante.'
-            )
+        # 2) Regla: nombre de hermandad visitante es OPCIONAL
+        # - Si no está reservado → no tiene sentido guardar nombre
+        if not reservado:
+            cleaned_data["nombre_hermandad_visitante"] = None
+        else:
+            # Si está reservado y el nombre viene vacío, lo guardamos como None (permitido)
+            cleaned_data["nombre_hermandad_visitante"] = nombre or None
 
         return cleaned_data

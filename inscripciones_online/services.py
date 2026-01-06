@@ -1,5 +1,4 @@
 import urllib.parse
-from twilio.rest import Client
 from django.conf import settings
 
 def generar_url_whatsapp(inscripcion, request):
@@ -45,26 +44,3 @@ def generar_url_whatsapp(inscripcion, request):
     return f"https://wa.me/{telefono}?text={mensaje_codificado}"
 
 
-def enviar_whatsapp_confirmacion(inscripcion):
-    if not inscripcion.devoto.telefono:
-        return
-
-    client = Client(
-        settings.TWILIO_ACCOUNT_SID,
-        settings.TWILIO_AUTH_TOKEN
-    )
-
-    mensaje = (
-        "🙏 *Inscripción confirmada*\n\n"
-        f"Código: {inscripcion.codigo}\n"
-        f"Procesión: {inscripcion.turno.procesion.nombre}\n"
-        f"Turno: {inscripcion.turno.numero_turno}\n"
-        f"Fecha: {inscripcion.turno.procesion.fecha.strftime('%d/%m/%Y')}\n\n"
-        "Gracias por formar parte 🙌"
-    )
-
-    client.messages.create(
-        from_=settings.TWILIO_WHATSAPP_FROM,
-        to=f"whatsapp:{inscripcion.devoto.telefono}",
-        body=mensaje
-    )
