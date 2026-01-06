@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{ titulo_correo }}</title>
+
+  <style>
+    /* Reset básico para emails */
+    html, body { margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; }
+    * { -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; }
+    table, td { border-collapse:collapse !important; }
+    img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+    a { text-decoration:none; }
+
+    /* Fondo */
+    body{ background:#f4f6f8; font-family:Arial, sans-serif; color:#1f2937; }
+
+    /* Contenedor (desktop centrado / móvil full width) */
+    .outer { width:100%; background:#f4f6f8; }
+    .container { width:100%; max-width:600px; }
+
+    /* Card */
+    .card {
+      background:#ffffff;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 10px 28px rgba(0,0,0,.10);
+    }
+
+    /* Header */
+    .header { padding:22px 22px 12px; text-align:center; }
+    .logo {
+      width:92px; height:92px;
+      border-radius:999px;
+      object-fit:contain;
+      background:#fff;
+      display:inline-block;
+    }
+    .title { margin:12px 0 0; font-size:20px; font-weight:800; color:#111827; }
+    .subtitle { margin:6px 0 0; font-size:13px; color:#6b7280; }
+
+    /* Barra */
+    .bar {
+      background:#3a1e6d;
+      color:#fff;
+      text-align:center;
+      padding:12px 16px;
+      font-weight:800;
+      letter-spacing:.2px;
+      font-size:14px;
+    }
+
+    /* Contenido */
+    .content { padding:18px 22px 10px; font-size:14px; line-height:1.65; color:#1f2937; }
+
+    /* Caja de datos */
+    .box {
+      margin:14px 0;
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:14px;
+    }
+
+    /* Filas (email-safe con tablas internas) */
+    .label { width:160px; color:#374151; font-weight:800; padding:6px 0; vertical-align:top; }
+    .value { color:#111827; padding:6px 0; vertical-align:top; }
+
+    /* Código */
+    .code-wrap { padding-top:10px; }
+    .code {
+      text-align:center;
+      font-weight:900;
+      font-size:18px;
+      letter-spacing:.8px;
+      color:#0b2a4a;
+      background:#eef2ff;
+      border:1px dashed #94a3b8;
+      padding:12px 12px;
+      border-radius:14px;
+    }
+
+    /* Nota */
+    .note {
+      margin:14px 0 0;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-radius:14px;
+      padding:12px 14px;
+      color:#7c2d12;
+    }
+
+    /* Footer */
+    .footer {
+      padding:14px 22px 20px;
+      text-align:center;
+      color:#6b7280;
+      font-size:12px;
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 600px) {
+      .content { padding:16px 14px 8px !important; }
+      .header { padding:18px 14px 10px !important; }
+      .footer { padding:12px 14px 18px !important; }
+      .box { padding:12px !important; }
+      .label { width:120px !important; }
+    }
+
+    /* En móviles muy pequeños, apilar label/valor */
+    @media screen and (max-width: 420px) {
+      .label, .value { display:block !important; width:100% !important; }
+      .label { padding-bottom:2px !important; }
+      .value { padding-top:0 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Fondo -->
+  <table class="outer" role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:10px;">
+        <!-- Contenedor -->
+        <table class="container" role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <table class="card" role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                <!-- Header -->
+                <tr>
+                  <td class="header">
+                    {% if logo_base64 %}
+                      <img class="logo" src="{{ logo_base64 }}" alt="Logo" />
+                    {% endif %}
+                    <div class="title">Confirmación de Inscripción</div>
+                    <div class="subtitle">Hermandad Aldea El Ingeniero</div>
+                  </td>
+                </tr>
+
+                <!-- Barra -->
+                <tr>
+                  <td class="bar">Comprobante de inscripción en línea</td>
+                </tr>
+
+                <!-- Contenido -->
+                <tr>
+                  <td class="content">
+                    <p style="margin:0 0 10px;">
+                      Hola <strong>{{ nombre_completo }}</strong>,
+                    </p>
+
+                    <p style="margin:0 0 12px;">
+                      Ha llegado el momento de estar más cerca de Nuestra Querida y Venerada Imagen,
+                      <strong>Virgen de Dolores, Madre de la Esperanza</strong>.
+                      Tenemos el gusto de confirmar su inscripción en línea en el
+                      <strong>Turno {{ turno_numero }}</strong> para la <strong>{{ procesion_nombre }}</strong>
+                      <strong>{{ Procesión_descripcion }}</strong>.
+                    </p>
+
+                    <!-- Caja -->
+                    <div class="box">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td class="label">Turno:</td>
+                          <td class="value">Turno {{ turno_numero }}</td>
+                        </tr>
+                        <tr>
+                          <td class="label">Procesión:</td>
+                          <td class="value">{{ procesion_nombre }}</td>
+                        </tr>
+                        <tr>
+                          <td class="label">Fecha de entrega:</td>
+                          <td class="value">{{ fecha_entrega }}</td>
+                        </tr>
+                        <tr>
+                          <td class="label">Lugar de entrega:</td>
+                          <td class="value">{{ lugar_entrega }}</td>
+                        </tr>
+                      </table>
+
+                      <div class="code-wrap">
+                        <div class="code">
+                          Contraseña No. {{ codigo_inscripcion }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <p style="margin:10px 0 0;">
+                      Desde ya le deseamos un feliz y bendecido turno.
+                    </p>
+
+                    <div class="note">
+                      <strong>Nota:</strong> a la hora de recoger su turno deberá presentar la
+                      <strong>Contraseña de Inscripción</strong> recibida en este correo o el comprobante guardado.
+                    </div>
+
+                    <p style="margin:12px 0 0;">
+                      Que nuestras Veneradas Imágenes le bendigan siempre.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td class="footer">
+                    Este es un correo automático, por favor no responder.
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+        </table>
+        <!-- /Contenedor -->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

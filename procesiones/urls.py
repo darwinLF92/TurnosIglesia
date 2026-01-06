@@ -12,8 +12,11 @@ urlpatterns = [
     path('obtener-anios/', views.obtener_anios, name='obtener_anios'),
     path('exportar-reporte-turnos-pdf/', views.exportar_reporte_turnos_pdf, name='exportar_reporte_turnos_pdf'),
     path('exportar-reporte-turnos-excel/', views.exportar_reporte_turnos_excel, name='exportar_reporte_turnos_excel'),
-
-
+    path(
+        'marcar-relevante/',
+        views.marcar_procesion_relevante,
+        name='marcar_procesion_relevante'
+    ),
 
 ]
 

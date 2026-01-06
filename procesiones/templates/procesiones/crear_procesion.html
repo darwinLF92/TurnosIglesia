@@ -16,7 +16,8 @@
         </div>
 
         <div class="card-body px-3 px-md-4">
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
+
                 {% csrf_token %}
 
                 <div class="mb-3">
@@ -37,6 +38,21 @@
                     <input type="date" class="form-control form-control-lg shadow-sm"
                            name="fecha" required>
                 </div>
+
+                   <div class="mb-3">
+                        <label class="form-label fw-bold">Imagen promocional</label>
+                        {{ form.imagen_promocional }}
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        {{ form.es_relevante }}
+                        <label class="form-check-label fw-bold ms-2">
+                            Procesión destacada (mostrar en el inicio)
+                        </label>
+                    </div>
+
+
+
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary btn-lg rounded-0">

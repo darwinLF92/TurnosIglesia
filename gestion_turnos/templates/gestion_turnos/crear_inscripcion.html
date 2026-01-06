@@ -1,89 +1,143 @@
-{% extends 'aplicacion/base.html' %}
+{% extends "aplicacion/base.html" %}
+
 {% block content %}
-
-
 <style>
+  /* --- Página --- */
+  .inscripcion-page{
+    display: flex;
+    justify-content: center;
+  }
 
-    h2 {
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    form {
-    background: white;
-    padding: 20px;
+  /* --- Card contenedora --- */
+  .inscripcion-card{
+    width: 100%;
+    max-width: 780px;       /* similar a la imagen */
+    background: #fff;
     border-radius: 14px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    max-width: 600px;
-    margin: auto;
-}
+    box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    padding: 26px 28px;
+    margin: 0 auto;
+  }
 
-    #devoto-nombre, #procesion-nombre{
-        text-align: left;
-        padding: 10px;
+  /* --- Título --- */
+  .inscripcion-form h2{
+    text-align:center;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin: 6px 0 18px;
+  }
+
+  /* --- Labels --- */
+  .inscripcion-form label{
+    font-weight: 500;
+    margin: 10px 0 6px;
+    display:block;
+  }
+
+  /* --- Inputs generales --- */
+  .inscripcion-form .form-control{
+    border-radius: 7px;
+    padding: 12px 12px;
+  }
+
+  /* --- Inputs de búsqueda (devoto / procesión) --- */
+  #devoto-nombre, #procesion-nombre{
+    text-align: left;
+    padding: 12px;
+  }
+
+  .inscripcion-form .input-group .btn{
+    border-radius: 0 7px 7px 0 !important;
+    padding: 12px 16px;
+    font-weight: 700;
+    min-width: 95px;
+  }
+
+  .inscripcion-form .input-group .form-control{
+    border-radius: 7px 0 0 7px !important;
+  }
+
+  /* --- Select turno --- */
+  #id_turno{
+    text-align: left;
+    padding: 10px;
+  }
+
+  /* --- Campos grises (valor, monto, cambio) --- */
+  #id_valor_turno, #id_monto_pagado, #id_cambio{
+    background: #f0f0f5;
+    font-weight: 700;
+    text-align: right;
+    padding: 12px 14px;
+  }
+
+  /* --- Botones inferiores --- */
+  .actions{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .actions .btn{
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 800;
+  }
+
+  .btn-primary{
+    background: linear-gradient(to bottom, #007aff, #005ecb);
+    border: none;
+  }
+  .btn-primary:hover{
+    background: linear-gradient(to bottom, #005ecb, #004bb7);
+  }
+
+  .btn-secondary{
+    background: #d1d1d6;
+    border: none;
+    color: #333;
+  }
+  .btn-secondary:hover{
+    background: #a1a1a6;
+  }
+
+  /* --- Modales (igual que ya tienes, pero mantengo tu estilo) --- */
+  .modal-content{
+    border-radius: 14px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  }
+  .modal-header{
+    background: #007AFF;
+    color: white;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    font-size: 18px;
+  }
+  .modal-footer{
+    background: #E5E5EA;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 576px){
+    .inscripcion-card{
+      padding: 18px 16px;
     }
-    #id_turno{
-        text-align: left;
-        padding: 5px;
+    .inscripcion-form h2{
+      font-size: 22px;
     }
-    #id_valor_turno, #id_monto_pagado, #id_cambio {
-        text-align: right;
-        font-weight: bold;
-        background-color: #f0f0f5;
-        padding: 10px;
-    }
-    button {
-        border-radius: 10px;
-        padding: 12px 18px;
-        border: none;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-    .btn-primary {
-        background: linear-gradient(to bottom, #007aff, #005ecb);
-        color: white;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(to bottom, #005ecb, #004bb7);
-    }
-    .btn-secondary {
-        background: #d1d1d6;
-        color: #333;
-    }
-    .btn-secondary:hover {
-        background: #a1a1a6;
-    }
-    .alert-danger {
-        background: #ff3b30;
-        color: white;
-        border-radius: 10px;
-        padding: 15px;
-    }
-    .modal-content {
-        border-radius: 14px;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    }
-    .modal-header {
-        background: #007AFF;
-        color: white;
-        border-top-left-radius: 14px;
-        border-top-right-radius: 14px;
-        font-size: 18px;
-    }
-    .modal-footer {
-        background: #E5E5EA;
-        border-bottom-left-radius: 14px;
-        border-bottom-right-radius: 14px;
-    }
-    .btn-seleccionar:hover {
-        background-color: #4eaefd;
-        color: #333;
-    }
+  }
 </style>
 
-<h2>INSCRIPCIÓN DE DEVOTOS</h2>
 
+<div class="inscripcion-page container-fluid py-4">
+  <div class="inscripcion-card">
 <form method="post">
+
+    <h2>INSCRIPCIÓN DE DEVOTOS</h2>
+
     {% csrf_token %}
     <label for="devoto-nombre">Nombre del Devoto:</label>
     <div class="input-group mb-3">
@@ -120,12 +174,12 @@
     <label for="id_cambio">Cambio:</label>
     <input type="text" id="id_cambio" class="form-control mb-3" value="0.00" disabled>
 
-    <div class="text-center">
+    <div class="actions">
         <a href="{% url 'gestion_turnos:lista_inscripciones' %}" class="btn btn-secondary">Cancelar</a>
         <button type="submit" class="btn btn-primary">Registrar</button>
     </div>
 </form>
-
+</div>
 <!-- Modal Devotos -->
 <div id="devotosModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -215,20 +269,30 @@
         </div>
     </div>
 </div>
+</div>
 
-<!-- Bootstrap JS (si no está en base.html) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-{% if error_message %}
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
 <script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Error de inscripción',
-        html: '{{ error_message.0|escapejs }}',
-        confirmButtonText: 'Aceptar'
-    });
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+      Swal.fire({
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+        title: "{% if message.tags == 'success' %}Éxito{% else %}Atención{% endif %}",
+        html: "{{ message|escapejs }}",
+        confirmButtonText: "Aceptar"
+      });
+    {% endfor %}
+  });
 </script>
 {% endif %}
+
+
+<script>
+  const CAN_TURNO_RESERVADO = {{ can_turno_reservado|yesno:"true,false" }};
+</script>
 
 <script>
     function seleccionarDevoto(id, nombre) {
@@ -278,12 +342,27 @@
                         var turnoSelect = document.getElementById("id_turno");
                         turnoSelect.innerHTML = '<option value="">Seleccionar</option>';
 
-                        data.forEach(function (item) {
-                            var option = document.createElement('option');
-                            option.value = item.id;
-                            option.text = "Turno " + item.numero_turno + " - " + item.referencia;
+                            data.forEach(function (item) {
+                                const option = document.createElement('option');
+                                option.value = item.id;
+
+                                option.text =
+                                    "Turno " + item.numero_turno +
+                                    (item.referencia ? " - " + item.referencia : "") +
+                                    " - Q" + item.valor;
+
+                                if (!item.habilitado) {
+                                    option.disabled = true;
+                                    option.style.color = "#999";
+                                    option.style.fontStyle = "italic";
+                                    option.text += " (Reservado)";
+                                } else if (item.reservado) {
+                                    option.text += " (Reservado)";
+                                }
+
                             turnoSelect.appendChild(option);
                         });
+
                     })
                     .catch(error => {
                         console.error("Error al cargar los turnos:", error);
@@ -293,22 +372,42 @@
         });
 
         document.getElementById('id_turno').addEventListener('change', function () {
-            var url = "{% url 'gestion_turnos:obtener_precio_turno' %}";
-            var turnoId = this.value;
+        var url = "{% url 'gestion_turnos:obtener_precio_turno' %}";
+        var turnoId = this.value;
 
-            if (turnoId) {
-                fetch(url + '?turno_id=' + turnoId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.precio) {
-                            document.getElementById('id_valor_turno').value = data.precio;
-                            document.getElementById('id_valor_turno_hidden').value = data.precio;
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error al obtener el precio del turno:", error);
-                    });
-            }
+        if (turnoId) {
+            fetch(url + '?turno_id=' + turnoId)
+            .then(response => response.json())
+            .then(data => {
+
+                // ✅ Precio
+                if (data.precio) {
+                document.getElementById('id_valor_turno').value = data.precio;
+                document.getElementById('id_valor_turno_hidden').value = data.precio;
+                }
+
+                // ✅ Fecha y lugar (cargarlos si vienen)
+                // Nota: si vienen vacíos, dejamos que el usuario los escriba.
+                const fechaInput = document.getElementById('id_fecha_entrega_estimada');
+                const lugarInput = document.getElementById('id_lugar_entrega');
+
+                if (data.fecha_entrega) {
+                fechaInput.value = data.fecha_entrega;
+                } else {
+                fechaInput.value = "";  // editable para que el usuario la ingrese
+                }
+
+                if (data.lugar_entrega) {
+                lugarInput.value = data.lugar_entrega;
+                } else {
+                lugarInput.value = "";  // editable para que el usuario lo ingrese
+                }
+
+            })
+            .catch(error => {
+                console.error("Error al obtener datos del turno:", error);
+            });
+        }
         });
 
         document.getElementById('id_monto_pagado').addEventListener('input', function () {
@@ -318,7 +417,7 @@
         document.getElementById('id_cambio').value = cambio.toFixed(2);
         });
 
-        // ✅ Este es el nuevo código que necesitas:
+   
         document.getElementById('id_monto_pagado').addEventListener('focus', function () {
             if (this.value === "0.00") {
                 this.value = "";

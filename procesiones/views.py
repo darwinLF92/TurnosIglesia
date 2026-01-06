@@ -18,6 +18,9 @@ from django.http import HttpResponse
 from weasyprint import HTML
 import tempfile
 import openpyxl
+from django.views.decorators.http import require_POST
+
+
 
 @method_decorator(login_required, name='dispatch')
 class ListaProcesionesView(ListView):
@@ -29,6 +32,18 @@ class ListaProcesionesView(ListView):
         return Procesion.objects.filter(activo=True).annotate(
             total_turnos=Count('turnos', filter=Q(turnos__activo=True))
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 👇 AQUÍ se valida el grupo (esto SÍ funciona)
+        context['es_admin'] = self.request.user.groups.filter(
+            name='Administrador'
+        ).exists()
+
+        return context
+
+
 
 @method_decorator(login_required, name='dispatch')
 class CrearProcesionView(CreateView):
@@ -205,3 +220,28 @@ def exportar_reporte_turnos_excel(request):
     response["Content-Disposition"] = 'attachment; filename="reporte_turnos.xlsx"'
     wb.save(response)
     return response
+
+
+@login_required
+@require_POST
+def marcar_procesion_relevante(request):
+    if not request.user.groups.filter(name='Administrador').exists():
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+
+    procesion_id = request.POST.get('procesion_id')
+    procesion = get_object_or_404(Procesion, id=procesion_id)
+
+    # Si se marca como relevante, desmarcar las demás
+    if not procesion.es_relevante:
+        Procesion.objects.exclude(id=procesion.id).update(es_relevante=False)
+        procesion.es_relevante = True
+    else:
+        procesion.es_relevante = False
+
+    procesion.save()
+
+    return JsonResponse({
+        'success': True,
+        'es_relevante': procesion.es_relevante,
+        'procesion_id': procesion.id
+    })

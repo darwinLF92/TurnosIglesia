@@ -1,4 +1,6 @@
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <div class="macos-container">
     <h2 class="macos-title">Comprobante de Inscripción</h2>
 
@@ -13,17 +15,22 @@
 
 
     <div class="macos-content">
-        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega_estimada|date:"d/m/Y" }}</p>
+        <p><strong>Fecha de Entrega Estimada:</strong> {{ inscripcion.fecha_entrega_estimada|date:"d-m-y" }}
+            a las {{ inscripcion.fecha_entrega_estimada|date:"H:i" }} Horas</p>
         <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
+        <p><strong>Tipo de Inscripción:</strong> {{ inscripcion.tipo_inscripcion }}</p>
     </div>
 
     <!-- Botones -->
     <div class="macos-buttons">
-        <a href="{% url 'gestion_turnos:comprobante_inscripcion_pdf' inscripcion.id %}" class="btn-macos btn-primary">Descargar PDF</a>
-        <a href="{% url 'gestion_turnos:lista_inscripciones' %}" class="btn-macos btn-secondary">Regresar</a>
+        <p>Compartir comprobante mendiante: </p>
+
+        <a href="{% url 'gestion_turnos:comprobante_inscripcion_pdf' inscripcion.id %}" class="btn-macos btn-primary"><i class="fa-solid fa-download"></i> PDF</a>
+        
+        <button id="btnEnviarCorreo" class="btn-macos btn-secondary"><i class="fa-solid fa-paper-plane"></i> Correo </button>
 
         {% if inscripcion.devoto.telefono %}
-            <button id="btnEnviarWhatsApp" class="btn-macos btn-success">Enviar por WhatsApp</button>
+            <button id="btnEnviarWhatsApp" class="btn-macos btn-success"><i class="fa-solid fa-paper-plane"></i> WhatsApp</button>
         {% endif %}
     </div>
 </div>
@@ -78,18 +85,24 @@
     }
 
     .btn-primary {
-        background-color: #007aff;
-        color: white;
+        background-color: #ffffff00;
+        color: rgb(158, 23, 23);
+        border-color: #333;
+        border: 1px solid #333;
     }
 
     .btn-secondary {
-        background-color: #8e8e93;
-        color: white;
+        background-color: #ffffff00;
+        color: rgb(21, 7, 146);
+        border-color: #333;
+        border: 1px solid #333;
     }
 
     .btn-success {
-        background-color: #34c759;
-        color: white;
+        background-color: #ffffff00;
+        color: rgb(7, 146, 42);
+        border-color: #333;
+        border: 1px solid #333;
     }
 </style>
 
@@ -125,6 +138,32 @@
             });
     });
 </script>
-
 {% endif %}
+
+<script>
+document.getElementById("btnEnviarCorreo").addEventListener("click", function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.innerText = "Enviando correo...";
+
+    fetch("{% url 'gestion_turnos:reenviar_correo_inscripcion' inscripcion.id %}")
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                alert(data.message);
+            } else {
+                alert("❌ " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("❌ Error al reenviar el correo.");
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerText = "Enviar correo";
+        });
+});
+</script>
+
 {% endblock %}

@@ -10,6 +10,7 @@
             <h2 class="page-title mb-1">Gestión de Procesiones</h2>
             <p class="text-muted mb-0 small">
                 Administra las procesiones, sus fechas, descripciones y turnos asociados.
+        
             </p>
         </div>
     </div>
@@ -52,6 +53,12 @@
                             <th scope="col">Fecha recorrido</th>
                             <th scope="col">Descripción</th>
                             <th scope="col">Total de turnos</th>
+                         
+                            {% if es_admin %}
+                            <th scope="col" class="text-center">Relevante</th>
+                            {% endif %}
+
+                            
                             <th scope="col" class="text-center">Acción</th>
                         </tr>
                     </thead>
@@ -72,6 +79,20 @@
                                     {{ procesion.total_turnos }}
                                 </span>
                             </td>
+                          
+{% if es_admin %}
+<td data-label="Relevante" class="text-center">
+    <div class="form-check d-flex justify-content-center">
+        <input class="form-check-input procesion-relevante-switch"
+               type="checkbox"
+               data-id="{{ procesion.id }}"
+               {% if procesion.es_relevante %}checked{% endif %}>
+    </div>
+</td>
+{% endif %}
+
+                        
+
                             <td data-label="Acción">
                                 <div class="d-flex justify-content-md-center justify-content-end gap-3 action-column cell-value">
                                      {% if perms.establecimiento.editar_registro %}
@@ -370,6 +391,48 @@
         });
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const switches = document.querySelectorAll('.procesion-relevante-switch');
+
+    switches.forEach(sw => {
+        sw.addEventListener('change', function () {
+
+            const procesionId = this.dataset.id;
+            const csrftoken = '{{ csrf_token }}';
+
+            fetch("{% url 'procesiones:marcar_procesion_relevante' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'procesion_id': procesionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Desmarcar todos los demás switches
+                    document.querySelectorAll('.procesion-relevante-switch').forEach(el => {
+                        if (el.dataset.id !== procesionId) {
+                            el.checked = false;
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', 'No se pudo actualizar', 'error');
+                    this.checked = !this.checked;
+                }
+            })
+            .catch(() => {
+                Swal.fire('Error', 'Error de conexión', 'error');
+                this.checked = !this.checked;
+            });
+        });
+    });
+});
+</script>
 
 <style>
     .page-title {
@@ -513,5 +576,50 @@
             font-size: 0.9rem;
         }
     }
+
+    
 </style>
+
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 22px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #0d6efd;
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+</style>
+
 {% endblock %}

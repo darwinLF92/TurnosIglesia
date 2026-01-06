@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprobante de Inscripción</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- html2canvas -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f3f3f3;
+        }
+
+        /* CONTENEDOR GENERAL */
+        .page {
+            display: flex;
+            justify-content: center;
+            padding: 20px 10px;
+        }
+
+        /* TARJETA DEL COMPROBANTE */
+        .card-comprobante {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* MARCA DE AGUA */
+        .marca-agua {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.12;
+            z-index: 0;
+        }
+
+        .marca-agua img {
+            width: 220px;
+        }
+
+        /* CONTENIDO */
+        .contenido {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ENCABEZADO */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 11px;
+            color: #444;
+        }
+
+        h2 {
+            text-align: center;
+            background-color: #122e4d;
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        /* TABLAS */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th, td {
+            padding: 6px 4px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        th {
+            width: 45%;
+            font-weight: bold;
+        }
+
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            padding-top: 8px;
+        }
+
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+        }
+
+        /* BOTÓN */
+        .btn-guardar {
+            margin: 15px 10px 25px;
+            width: calc(100% - 20px);
+            padding: 14px;
+            font-size: 16px;
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-guardar:active {
+            transform: scale(0.98);
+        }
+
+        .tipo-inscripcion {
+        text-align: center;
+        color: #198754; /* verde */
+        font-weight: bold;
+    }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div id="comprobante" class="card-comprobante">
+
+        {% if establecimiento.logo %}
+        <div class="marca-agua">
+            <img src="{{ establecimiento.logo.url }}" alt="Marca de agua">
+        </div>
+        {% endif %}
+
+        <div class="contenido">
+
+            <!-- ENCABEZADO -->
+            <div class="header">
+                <h1>{{ establecimiento.hermandad }}</h1>
+                <p>{{ establecimiento.nombre }}</p>
+            </div>
+
+            <h2>Comprobante de Inscripción</h2>
+
+            <!-- DATOS PRINCIPALES -->
+            <table>
+                <tr>
+                    <th>Fecha de inscripción:</th>
+                    <td>{{ insc.fecha_inscripcion|date:"d/m/Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Devoto:</th>
+                    <td>{{ insc.devoto.nombre }}</td>
+                </tr>
+                <tr>
+                    <th>Procesión:</th>
+                    <td>
+                        {{ insc.turno.procesion.nombre }}<br>
+                        {{ insc.turno.procesion.descripcion }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Turno:</th>
+                    <td>
+                        Turno {{ insc.turno.numero_turno }}
+                        {% if insc.turno.referencia %}
+                            - {{ insc.turno.referencia }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Valor del turno:</th>
+                    <td>Q{{ insc.valor_turno }}</td>
+                </tr>
+            </table>
+
+            <!-- DETALLES DE ENTREGA -->
+            <table>
+                <tr>
+                    <th colspan="2" class="section-title">Detalles de la entrega</th>
+                </tr>
+                <tr>
+                    <th>Fecha entrega:</th>
+                    <td>
+                        {% if insc.fecha_entrega_estimada %}
+                            {{ insc.fecha_entrega_estimada|date:"d/m/Y" }}
+                            {{ insc.fecha_entrega_estimada|date:"H:i" }} hrs
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Lugar de entrega:</th>
+                    <td>{{ insc.lugar_entrega|default:"Pendiente" }}</td>
+                </tr>
+                <tr>
+                    <th>Contraseña:</th>
+                    <td><strong>{{ insc.codigo }}</strong></td>
+                </tr>
+
+                 <tr>
+                <th>Tipo de inscripción:</th>
+                <td style="text-align:left;">
+                    <span style="
+                        display: inline-block;
+                        padding: 4px 10px;
+                        border-radius: 12px;
+                        background-color: #d1e7dd;
+                        color: #198754;
+                        font-weight: bold;
+                        font-size: 10px;
+                    ">
+                        {{ insc.get_tipo_inscripcion_display }}
+                    </span>
+                </td>
+            </tr>
+            </table>
+
+           
+
+
+            <p class="footer">
+                Favor guardar este comprobante.<br>
+                Será solicitado el día de entrega del turno.<br>
+                Reposición: Q10.00
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<button class="btn-guardar" onclick="guardarComprobante()">
+    📷 Guardar comprobante como imagen
+</button>
+
+<script>
+function guardarComprobante() {
+    const comprobante = document.getElementById("comprobante");
+
+    html2canvas(comprobante, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "comprobante_{{ insc.codigo }}.jpg";
+        link.href = canvas.toDataURL("image/jpeg", 0.95);
+        link.click();
+    });
+}
+</script>
+
+</body>
+</html>

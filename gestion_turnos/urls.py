@@ -28,4 +28,6 @@ urlpatterns = [
     path('reporte-inscripciones-pdf/', views.exportar_inscripciones_pdf, name='exportar_inscripciones_pdf'),
     path('exportar-inscripciones-excel/', views.exportar_inscripciones_excel, name='exportar_inscripciones_excel'),
 
+    path("inscripcion/<int:inscripcion_id>/reenviar-correo/", views.reenviar_correo_inscripcion, name="reenviar_correo_inscripcion"),
+
 ]

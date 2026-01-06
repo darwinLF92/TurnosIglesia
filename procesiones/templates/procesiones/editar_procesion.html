@@ -16,7 +16,7 @@
         </div>
 
         <div class="card-body px-3 px-md-4">
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <div class="mb-3">
@@ -44,6 +44,46 @@
                            value="{{ form.instance.fecha|date:'Y-m-d' }}"
                            required>
                 </div>
+                
+<div class="mb-3">
+    <label class="form-label fw-bold">Imagen promocional</label>
+
+    {% if form.instance.imagen_promocional %}
+        <div class="mb-2">
+            <small class="text-muted d-block mb-1">Imagen actual:</small>
+
+            <img src="{{ form.instance.imagen_promocional.url }}"
+                 class="img-fluid rounded shadow-sm mb-2"
+                 style="max-height:180px;object-fit:cover;">
+
+            <div class="form-check">
+                <input type="checkbox"
+                       name="imagen_promocional-clear"
+                       id="imagen_promocional-clear"
+                       class="form-check-input">
+
+                <label for="imagen_promocional-clear"
+                       class="form-check-label text-danger fw-semibold">
+                    Quitar imagen actual
+                </label>
+            </div>
+        </div>
+    {% endif %}
+
+    <input type="file"
+           name="imagen_promocional"
+           class="form-control mt-2"
+           accept="image/*">
+</div>
+
+
+        <div class="form-check form-switch mb-4">
+            {{ form.es_relevante }}
+            <label class="form-check-label fw-bold ms-2">
+                Procesión destacada (mostrar en el inicio)
+            </label>
+        </div>
+
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary btn-lg rounded-0 w-100">

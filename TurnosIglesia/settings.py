@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'notificaciones',
     'rest_framework_simplejwt',
     'noticias',
+    'inscripciones_online',
 ]
 
 MIDDLEWARE = [
