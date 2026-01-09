@@ -1,0 +1,450 @@
+/* Contenedor principal del feed */
+body[data-page="muro"] footer {
+    display: none !important;
+}
+
+.feed-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 10px; /* para que no pegue al borde */
+}
+/* Espaciado suave entre secciones */
+/* Reducir espacio entre el formulario de publicar y el buscador */
+.fb-post-box {
+    margin-bottom: 6px !important;
+}
+
+/* Reducir espacio del buscador */
+.feed-container form {
+    margin-bottom: 6px !important;
+}
+
+/* Separación entre posts */
+#posts-container .fb-post {
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Quitar padding interno que genera salto */
+.feed-container {
+    padding-top: 0 !important;
+}
+
+/* Mantener compacto en móvil */
+@media (max-width: 768px) {
+    .feed-container {
+        padding-top: 4px !important;
+    }
+}
+
+
+/* Avatar inicial cuando no hay foto */
+.avatar-inicial {
+  width: 45px;
+  height: 45px;
+  background: #007bff;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+/* Caja publicar */
+.fb-post-box textarea {
+  width: 100%;
+  background: #f5f6f7;
+  border-radius: 20px;
+  padding: 12px 15px;
+  border: none;
+  resize: none;
+}
+
+/* Barra de acciones (foto, video, sentimiento) */
+.fb-actions {
+  background: #f0f2f5;
+}
+
+.fb-action-item {
+  cursor: pointer;
+  color: #444;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fb-action-item i {
+  font-size: 18px;
+}
+
+/* Avatar del post */
+.fb-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#4e73df,#224abe);
+}
+
+/* Tarjeta de post */
+/* Tarjeta de publicaciones con fotos: altura coherente */
+.fb-post {
+    border-radius: 12px;
+    overflow: hidden;        /* evita que algo se salga */
+    margin-bottom: 18px;
+}
+
+/* Altura mínima para que siempre se vea pareja */
+.fb-post.has-images {
+    min-height: 300px; /* ajustable */
+}
+
+.fb-post .card-body {
+  padding: 12px 14px;
+}
+
+/* Avatar dinámico por género */
+.avatar-m {
+  background: #2563eb !important; /* Azul */
+  color: #fff !important;
+}
+
+.avatar-f {
+  background: #d946ef !important; /* Fucsia */
+  color: #fff !important;
+}
+
+.avatar-o {
+  background: #22c55e !important; /* Verde */
+  color: #fff !important;
+}
+
+
+/* ===========================
+   MOSAICO TIPO FACEBOOK
+   =========================== */
+
+/* Contenedor */
+.fb-mosaic {
+    display: grid;
+    gap: 4px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* 1 imagen */
+.fb-mosaic[data-count="1"] {
+    grid-template-columns: 1fr;
+    max-height: 550px;
+}
+
+/* 2 imágenes */
+.fb-mosaic[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* 3 imágenes: 1 grande arriba, 2 abajo */
+.fb-mosaic[data-count="3"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px 180px;
+}
+.fb-mosaic[data-count="3"] .fb-mosaic-item:nth-child(1) {
+    grid-column: span 2;
+}
+
+/* 4 imágenes: cuadrícula 2x2 */
+.fb-mosaic[data-count="4"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, 200px);
+}
+
+/* 5+ imágenes: 2x2 arriba + 1 abajo */
+.fb-mosaic[data-count="5"],
+.fb-mosaic[data-count]:not([data-count="1"])
+                         :not([data-count="2"])
+                         :not([data-count="3"])
+                         :not([data-count="4"]) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 200px 200px 200px;
+}
+
+/* Primera fila → 2 imágenes */
+/* Segunda fila → 2 imágenes */
+/* Tercera fila → 1 imagen grande */
+.fb-mosaic-item:nth-child(5) {
+    grid-column: span 2;
+}
+
+/* Imagen */
+.fb-mosaic-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Overlay +N */
+.fb-mosaic-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 42px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Contenedor */
+.fb-mosaic-item {
+    position: relative;
+    cursor: pointer;
+}
+
+/* Comentarios */
+.fb-comment {
+  background: #f0f2f5;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Acciones del comentario */
+.comment-actions {
+  font-size: 0.8rem;
+}
+
+.comment-count {
+  font-size: 0.85rem;
+}
+
+.like-count:hover,
+.comment-count:hover {
+  text-decoration: underline;
+}
+
+/* Respuestas anidadas */
+.respuesta-container {
+  border-left: 2px solid #e0e0e0;
+  margin-left: 16px;
+  padding-left: 12px;
+}
+
+/* Respuesta agregada por JS */
+.comment-reply {
+  background: #e9ecef;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+/* Fila de like en modal */
+.like-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: 8px;
+  transition: background .2s ease;
+}
+
+.like-item:hover {
+  background: #f1f3f5;
+}
+
+/* Avatar simple en lista de likes */
+.like-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e1e5eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #555;
+  margin-right: 12px;
+}
+
+.like-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Texto del post limitado (Ver más) */
+.post-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  color: #1c1e21;
+  line-height: 1.4rem;
+}
+
+.post-text.expanded {
+  -webkit-line-clamp: unset;
+}
+
+.ver-mas-btn {
+  color: #65676b !important;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.ver-mas-btn:hover {
+  text-decoration: underline;
+}
+
+/* Tooltips bootsrap que respeten saltos de línea */
+.tooltip-inner {
+  white-space: pre-line !important;
+  text-align: left !important;
+}
+
+/* 🌟 Modal fullscreen: que todo se adapte a la pantalla */
+#modalSwiperGallery .modal-body {
+    height: 100vh !important;
+    padding: 0 !important;
+}
+
+/* 🔥 Swiper ocupa toda la pantalla */
+.mySwiper {
+    width: 100%;
+    height: 100%;
+}
+
+/* Cada slide centrado y ajustado */
+.mySwiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #111;
+}
+
+/* Las imágenes y videos ajustan sin salirse */
+.mySwiper img,
+.mySwiper video {
+    max-width: 100%;
+    max-height: 95vh;  /* para no tapar el botón Cerrar */
+    object-fit: contain;
+}
+
+/* Flechas centradas verticalmente */
+.swiper-button-next,
+.swiper-button-prev {
+    color: white;
+    top: 50% !important;
+    transform: translateY(-50%);
+}
+
+/* Puntos más visibles */
+.swiper-pagination-bullet {
+    background: white;
+}
+
+/* Contenedor de cada media */
+.media-edit-item {
+    position: relative;
+}
+
+.media-edit-item img,
+.media-edit-item video {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.media-edit-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    z-index: 10;
+    transform: scale(1.2);
+    accent-color: #0d6efd;
+    background: rgba(255,255,255,0.7);
+    border-radius: 12px;
+}
+
+/* ===== Menú de opciones del post (dropdown) ===== */
+
+.post-menu-dropdown {
+    background: #fff !important;        /* Fondo blanco */
+    border-radius: 10px !important;     /* Bordes redondeados */
+    padding: 8px 0 !important;          /* Espaciado interno */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important; /* Sombra suave */
+    border: 1px solid #e5e5e5 !important;
+}
+
+/* Elementos dentro del menú */
+.post-menu-dropdown .dropdown-item {
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    color: #080808 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Íconos dentro del menú */
+.post-menu-dropdown .dropdown-item i {
+    font-size: 18px;
+    color: #444;
+}
+
+/* Hover */
+.post-menu-dropdown .dropdown-item:hover {
+    background: #050505a2 !important;
+    color: #f7f7f7;
+}
+
+#skeleton-loader .skeleton {
+    background: linear-gradient(90deg, #ececec 25%, #e0e0e0 50%, #ececec 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card {
+    border-radius: 14px;
+}
+
+.skeleton.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+}
+
+.skeleton.line {
+    height: 12px;
+    border-radius: 4px;
+}
+
+.skeleton.line.small {
+    height: 8px;
+    width: 70%;
+}
+
+.skeleton.line.short {
+    width: 40%;
+}
+
+.skeleton.media {
+    height: 200px;
+    border-radius: 12px;
+}
+
+@keyframes shimmer {
+    0% { background-position-x: -200%; }
+    100% { background-position-x: 200%; }
+}
+
