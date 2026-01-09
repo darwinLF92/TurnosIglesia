@@ -575,10 +575,22 @@ if (btnReply) {
   }
 
   // 9) Eliminar publicación
-  const eliminarBtn = e.target.closest(".btn-eliminar-post");
-  if (eliminarBtn) {
-    const postId = eliminarBtn.dataset.postId;
-    if (!confirm("¿Seguro que deseas eliminar esta publicación?")) return;
+// 9) Eliminar publicación (con SweetAlert)
+const eliminarBtn = e.target.closest(".btn-eliminar-post");
+if (eliminarBtn) {
+  const postId = eliminarBtn.dataset.postId;
+
+  Swal.fire({
+    title: "¿Eliminar publicación?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#e11d48",  // rojo bonito
+    cancelButtonColor: "#6b7280"
+  }).then(result => {
+    if (!result.isConfirmed) return;
 
     fetch(`/noticias/eliminar/${postId}/`, {
       method: "POST",
@@ -592,11 +604,33 @@ if (btnReply) {
         if (data.success) {
           const card = document.getElementById("post-" + postId);
           if (card) card.remove();
-        }
-      });
 
-    return;
-  }
+          Swal.fire({
+            icon: "success",
+            title: "Publicación eliminada",
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo eliminar la publicación."
+          });
+        }
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Ocurrió un problema al eliminar."
+        });
+      });
+  });
+
+  return;
+}
+
 
   // 10) Clic en miniatura de galería (abrir Swiper)
   const galleryItem = e.target.closest(".fb-gallery-item");

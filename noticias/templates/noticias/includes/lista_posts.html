@@ -18,7 +18,7 @@
               <li>
                 <button class="dropdown-item btn-editar-post"
                         data-post-id="{{ post.id }}"
-                        data-post-contenido="{{ post.contenido }}">
+                        data-post-contenido="{{ post.contenido|escapejs }}">
                   <i class="fas fa-edit"></i> Editar
                 </button>
               </li>

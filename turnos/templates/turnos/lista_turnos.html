@@ -11,7 +11,7 @@
 
     /* Sección izquierda (Lista de Procesiones) */
     .procesiones-container {
-        width: 35%;
+        width: 40%;
         min-width: 300px;
         padding: 15px;
         border-right: 2px solid #ddd;
@@ -122,6 +122,9 @@
         background: #f8f9fa;
         color: #bd2130;
     }
+    .fecha-p{
+        width: 30%;
+    }
 
 </style>
 
@@ -133,6 +136,7 @@
             <thead>
                 <tr>
                     <th>Procesión</th>
+                    <th>Fecha</th>
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -140,6 +144,8 @@
                 {% for procesion in procesiones %}
                     <tr>
                         <td>{{ procesion.nombre }}</td>
+                        <td class="fecha-p">{{ procesion.fecha|date:"d-m-Y" }}</td>
+
                         <td>
                             <a href="?procesion_id={{ procesion.id }}" class="btn-detalle">
                                 Detalle
@@ -153,7 +159,46 @@
                 {% endfor %}
             </tbody>
         </table>
+
+<nav aria-label="Paginación procesiones" class="mt-3">
+  <ul class="pagination justify-content-center">
+
+    <!-- Botón Primera -->
+    {% if page_obj.number > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1">Primera</a>
+      </li>
+    {% endif %}
+
+    <!-- Números de páginas -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+        {% if num == page_obj.number %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- Botón Última -->
+    {% if page_obj.number < page_obj.paginator.num_pages %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+
+
     </div>
+
+
 
  <!-- Turnos Disponibles -->
 <div class="turnos-container">
@@ -206,6 +251,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <script>
     $(document).ready(function () {
@@ -315,5 +361,51 @@
     });
 </script>
 
+<style>
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
 
+.pagination .page-item {
+    list-style: none;
+}
+
+.pagination .page-link {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    background: #f2f2f2;
+    color: #333;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pagination .page-link:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: #4a4aff;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.pagination .page-item.disabled .page-link {
+    background: #ddd;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pagination .page-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.4);
+}
+
+
+</style>
 {% endblock %}

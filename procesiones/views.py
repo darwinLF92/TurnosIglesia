@@ -31,7 +31,7 @@ class ListaProcesionesView(ListView):
     def get_queryset(self):
         return Procesion.objects.filter(activo=True).annotate(
             total_turnos=Count('turnos', filter=Q(turnos__activo=True))
-        )
+        ).order_by('-fecha_creacion')   # 👈 más reciente primero
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

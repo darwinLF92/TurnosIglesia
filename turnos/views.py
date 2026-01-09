@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-
+from django.core.paginator import Paginator
 
 
 
@@ -84,20 +84,27 @@ class CrearTurnoView(CreateView):
 
 @login_required    
 def lista_turnos(request):
-    procesion_id = request.GET.get('procesion_id')  # Obtiene el ID de la procesión desde la URL
-    turnos = None  # Inicializa turnos como None
+    procesion_id = request.GET.get('procesion_id')
 
-    # Solo procesiones activas
-    procesiones = Procesion.objects.filter(activo=True)
+    # 🔹 Procesiones activas, más recientes primero
+    qs_procesiones = Procesion.objects.filter(activo=True).order_by('-fecha_creacion')
 
-    if procesion_id:  # Verifica si hay un ID de procesión
-        turnos = Turno.objects.filter(procesion_id=procesion_id)
+    # 🔹 Paginación de procesiones (por ejemplo, 10 por página)
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(qs_procesiones, 2)
+    procesiones_page = paginator.get_page(page_number)
 
-    turnos = Turno.objects.filter(procesion_id=procesion_id).order_by('numero_turno')
+    # 🔹 Turnos SOLO si se eligió una procesión
+    turnos = None
+    if procesion_id:
+        turnos = Turno.objects.filter(
+            procesion_id=procesion_id
+        ).order_by('numero_turno')
 
     return render(request, 'turnos/lista_turnos.html', {
         'turnos': turnos,
-        'procesiones': procesiones
+        'procesiones': procesiones_page,  # ahora es una página
+        'page_obj': procesiones_page,     # alias útil para el template
     })
 
 
