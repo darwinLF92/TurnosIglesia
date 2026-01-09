@@ -91,7 +91,7 @@ def lista_turnos(request):
 
     # 🔹 Paginación de procesiones (por ejemplo, 10 por página)
     page_number = request.GET.get('page', 1)
-    paginator = Paginator(qs_procesiones, 2)
+    paginator = Paginator(qs_procesiones, 5)
     procesiones_page = paginator.get_page(page_number)
 
     # 🔹 Turnos SOLO si se eligió una procesión
