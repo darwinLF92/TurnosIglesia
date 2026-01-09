@@ -44,17 +44,32 @@ footer {
                 {{ form.contenido }}
             </div>
 
-            <div class="fb-actions d-flex justify-content-between p-2 rounded">
-                <label class="fb-action-item">
-                    <i class="fas fa-image text-success"></i> Foto
-                    <input type="file" name="media" multiple accept="image/*,video/*" hidden>
-                </label>
+{# input real que se enviará al servidor #}
+<input type="file"
+       id="id_media"
+       name="media"
+       multiple
+       accept="image/*,video/*"
+       class="d-none" />
 
-                <label class="fb-action-item">
-                    <i class="fas fa-video text-danger"></i> Video
-                    <input type="file" name="media" multiple accept="image/*,video/*" hidden>
-                </label>
-            </div>
+<div class="fb-actions d-flex align-items-center p-2 rounded">
+  {# Ambos labels abren el mismo input #}
+  <label class="fb-action-item me-2 mb-0" for="id_media">
+    <i class="fas fa-image text-success"></i> Foto
+  </label>
+
+  <label class="fb-action-item mb-0" for="id_media">
+    <i class="fas fa-video text-danger"></i> Video
+  </label>
+
+  {# Contador / link a la vista previa #}
+  <small id="media-counter"
+         class="ms-auto text-primary d-none"
+         style="cursor:pointer; text-decoration:underline;">
+    0 archivos seleccionados
+  </small>
+</div>
+
 
             <button class="btn btn-primary w-100 mt-3 fw-bold" style="border-radius:20px;">
                 Publicar
@@ -199,6 +214,44 @@ footer {
   </div>
 </div>
 
+<!-- Modal vista previa archivos NUEVA PUBLICACIÓN -->
+<div class="modal fade" id="previewMediaModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content preview-modal">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-title fw-semibold mb-0">
+            <i class="fas fa-images me-2 text-primary"></i>
+            Archivos seleccionados
+          </h5>
+          <small class="text-muted">
+            Revisa, elimina o agrega más archivos antes de publicar.
+          </small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body pt-3">
+        <div class="row g-3" id="previewMediaBody">
+          <!-- Se llena con JS -->
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+
+        <button type="button" class="btn btn-primary" id="btnAddMoreMedia">
+          <i class="fas fa-plus me-1"></i> Agregar más archivos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <!-- Swiper -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -210,11 +263,48 @@ footer {
     listaLikes: "{% url 'noticias:lista_likes' 0 %}",
     listaComentarios: "{% url 'noticias:lista_comentarios' 0 %}",
     toggleLikeComentario: "{% url 'noticias:toggle_like_comentario' 0 %}",
-    responderComentario: "{% url 'noticias:responder_comentario' 0 %}"
+    responderComentario: "{% url 'noticias:responder_comentario' 0 %}",
+    editarPost: "{% url 'noticias:editar_post' 0 %}",
+    eliminarPost: "{% url 'noticias:eliminar_post' 0 %}"
   };
+
+  // pequeñita función para reemplazar el 0 por el id
+  window.buildPostUrl = function(pattern, id) {
+    return pattern.replace(/0\/?$/, id + "/");
+  }
 </script>
 
+
 <script src="{% static 'noticias/js/muro.js' %}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // formulario de nueva publicación
+  const postForm = document.querySelector(".fb-post-box form");
+  if (!postForm) return;
+
+  let enviando = false;
+
+  postForm.addEventListener("submit", function (e) {
+    if (enviando) return;   // evita doble clic
+    enviando = true;
+
+    // Loader SweetAlert
+    Swal.fire({
+      title: "Creando publicación...",
+      text: "Por favor espera unos segundos.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+  });
+});
+</script>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -329,10 +419,176 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const mediaInput      = document.getElementById("id_media");
+  const counterLink     = document.getElementById("media-counter");
+  const previewBody     = document.getElementById("previewMediaBody");
+  const previewModalEl  = document.getElementById("previewMediaModal");
+  const btnAddMoreMedia = document.getElementById("btnAddMoreMedia");
+
+  if (!mediaInput || !counterLink || !previewBody || !previewModalEl) return;
+
+  // DataTransfer para poder quitar archivos del FileList
+  let dt = new DataTransfer();
+
+  // ==============================
+  // Helpers
+  // ==============================
+  function updateCounter() {
+    const total = mediaInput.files.length;
+
+    if (!total) {
+      counterLink.classList.add("d-none");
+      counterLink.textContent = "";
+      return;
+    }
+
+    counterLink.classList.remove("d-none");
+    counterLink.textContent =
+      total === 1
+        ? "1 archivo seleccionado"
+        : `${total} archivos seleccionados`;
+  }
+
+  function renderPreview() {
+    previewBody.innerHTML = "";
+
+    const files = Array.from(mediaInput.files);
+    if (!files.length) {
+      previewBody.innerHTML =
+        "<p class='text-muted mb-0'>No hay archivos seleccionados.</p>";
+      return;
+    }
+
+    files.forEach((file, index) => {
+      const url = URL.createObjectURL(file);
+      let mediaHtml = "";
+
+      if (file.type.startsWith("image/")) {
+        mediaHtml = `<img src="${url}" class="img-fluid mb-2" />`;
+      } else if (file.type.startsWith("video/")) {
+        mediaHtml = `<video src="${url}" class="w-100 mb-2" controls></video>`;
+      } else {
+        mediaHtml = `<div class="small text-muted">${file.name}</div>`;
+      }
+
+      previewBody.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="col-12 col-sm-6 col-md-4">
+          <div class="preview-media-card p-2 position-relative">
+            <button type="button"
+                    class="btn btn-danger btn-sm preview-media-remove position-absolute top-0 end-0 m-1"
+                    data-index="${index}">
+              &times;
+            </button>
+            ${mediaHtml}
+            <div class="small text-truncate mt-1" title="${file.name}">
+              ${file.name}
+            </div>
+          </div>
+        </div>
+        `
+      );
+    });
+  }
+
+  // ==============================
+  // Eventos
+  // ==============================
+
+  // Cuando se seleccionan archivos (añadirlos al DataTransfer)
+  mediaInput.addEventListener("change", function (e) {
+    const nuevos = Array.from(e.target.files);
+
+    nuevos.forEach(file => dt.items.add(file));
+
+    mediaInput.files = dt.files;
+    updateCounter();
+
+    // Si el modal está abierto, refrescamos la vista
+    if (bootstrap.Modal.getInstance(previewModalEl)) {
+      renderPreview();
+    }
+  });
+
+  // Click en el contador -> abrir modal
+  counterLink.addEventListener("click", function () {
+    renderPreview();
+    const modal = new bootstrap.Modal(previewModalEl);
+    modal.show();
+  });
+
+  // Botón "Agregar más archivos" dentro del modal
+  if (btnAddMoreMedia) {
+    btnAddMoreMedia.addEventListener("click", function () {
+      mediaInput.click(); // abre el diálogo de archivos
+    });
+  }
+
+  // Eliminar archivo desde el modal
+  previewModalEl.addEventListener("click", function (e) {
+    const btn = e.target.closest(".preview-media-remove");
+    if (!btn) return;
+
+    const indexToRemove = parseInt(btn.dataset.index, 10);
+
+    const newDt = new DataTransfer();
+    Array.from(mediaInput.files).forEach((file, index) => {
+      if (index !== indexToRemove) {
+        newDt.items.add(file);
+      }
+    });
+
+    dt = newDt;
+    mediaInput.files = dt.files;
+
+    updateCounter();
+    renderPreview();
+
+    // Si ya no hay archivos, cerramos el modal
+    if (!mediaInput.files.length) {
+      const modalInstance = bootstrap.Modal.getInstance(previewModalEl);
+      if (modalInstance) modalInstance.hide();
+    }
+  });
+});
+</script>
 
 
+<style>
+  .preview-modal {
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+}
 
+.preview-modal .modal-body {
+  background: #f9fafb;
+}
 
+.preview-media-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.preview-media-card img,
+.preview-media-card video {
+  border-radius: 10px;
+}
+
+.preview-media-remove {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+</style>
 
 
 {% endblock %}

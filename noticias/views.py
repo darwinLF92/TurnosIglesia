@@ -348,12 +348,16 @@ def buscar_publicaciones(request):
     if q:
         posts = posts.filter(contenido__icontains=q)
 
-    paginator = Paginator(posts, 5)  # 🔥 5 posts por carga (puedes ajustar)
+    paginator = Paginator(posts, 5)
     page_obj = paginator.get_page(page)
 
     html = render_to_string(
         "noticias/includes/lista_posts.html",
-        {"posts": page_obj.object_list, "user": request.user, "comentario_form": ComentarioForm()}
+        {
+            "posts": page_obj.object_list,
+            "comentario_form": ComentarioForm(),
+        },
+        request=request,              # ⭐️ ESTO ES LO QUE FALTABA
     )
 
     return JsonResponse({
