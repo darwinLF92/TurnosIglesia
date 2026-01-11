@@ -23,5 +23,16 @@ class Procesion(models.Model):
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+    turnos_devoto_online = models.PositiveIntegerField(
+        default=0,
+        help_text="Cantidad máxima de turnos online por devoto (0 = ilimitado)"
+    )
+
+    turnos_devoto_local = models.PositiveIntegerField(
+        default=0,
+        help_text="Cantidad máxima de turnos presenciales por devoto (0 = ilimitado)"
+    )
+
+
     def __str__(self):
         return self.nombre

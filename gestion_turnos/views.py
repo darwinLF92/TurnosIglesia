@@ -38,7 +38,7 @@ def inscribir_devoto(request):
     can_turno_reservado = request.user.has_perm('establecimiento.turno_reservado')
 
     devotos_activos = Devoto.objects.filter(activo=True).order_by('nombre')
-    procesiones = Procesion.objects.filter(activo=True).order_by('nombre')
+    procesiones = Procesion.objects.filter(activo=True).order_by('-fecha_creacion')
 
     if request.method == 'POST':
         form = InscripcionForm(request.POST, user=request.user)
@@ -121,6 +121,28 @@ def inscribir_devoto(request):
 
                 if inscripcion.turno:
                     inscripcion.valor_turno = inscripcion.turno.valor
+
+                    procesion = inscripcion.turno.procesion
+                    max_turnos_local = getattr(procesion, "turnos_devoto_local", 0) or 0
+
+                    if max_turnos_local > 0:
+                        inscripciones_devoto_en_procesion = RegistroInscripcion.objects.filter(
+                            devoto=inscripcion.devoto,
+                            turno__procesion=procesion,
+                            inscrito=True,
+                        ).count()
+
+                        if inscripciones_devoto_en_procesion >= max_turnos_local:
+                            messages.error(
+                                request,
+                                f"No se puede inscribir a un devoto a más {max_turnos_local} turnos, contactar al Administrador para sugerir o solicitar cambio."
+                            )
+                            return render(request, 'gestion_turnos/crear_inscripcion.html', {
+                                'form': form,
+                                'devotos_activos': devotos_activos,
+                                'procesiones': procesiones,
+                                'can_turno_reservado': can_turno_reservado,
+                            })
 
                 inscripcion.cambio = inscripcion.calcular_cambio()
                 inscripcion.save()

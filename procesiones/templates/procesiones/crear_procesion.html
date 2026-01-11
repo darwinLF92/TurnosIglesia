@@ -39,6 +39,26 @@
                            name="fecha" required>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Turnos por Devoto Online</label>
+                    <input type="number"
+                        class="form-control form-control-lg shadow-sm"
+                        name="turnos_devoto_online"
+                        value="{{ form.instance.turnos_devoto_online }}"
+                        min="0"
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Turnos por Devoto Presencial</label>
+                    <input type="number"
+                        class="form-control form-control-lg shadow-sm"
+                        name="turnos_devoto_local"
+                        value="{{ form.instance.turnos_devoto_local }}"
+                        min="0"
+                        >
+                </div>
+
                    <div class="mb-3">
                         <label class="form-label fw-bold">Imagen promocional</label>
                         {{ form.imagen_promocional }}

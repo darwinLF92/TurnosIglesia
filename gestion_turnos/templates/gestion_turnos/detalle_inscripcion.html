@@ -1,90 +1,241 @@
 {% block content %}
-<div class="macos-container">
-    <h2 class="macos-title">Detalle de Inscripción</h2>
+<div class="detalle-container">
+    <!-- Cabecera -->
+    <div class="detalle-header">
+        <div class="detalle-header-title">
+            {{ inscripcion.devoto.nombre }}
+        </div>
+        <div class="detalle-header-sub">
+            Turno {{ inscripcion.turno.numero_turno }} – {{ inscripcion.turno.referencia }}
+        </div>
+    </div>
 
-    <div class="macos-content">
-        <p><strong>Fecha de Inscripción:</strong> {{ inscripcion.fecha_inscripcion|date:"d-m-y H:i" }}</p>
-        <p><strong>Devoto:</strong> {{ inscripcion.devoto.nombre }}</p>
-        <p><strong>Turno:</strong> {{ inscripcion.turno.numero_turno }} - {{inscripcion.turno.referencia}}</p>
+    <!-- Detalle en filas -->
+    <div class="detalle-grid">
 
-        <p><strong>Entregado:</strong> 
-            <span class="badge {% if inscripcion.entregado %}badge-success{% else %}badge-danger{% endif %}">
-                {% if inscripcion.entregado %}Sí{% else %}No{% endif %}
+        <div class="detalle-item">
+            <span class="detalle-label">Fecha de inscripción:</span>
+            <span class="detalle-value">
+                {{ inscripcion.fecha_inscripcion|date:"d-m-Y H:i" }}
             </span>
-        </p>
-        <p><strong>Fecha de Entrega:</strong> {{ inscripcion.fecha_entrega|default:"No entregado" }}</p>
-        <p><strong>Valor del Turno:</strong> Q{{ inscripcion.valor_turno }}</p>
-        <p><strong>Fecha de Entrega Estimada:</strong> {{ inscripcion.fecha_entrega_estimada|date:"d-m-y" }}
-            a las {{ inscripcion.fecha_entrega_estimada|date:"H:i" }} Horas</p>
-        
-        <p><strong>Lugar de Entrega:</strong> {{ inscripcion.lugar_entrega }}</p>
-        <p><strong>Monto Pagado:</strong> Q{{ inscripcion.monto_pagado }}</p>
-        <p><strong>Cambio:</strong> Q{{ inscripcion.cambio }}</p>
-        <p><strong>Estado:</strong> 
-            <span class="status {% if inscripcion.inscrito %}status-success{% else %}status-danger{% endif %}">
-                {% if inscripcion.inscrito %}INSCRITO{% else %}NO INSCRITO{% endif %}
+        </div>
+
+        <!-- ⭐ NUEVO CAMPO: TIPO DE INSCRIPCIÓN ⭐ -->
+        <div class="detalle-item">
+            <span class="detalle-label">Tipo de inscripción:</span>
+            <span class="detalle-value">
+                {% if inscripcion.tipo_inscripcion == 'online' %}
+                    <span class="badge badge-info">En línea</span>
+                {% elif inscripcion.tipo_inscripcion == 'presencial' %}
+                    <span class="badge badge-warning">Presencial</span>
+                {% else %}
+                    <span class="badge badge-secondary">No definido</span>
+                {% endif %}
             </span>
-        </p>
-        <p><strong>Contraseña de Inscripción: </strong>{{inscripcion.codigo}}</p>
+        </div>
+        <!-- ⭐ FIN DEL CAMPO NUEVO ⭐ -->
+
+        <div class="detalle-item">
+            <span class="detalle-label">Entregado:</span>
+            <span class="detalle-value">
+                {% if inscripcion.entregado %}
+                    <span class="badge badge-entregado">Sí</span>
+                {% else %}
+                    <span class="badge badge-no-entregado">No</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detalle-item">
+            <span class="detalle-label">Fecha de entrega:</span>
+            <span class="detalle-value">
+                {% if inscripcion.fecha_entrega %}
+                    {{ inscripcion.fecha_entrega|date:"d-m-Y H:i" }}
+                {% else %}
+                    No entregado
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detalle-item">
+            <span class="detalle-label">Fecha entrega estimada:</span>
+            <span class="detalle-value">
+                {{ inscripcion.fecha_entrega_estimada|date:"d-m-Y" }}
+                a las {{ inscripcion.fecha_entrega_estimada|date:"H:i" }} horas
+            </span>
+        </div>
+
+        <div class="detalle-item">
+            <span class="detalle-label">Lugar de entrega:</span>
+            <span class="detalle-value">
+                {{ inscripcion.lugar_entrega|default:"Sin definir" }}
+            </span>
+        </div>
+
+        <div class="detalle-item">
+            <span class="detalle-label">Estado inscripción:</span>
+            <span class="detalle-value">
+                {% if inscripcion.inscrito %}
+                    <span class="badge badge-estado-ok">INSCRITO</span>
+                {% else %}
+                    <span class="badge badge-estado-bad">NO INSCRITO</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="detalle-item">
+            <span class="detalle-label">Contraseña de inscripción:</span>
+            <span class="detalle-value">
+                {{ inscripcion.codigo }}
+            </span>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="detalle-resumen">
+        <div class="detalle-kpi">
+            <div class="detalle-kpi-label">Valor del turno</div>
+            <div class="detalle-kpi-value">Q{{ inscripcion.valor_turno }}</div>
+        </div>
+        <div class="detalle-kpi">
+            <div class="detalle-kpi-label">Monto pagado</div>
+            <div class="detalle-kpi-value">Q{{ inscripcion.monto_pagado }}</div>
+        </div>
+        <div class="detalle-kpi">
+            <div class="detalle-kpi-label">Cambio</div>
+            <div class="detalle-kpi-value">Q{{ inscripcion.cambio }}</div>
+        </div>
     </div>
 </div>
 
 <style>
-    /* Estilos inspirados en macOS */
-    .macos-container {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        color: #333;
-    }
+/* === TARJETA ESTILO DETALLE TURNO === */
+.detalle-container {
+    max-width: 540px;
+    margin: auto;
+    background: linear-gradient(145deg, #fefce8, #fef9c3);
+    padding: 20px 22px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.35);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 
-    .macos-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-        text-align: center;
-        margin-bottom: 15px;
-    }
+/* Cabecera */
+.detalle-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.6);
+}
 
-    .macos-content p {
-        margin: 8px 0;
-        font-size: 14px;
-        color: #555;
-    }
+.detalle-header-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1f2937;
+}
 
-    /* Estilos para etiquetas de estado */
-    .badge {
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    .badge-success {
-        background-color: #4CAF50;
-        color: white;
-    }
-    .badge-danger {
-        background-color: #E53935;
-        color: white;
-    }
+.detalle-header-sub {
+    font-size: 14px;
+    color: #4b5563;
+}
 
-    /* Estado de inscripción */
-    .status {
-        font-weight: bold;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-    }
-    .status-success {
-        background-color: #4CAF50;
-        color: white;
-    }
-    .status-danger {
-        background-color: #E53935;
-        color: white;
-    }
+/* Grid */
+.detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+}
+
+.detalle-item {
+    font-size: 15px;
+    color: #374151;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.detalle-label {
+    font-weight: 700;
+    color: #111827;
+}
+
+.detalle-value {
+    font-weight: 500;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.18);
+    color: #1e3a8a;
+}
+
+.badge-warning {
+    background: rgba(234, 179, 8, 0.18);
+    color: #92400e;
+}
+
+.badge-secondary {
+    background: rgba(148, 163, 184, 0.20);
+    color: #374151;
+}
+
+.badge-entregado {
+    background: rgba(22, 163, 74, 0.15);
+    color: #166534;
+}
+
+.badge-no-entregado {
+    background: rgba(239, 68, 68, 0.15);
+    color: #b91c1c;
+}
+
+.badge-estado-ok {
+    background: rgba(22, 163, 74, 0.15);
+    color: #14532d;
+}
+
+.badge-estado-bad {
+    background: rgba(239, 68, 68, 0.15);
+    color: #7f1d1d;
+}
+
+/* KPIs */
+.detalle-resumen {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(148, 163, 184, 0.6);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.detalle-kpi {
+    flex: 1 1 120px;
+}
+
+.detalle-kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #6b7280;
+}
+
+.detalle-kpi-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1f2937;
+}
 </style>
+
 {% endblock %}

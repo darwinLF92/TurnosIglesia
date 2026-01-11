@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const resumenHtml = `
     <div style="text-align:left">
       <p><b>Procesión:</b> {{ resumen.procesion }}</p>
-      <p><b>Fecha:</b> {{ resumen.fecha }}</p>
+      <p><b>Fecha:</b> {{ resumen.fecha|date:"d-m-Y" }}</p>
       <p><b>Turno:</b> {{ resumen.turno }}</p>
       <p><b>Valor:</b> Q{{ resumen.valor }}</p>
     </div>
@@ -91,13 +91,28 @@ document.addEventListener('DOMContentLoaded', function () {
     cancelButtonText: 'Cancelar'
   }).then((result) => {
     if (result.isConfirmed) {
-      document.getElementById('confirmado').value = "1";
-      document.getElementById('formInscripcion').submit();
+
+      // 🔹 SweetAlert de CARGA
+      Swal.fire({
+        title: 'Registrando su inscripción...',
+        html: 'Por favor, espere un momento.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+
+          // aquí ya mandamos el formulario
+          document.getElementById('confirmado').value = "1";
+          document.getElementById('formInscripcion').submit();
+        }
+      });
+
     }
   });
 });
 </script>
 {% endif %}
+
 
 {% if messages %}
 <script>

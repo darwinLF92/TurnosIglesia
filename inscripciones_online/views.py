@@ -158,6 +158,26 @@ def inscripcion_online(request, procesion_id):
 
                 devoto = _obtener_o_crear_devoto_desde_usuario(request.user)
 
+                inscripciones_devoto = RegistroInscripcion.objects.filter(
+                    devoto=devoto,
+                    turno__procesion=procesion,
+                    inscrito=True
+                ).count()
+
+                max_turnos = procesion.turnos_devoto_online or 0
+
+                # ⭐ Si max_turnos = 0 → ilimitado → NO se valida
+                if max_turnos > 0 and inscripciones_devoto >= max_turnos:
+                    messages.error(
+                        request,
+                        f"Estimado devoto, no puedes inscribirte a más de {max_turnos} turnos en esta procesión."
+                    )
+                    return redirect(
+                        "inscripciones_online:inscripcion_online",
+                        procesion_id=procesion.id
+                    )
+
+
                 # ❌ EVITAR DOBLE INSCRIPCIÓN
                 if RegistroInscripcion.objects.filter(
                     devoto=devoto,
