@@ -70,17 +70,17 @@ def login_view(request):
         if user is not None:
             login(request, user)
 
-            # 🔔 Mensaje de bienvenida (tag especial para SweetAlert)
-            nombre_mostrar = f"{user.first_name} {user.last_name}".strip() or user.username
-
-            messages.success(
-                request,
-                f"Bienvenido(a) de nuevo, {nombre_mostrar}.",
-                extra_tags="bienvenida"
-            )
-
             # Recupera el parámetro "next" si viene de una página protegida
-            next_url = request.GET.get('next')
+            next_url = request.GET.get('next') or request.POST.get('next')
+
+            # 🔔 Mensaje de bienvenida SOLO si NO viene con "next"
+            if not next_url:
+                nombre_mostrar = f"{user.first_name} {user.last_name}".strip() or user.username
+                messages.success(
+                    request,
+                    f"Bienvenido(a) de nuevo, {nombre_mostrar}.",
+                    extra_tags="bienvenida"
+                )
 
             # Seguridad: verifica que "next" sea una URL válida del mismo dominio
             if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
@@ -95,6 +95,8 @@ def login_view(request):
         'error_message': error_message,
         'logo_url': logo_url,
         'nombre_hermandad': nombre_hermandad,
+        # opcional: para usarlo en un <input type="hidden" name="next">
+        'next': request.GET.get('next', ''),
     }
     return render(request, 'aplicacion/login.html', context)
 
