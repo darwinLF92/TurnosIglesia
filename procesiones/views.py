@@ -19,6 +19,8 @@ from weasyprint import HTML
 import tempfile
 import openpyxl
 from django.views.decorators.http import require_POST
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
 
 
 
@@ -178,7 +180,7 @@ def exportar_reporte_turnos_pdf(request):
 
     return response
 
-def exportar_reporte_turnos_excel(request):
+def exportar_reporte_turnos_excel(request): 
     anio = request.GET.get('anio')
     procesion_id = request.GET.get('procesion_id')
     turno_id = request.GET.get('turno_id')
@@ -199,27 +201,132 @@ def exportar_reporte_turnos_excel(request):
     ws = wb.active
     ws.title = "Reporte Turnos"
 
-    ws.append(["Nombre Procesión:", procesion.nombre])
-    ws.append(["Fecha Procesión:", procesion.fecha.strftime('%d/%m/%Y')])
-    ws.append([])
+    # === Estilos básicos ===
+    bold_font = Font(bold=True)
+    title_font = Font(bold=True, size=14)
+    header_fill = PatternFill("solid", fgColor="1F4E78")  # azul oscuro
+    header_font = Font(bold=True, color="FFFFFF")         # blanco
+    center = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin"),
+    )
 
-    ws.append(["Turno No.", "Referencia", "Marcha Fúnebre", "Inscritos", "Entregados"])
+    # === Encabezado de la procesión ===
+    ws["A1"] = "Nombre Procesión:"
+    ws["B1"] = procesion.nombre
+    ws["A2"] = "Fecha Procesión:"
+    ws["B2"] = procesion.fecha.strftime("%d/%m/%Y")
 
+    ws["A1"].font = ws["A2"].font = bold_font
+
+    # Un pequeño título encima (opcional)
+    ws.insert_rows(1)
+    ws["A1"] = "REPORTE DE TURNOS"
+    ws.merge_cells("A1:J1")
+    ws["A1"].font = title_font
+    ws["A1"].alignment = center
+
+    # La fila de encabezados quedará en la fila 5
+    ws.append([])  # fila 3 vacía
+    ws.append([])  # fila 4 vacía
+
+    ws.append([
+        "Turno No.",
+        "Tipo de turno",
+        "Clase de turno",
+        "Reservado",
+        "Reservado para",
+        "Referencia",
+        "Marcha Fúnebre",
+        "Inscritos",
+        "Entregados",
+        "Costo del turno",
+    ])
+    header_row = ws.max_row
+
+    # Aplicar estilo al encabezado
+    for col in range(1, 11):
+        cell = ws.cell(row=header_row, column=col)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = center
+        cell.border = thin_border
+
+    total_costo = 0
+
+    # === Filas de datos ===
     for turno in turnos:
         inscritos = RegistroInscripcion.objects.filter(turno=turno).count()
         entregados = RegistroInscripcion.objects.filter(turno=turno, entregado=True).count()
+
+        # Reservado / Reservado para
+        if turno.reservado_hermandad:
+            reservado_str = "Sí"
+            nombre_limpio = (turno.nombre_hermandad_visitante or "").strip()
+            if nombre_limpio:
+                reservado_para = nombre_limpio
+            else:
+                reservado_para = "Extraordinario"
+        else:
+            reservado_str = "No"
+            reservado_para = ""
+
+        costo_turno = turno.valor
+        total_costo += turno.valor * inscritos
+
+
         ws.append([
             turno.numero_turno,
-            turno.referencia,
-            turno.marcha_funebre,
+            turno.get_tipo_turno_display(),
+            turno.get_clase_turno_display(),
+            reservado_str,
+            reservado_para,
+            turno.referencia or "",
+            turno.marcha_funebre or "",
             inscritos,
-            entregados
+            entregados,
+            float(costo_turno),
         ])
 
-    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        # Borde a la fila recién agregada
+        current_row = ws.max_row
+        for col in range(1, 11):
+            cell = ws.cell(row=current_row, column=col)
+            cell.border = thin_border
+
+    # === Fila de TOTAL ===
+    total_row = ws.max_row + 2
+    ws.cell(row=total_row, column=9, value="TOTAL:")
+    ws.cell(row=total_row, column=9).font = bold_font
+    ws.cell(row=total_row, column=10, value=float(total_costo))
+    ws.cell(row=total_row, column=10).font = bold_font
+    ws.cell(row=total_row, column=10).border = thin_border
+
+    # === Formato moneda para la columna de costo ===
+    for row in range(header_row + 1, ws.max_row + 1):
+        cell = ws.cell(row=row, column=10)
+        cell.number_format = '"Q"#,##0.00'
+
+    # === Ajustar ancho de columnas automáticamente ===
+    for col in range(1, 11):
+        max_length = 0
+        col_letter = get_column_letter(col)
+        for row in range(1, ws.max_row + 1):
+            value = ws.cell(row=row, column=col).value
+            if value is not None:
+                max_length = max(max_length, len(str(value)))
+        ws.column_dimensions[col_letter].width = max_length + 2
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
     response["Content-Disposition"] = 'attachment; filename="reporte_turnos.xlsx"'
     wb.save(response)
     return response
+
 
 
 @login_required

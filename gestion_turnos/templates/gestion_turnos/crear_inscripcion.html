@@ -2,16 +2,16 @@
 
 {% block content %}
 <style>
-  /* --- Página --- */
+  
   .inscripcion-page{
     display: flex;
     justify-content: center;
   }
 
-  /* --- Card contenedora --- */
+ 
   .inscripcion-card{
     width: 100%;
-    max-width: 780px;       /* similar a la imagen */
+    max-width: 780px;       
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 10px 22px rgba(0,0,0,.12);
@@ -19,7 +19,7 @@
     margin: 0 auto;
   }
 
-  /* --- Título --- */
+ 
   .inscripcion-form h2{
     text-align:center;
     font-weight: 700;
@@ -27,20 +27,19 @@
     margin: 6px 0 18px;
   }
 
-  /* --- Labels --- */
   .inscripcion-form label{
     font-weight: 500;
     margin: 10px 0 6px;
     display:block;
   }
 
-  /* --- Inputs generales --- */
+
   .inscripcion-form .form-control{
     border-radius: 7px;
     padding: 12px 12px;
   }
 
-  /* --- Inputs de búsqueda (devoto / procesión) --- */
+
   #devoto-nombre, #procesion-nombre{
     text-align: left;
     padding: 12px;
@@ -57,21 +56,32 @@
     border-radius: 7px 0 0 7px !important;
   }
 
-  /* --- Select turno --- */
+
   #id_turno{
     text-align: left;
     padding: 10px;
   }
 
-  /* --- Campos grises (valor, monto, cambio) --- */
-  #id_valor_turno, #id_monto_pagado, #id_cambio{
-    background: #f0f0f5;
-    font-weight: 700;
-    text-align: right;
-    padding: 12px 14px;
-  }
 
-  /* --- Botones inferiores --- */
+#id_valor_turno, #id_cambio{
+  background: #f0f0f5;
+  font-weight: 700;
+  text-align: right;
+  padding: 12px 14px;
+}
+
+
+#id_monto_pagado{
+  background: #fff5f5;
+  font-weight: 700;
+  text-align: right;
+  padding: 12px 14px;
+  border: 2px solid #4f8ff0;  
+  color: #005bb0;             
+}
+
+
+
   .actions{
     display:flex;
     justify-content:center;
@@ -102,7 +112,7 @@
     background: #a1a1a6;
   }
 
-  /* --- Modales (igual que ya tienes, pero mantengo tu estilo) --- */
+
   .modal-content{
     border-radius: 14px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
@@ -120,7 +130,7 @@
     border-bottom-right-radius: 14px;
   }
 
-  /* --- Responsive --- */
+
   @media (max-width: 576px){
     .inscripcion-card{
       padding: 18px 16px;
@@ -180,7 +190,7 @@
     </div>
 </form>
 </div>
-<!-- Modal Devotos -->
+
 <div id="devotosModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -225,7 +235,7 @@
     </div>
 </div>
 
-<!-- Modal Procesiones -->
+
 <div id="procesionesModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -380,29 +390,32 @@
             .then(response => response.json())
             .then(data => {
 
-                // ✅ Precio
                 if (data.precio) {
                 document.getElementById('id_valor_turno').value = data.precio;
                 document.getElementById('id_valor_turno_hidden').value = data.precio;
                 }
 
-                // ✅ Fecha y lugar (cargarlos si vienen)
-                // Nota: si vienen vacíos, dejamos que el usuario los escriba.
                 const fechaInput = document.getElementById('id_fecha_entrega_estimada');
                 const lugarInput = document.getElementById('id_lugar_entrega');
 
                 if (data.fecha_entrega) {
                 fechaInput.value = data.fecha_entrega;
                 } else {
-                fechaInput.value = "";  // editable para que el usuario la ingrese
+                fechaInput.value = "";  
                 }
 
                 if (data.lugar_entrega) {
                 lugarInput.value = data.lugar_entrega;
                 } else {
-                lugarInput.value = "";  // editable para que el usuario lo ingrese
+                lugarInput.value = "";  
                 }
 
+                if (data.precio) {
+                    const montoInput = document.getElementById('id_monto_pagado');
+                    montoInput.value = data.precio;
+
+                    montoInput.dispatchEvent(new Event('input'));
+                }
             })
             .catch(error => {
                 console.error("Error al obtener datos del turno:", error);
