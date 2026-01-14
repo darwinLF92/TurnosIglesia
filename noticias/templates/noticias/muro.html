@@ -351,6 +351,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
             contenedor.insertAdjacentHTML("beforeend", data.html);
 
+            initPostTooltips(contenedor);
+
             skeleton.style.display = "none"; // ocultar loader
 
             cargando = false;
@@ -362,6 +364,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // CARGA INICIAL
     cargarPagina(1);
+
+    document.addEventListener("DOMContentLoaded", function () {
+    initPostTooltips(document);
+    });
 
     // ============ BÚSQUEDA AJAX ===============
     function debounce(fn, delay) {
@@ -396,6 +402,8 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
 
             contenedor.insertAdjacentHTML("beforeend", data.html);
+
+            initPostTooltips(contenedor);
 
             skeleton.style.display = "none";
             window.hasNext = false;
@@ -556,7 +564,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<script>
+function initPostTooltips(rootElement) {
+    // rootElement: contenedor donde se insertó el HTML de posts
+    const tooltipTriggerList = [].slice.call(
+        (rootElement || document).querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
 
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        // Evitar inicializar dos veces el mismo elemento
+        if (!tooltipTriggerEl._tooltipInstance) {
+            tooltipTriggerEl._tooltipInstance = new bootstrap.Tooltip(tooltipTriggerEl);
+        }
+    });
+}
+</script>
+<style>
+/* Alinear texto de TODOS los tooltips a la izquierda */
+.tooltip-inner {
+    text-align: left;
+}
+
+/* Lista interna del tooltip */
+.tooltip-list {
+    margin: 0;
+    padding-left: 0;
+}
+
+.tooltip-list li {
+    list-style: none;
+    padding: 2px 0;
+    font-size: 13px;
+    text-align: left;
+}
+
+.tooltip-more {
+    font-style: italic;
+    color: #9ca3af;
+}
+
+
+</style>
 <style>
   .preview-modal {
   border-radius: 18px;

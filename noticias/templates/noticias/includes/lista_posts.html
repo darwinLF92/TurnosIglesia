@@ -116,24 +116,36 @@
           </span>
         </button>
 
-        <small class="text-muted">
-          <span class="like-count"
-                data-post-id="{{ post.id }}"
-                style="cursor:pointer;"
-                data-bs-toggle="tooltip"
-                data-bs-html="true"
-                title="{% for u in post.likes.all|slice:':5' %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
-            {{ post.total_likes }} Me gusta
-          </span> •
-          <span class="comment-count"
-                data-post-id="{{ post.id }}"
-                style="cursor:pointer;"
-                data-bs-toggle="tooltip"
-                data-bs-html="true"
-                title="{% for c in post.comentarios.all|slice:':5' %}{{ c.autor.get_full_name|default:c.autor.username }}{% if not forloop.last %}<br>{% endif %}{% endfor %}">
-            {{ post.comentarios.count }} comentarios
-          </span>
-        </small>
+<small class="text-muted">
+
+  <!-- LIKE COUNT -->
+  <span class="like-count"
+        data-post-id="{{ post.id }}"
+        style="cursor:pointer;"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        data-bs-html="true"
+        data-bs-original-title="{% if post.total_likes == 0 %}Sin reacciones{% else %}<ul class='tooltip-list'>{% for u in post.likes.all|slice:':5' %}<li>{{ u.get_full_name|default:u.username }}</li>{% endfor %}{% if post.total_likes > 5 %}<li class='tooltip-more'>+{{ post.total_likes|add:'-5' }} más</li>{% endif %}</ul>{% endif %}">
+      {{ post.total_likes }} Me gusta
+  </span>
+
+  •
+
+  <!-- COMMENT COUNT -->
+  <span class="comment-count"
+        data-post-id="{{ post.id }}"
+        style="cursor:pointer;"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        data-bs-html="true"
+        data-bs-original-title="{% if post.comentarios.count == 0 %}Sin comentarios{% else %}<ul class='tooltip-list'>{% for c in post.comentarios.all|slice:':5' %}<li>{{ c.autor.get_full_name|default:c.autor.username }}</li>{% endfor %}{% if post.comentarios.count > 5 %}<li class='tooltip-more'>+{{ post.comentarios.count|add:'-5' }} más</li>{% endif %}</ul>{% endif %}">
+      {{ post.comentarios.count }} comentarios
+  </span>
+
+</small>
+
+
+
       </div>
 
       <hr class="my-2">
@@ -171,3 +183,4 @@
 {% empty %}
   <p class="text-muted text-center">Aún no hay publicaciones.</p>
 {% endfor %}
+

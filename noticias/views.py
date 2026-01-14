@@ -14,6 +14,8 @@ from .utils_notificaciones import (
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.template.loader import render_to_string
+from aplicacion.templatetags.auth_extras import timesince_es
+
 
 
 def muro_noticias(request):
@@ -141,14 +143,16 @@ def serialize_comentario(com, user):
         "id": com.id,
         "autor": com.autor.get_full_name() or com.autor.username,
         "texto": com.texto,
-        "fecha": timesince(com.creado_en) + " atrás",
+        # 🔹 AHORA EN ESPAÑOL
+        "fecha": f"hace {timesince_es(com.creado_en)}",
         "total_likes": com.total_likes,
         "liked_by_user": user in com.likes.all(),
         "respuestas": [
-            serialize_comentario(r, user) 
+            serialize_comentario(r, user)
             for r in com.respuestas.all().order_by("creado_en")
         ]
     }
+
 
 
 @login_required
