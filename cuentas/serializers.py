@@ -10,7 +10,8 @@ from nucleo.correos import enviar_confirmacion_correo
 from django.core.signing import BadSignature, SignatureExpired
 from django.contrib.auth.password_validation import validate_password
 from nucleo.correos import enviar_reset_password_correo
-from datetime import date, timezone
+from datetime import date
+from django.utils import timezone
 from devotos.models import Devoto
 from inscripciones_online.models import DevotoCuenta  # ajusta import según tu app
 from django.db import IntegrityError
