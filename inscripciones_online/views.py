@@ -250,23 +250,18 @@ def comprobante_inscripcion_imagen(request, codigo):
     )
 
 
+
 @login_required
 def mis_inscripciones(request):
     devoto_cuenta = DevotoCuenta.objects.select_related("devoto").filter(user=request.user).first()
-    print("USER:", request.user.id, request.user.username)
 
     if not devoto_cuenta:
-            print("NO HAY DevotoCuenta para este user")
-            return render(request, "inscripciones_online/mis_inscripciones.html", {"sin_devoto": True})
+        return render(
+            request,
+            "inscripciones_online/mis_inscripciones.html",
+            {"sin_devoto": True}
+        )
 
-    devoto = devoto_cuenta.devoto
-    print("DEVOTO (de la cuenta):", devoto.id, devoto.nombre)
-
-    qs_all = RegistroInscripcion.objects.filter(devoto=devoto)
-    print("INSCRIPCIONES para ese DEVOTO:", qs_all.count())
-
-    qs_true = RegistroInscripcion.objects.filter(devoto=devoto, inscrito=True)
-    print("INSCRIPCIONES inscrito=True:", qs_true.count())
     devoto = devoto_cuenta.devoto
     query = request.GET.get("q", "").strip()
 
@@ -287,7 +282,11 @@ def mis_inscripciones(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    return render(request, "inscripciones_online/mis_inscripciones.html", {
-        "page_obj": page_obj,
-        "query": query,
-    })
+    return render(
+        request,
+        "inscripciones_online/mis_inscripciones.html",
+        {
+            "page_obj": page_obj,
+            "query": query,
+        }
+    )

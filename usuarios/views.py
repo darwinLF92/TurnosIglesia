@@ -43,7 +43,12 @@ def crear_usuario(request):
 def lista_usuarios(request):
     search = request.GET.get('search', '')
     grupo = request.GET.get('grupo', '')
+    paginacion = request.GET.get('paginacion', 8)  # 👈 cantidad por página (default 10)
 
+    # Todos los usuarios activos (para el contador general)
+    total_activos = User.objects.filter(is_active=True).count()
+
+    # Query base
     usuarios_list = User.objects.filter(is_active=True)
 
     # 🔍 Filtro por texto
@@ -61,11 +66,11 @@ def lista_usuarios(request):
 
     usuarios_list = usuarios_list.order_by('username')
 
-    paginator = Paginator(usuarios_list, 10)
+    # 👇 Usa 'paginacion' para el Paginator
+    paginator = Paginator(usuarios_list, int(paginacion))
     page_number = request.GET.get('page')
     usuarios = paginator.get_page(page_number)
 
-    # Para cargar grupos únicos
     grupos = Group.objects.all().order_by('name')
 
     return render(request, 'lista_usuarios.html', {
@@ -73,7 +78,10 @@ def lista_usuarios(request):
         'grupos': grupos,
         'search': search,
         'grupo': grupo,
+        'total_activos': total_activos,
+        'paginacion': int(paginacion),  # 👈 lo mandamos al template
     })
+
 
 
 @login_required

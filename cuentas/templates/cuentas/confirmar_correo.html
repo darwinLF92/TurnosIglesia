@@ -246,44 +246,56 @@ html, body {
         <!-- BODY -->
         <div class="card-body">
 
-            {% if estado == "error_confirmacion" %}
+{% if estado == "error_confirmacion" %}
 
-                <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft mt-3">Volver al inicio</a>
+    <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft mt-3">Volver al inicio</a>
 
-            {% elif estado == "password_ok" %}
+{% elif estado == "password_ok" %}
 
-                <a href="{% url 'aplicacion:login' %}" class="btn btn-primary mb-3">Iniciar sesión</a>
-                <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft">Ir al inicio</a>
+    <a href="{% url 'aplicacion:login' %}" class="btn btn-primary mb-3">Iniciar sesión</a>
+    <a href="{% url 'aplicacion:home' %}" class="btn btn-outline-light-soft">Ir al inicio</a>
 
-            {% else %}
+{% else %}
 
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="correo" value="{{ correo }}">
+    {# 🔴 AQUÍ VAN LOS ERRORES #}
+    {% if errores %}
+    <div class="alert alert-danger" style="background:#7f1d1d; border:none; color:white; border-radius:10px; padding:10px 15px;">
+        <ul class="mb-0">
+            {% for campo, lista in errores.items %}
+                {% for error in lista %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
-                <div class="mb-3">
-                    <label class="form-label">Correo</label>
-                    <input type="email" class="form-control" value="{{ correo }}" disabled>
-                </div>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="correo" value="{{ correo }}">
 
-                <!-- Password 1 -->
-                <div class="mb-3 input-group-custom">
-                    <label class="form-label">Contraseña nueva</label>
-                    <input type="password" id="password1" name="password1" class="form-control" required>
-                    <i class="fa-regular fa-eye toggle-eye" onclick="togglePass('password1', this)"></i>
-                </div>
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" class="form-control" value="{{ correo }}" disabled>
+        </div>
 
-                <!-- Password 2 -->
-                <div class="mb-4 input-group-custom">
-                    <label class="form-label">Confirmar contraseña</label>
-                    <input type="password" id="password2" name="password2" class="form-control" required>
-                    <i class="fa-regular fa-eye toggle-eye" onclick="togglePass('password2', this)"></i>
-                </div>
+        <div class="mb-3 input-group-custom">
+            <label class="form-label">Contraseña nueva</label>
+            <input type="password" id="password1" name="password1" class="form-control" required>
+            <i class="fa-regular fa-eye toggle-eye" onclick="togglePass('password1', this)"></i>
+        </div>
 
-                <button class="btn btn-primary">Guardar contraseña</button>
-            </form>
+        <div class="mb-4 input-group-custom">
+            <label class="form-label">Confirmar contraseña</label>
+            <input type="password" id="password2" name="password2" class="form-control" required>
+            <i class="fa-regular fa-eye toggle-eye" onclick="togglePass('password2', this)"></i>
+        </div>
 
-            {% endif %}
+        <button class="btn btn-primary">Guardar contraseña</button>
+    </form>
+
+{% endif %}
+
         </div>
 
     </div>
