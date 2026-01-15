@@ -9,12 +9,14 @@
       <div class="alert alert-success mb-4">
         <h4 class="mb-2">¡Inscripción realizada con éxito!</h4>
 
-        <p><strong>Procesión:</strong> {{ insc.turno.procesion.nombre }}</p>
-        <p><strong>Contraseña:</strong> {{ insc.codigo }}</p>
-        <p><strong>Marcha Fúnebre:</strong> {{ insc.turno.marcha_funebre }} </p>
-        <p><strong>Fecha:</strong> {{ insc.turno.procesion.fecha|date:"d/m/Y" }}</p>
         <p><strong>Turno:</strong> {{ insc.turno.numero_turno }}</p>
+        <p><strong>Procesión:</strong> {{ insc.turno.procesion.nombre }}</p>
+        <p><strong>Marcha Fúnebre:</strong> {{ insc.turno.marcha_funebre }} </p>
+        <p><strong>Fecha Procesión:</strong> {{ insc.turno.procesion.fecha|date:"d/m/Y" }}</p>
+        <p><strong>Contraseña:</strong> {{ insc.codigo }}</p>
+        <p><strong>Referencia:</strong> {{ insc.turno.referencia }} </p>
         <p><strong>Valor:</strong> Q{{ insc.valor_turno }}</p>
+        
       </div>
 
       <div class="d-flex flex-column flex-md-row gap-3">

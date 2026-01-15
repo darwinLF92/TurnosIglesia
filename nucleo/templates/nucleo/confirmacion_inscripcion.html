@@ -15,29 +15,39 @@
     a { text-decoration:none; }
 
     /* Fondo */
-    body{ background:#f4f6f8; font-family:Arial, sans-serif; color:#1f2937; }
+    body{ background:#ffffff; font-family:Arial, sans-serif; color:#1f2937; }
 
     /* Contenedor (desktop centrado / móvil full width) */
-    .outer { width:100%; background:#f4f6f8; }
-    .container { width:100%; max-width:600px; }
+    .outer { width:100%; background:#ffffff; }
+    /* Contenedor full-width en escritorio */
+    .container {
+      width:100% !important;
+      max-width:100% !important;
+      padding:0 !important;
+    }
 
-    /* Card */
+    /* Tarjeta full-width */
     .card {
-      background:#ffffff;
-      border-radius:16px;
+      width:100% !important;
+      max-width:100% !important;
+      margin:0 !important;
+      border-radius:0 !important;
       overflow:hidden;
-      box-shadow:0 10px 28px rgba(0,0,0,.10);
+      background:#ffffff;
+      box-shadow:none; /* o déjalo si quieres */
+    }
+
+    /* En móvil vuelve al estilo original */
+    @media screen and (max-width: 600px) {
+      .card {
+        border-radius:16px !important;
+        box-shadow:0 10px 28px rgba(0,0,0,.10) !important;
+      }
     }
 
     /* Header */
     .header { padding:22px 22px 12px; text-align:center; }
-    .logo {
-      width:92px; height:92px;
-      border-radius:999px;
-      object-fit:contain;
-      background:#fff;
-      display:inline-block;
-    }
+
     .title { margin:12px 0 0; font-size:20px; font-weight:800; color:#111827; }
     .subtitle { margin:6px 0 0; font-size:13px; color:#6b7280; }
 
@@ -131,12 +141,11 @@
 
                 <!-- Header -->
                 <tr>
-                  <td class="header">
-                    {% if logo_base64 %}
-                      <img class="logo" src="{{ logo_base64 }}" alt="Logo" />
+                  <td class="header" style="padding:0 !important;">
+                    {% if banner_url %}
+                     <img src="{{ banner_url }}" alt="Imagen Procesión"
+                          style="width:100%; max-width:100%; display:block; margin:0; padding:0;" />
                     {% endif %}
-                    <div class="title">Confirmación de Inscripción</div>
-                    <div class="subtitle">Hermandad Aldea El Ingeniero</div>
                   </td>
                 </tr>
 
@@ -165,15 +174,23 @@
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                         <tr>
                           <td class="label">Turno:</td>
-                          <td class="value">Turno {{ turno_numero }}</td>
+                          <td class="value">Turno {{ turno_numero }} - {{ clase_turno }}</td>
                         </tr>
                         <tr>
                           <td class="label">Procesión:</td>
                           <td class="value">{{ procesion_nombre }}</td>
                         </tr>
                         <tr>
-                          <td class="label">Fecha de entrega:</td>
-                          <td class="value">{{ fecha_entrega }}</td>
+                          <td class="label">Fecha Procesión:</td>
+                          <td class="value">{{ fecha_procesion|date:"d/m/Y" }}</td>
+                        </tr>
+                        <tr>
+                          <td class="label">Marcha Fúnebre:</td>
+                          <td class="value">{{ marcha_funebre }}</td>
+                        </tr>
+                        <tr>
+                          <td class="label">Referencia:</td>
+                          <td class="value">{{ referencia_turno }}</td>
                         </tr>
                         <tr>
                           <td class="label">Lugar de entrega:</td>
