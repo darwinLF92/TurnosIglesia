@@ -26,14 +26,18 @@
   <div class="container-fluid">
 
     <!-- Logo / Home -->
-  <a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
-    {% if logo_establecimiento %}
-        <img src="{{ logo_establecimiento }}" alt="Inicio" width="50" height="50">
-    {% else %}
-        <img src="{% static 'logos/home.png' %}" alt="Inicio" width="50" height="50">
-    {% endif %}
-    <span class="d-none d-sm-inline ms-2"></span>
-  </a>
+<!-- Logo / Home -->
+<a href="{% url 'aplicacion:home' %}" class="navbar-brand brand-logo" aria-label="Inicio">
+
+  {% if logo_url %}
+      <img src="{{ logo_url }}" alt="Inicio" width="50" height="50">
+  {% else %}
+      <img src="{% static 'logos/home.png' %}" alt="Inicio" width="50" height="50">
+  {% endif %}
+
+  <span class="d-none d-sm-inline ms-2"></span>
+</a>
+
 
 
 <!-- 🔹 Contenedor móvil: Perfil + Menú -->
