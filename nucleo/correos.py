@@ -12,6 +12,7 @@ from PIL import Image
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from urllib.parse import urljoin
+from establecimiento.models import Establecimiento
 
 # Dirección desde la cual se enviarán todos los correos
 FROM_NO_REPLY = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@hermandadelingeniero.com.gt")
@@ -84,6 +85,47 @@ def cargar_imagen_procesion_url(procesion):
         logo_rel = static("home/logo_hermandad.png")
         return make_absolute_url(logo_rel)
 
+
+def cargar_logo_url_establecimiento():
+    """
+    Devuelve URL absoluta del logo en el modelo Establecimiento.
+    Si no existe, devuelve None.
+    """
+    est = Establecimiento.objects.first()
+    if est and est.logo and getattr(est.logo, "url", None):
+        return make_absolute_url(est.logo.url)
+    return None
+
+def cargar_logo_base64_establecimiento():
+    """Convierte el logo de Establecimiento a base64 (solo para DEBUG)."""
+    est = Establecimiento.objects.first()
+    if not (est and est.logo and est.logo.path):
+        return None
+
+    ruta = Path(est.logo.path)
+    if not ruta.exists():
+        return None
+
+    with open(ruta, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+        return f"data:image/png;base64,{encoded}"
+
+def obtener_logo_src():
+    """
+    - En producción (DEBUG=False): usar URL absoluta (requerido por Gmail)
+    - En local (DEBUG=True): usar base64 para que se vea aunque sea 127.0.0.1
+    """
+    if not settings.DEBUG:
+        url = cargar_logo_url_establecimiento()
+        return url
+
+    # Modo DEBUG (local)
+    b64 = cargar_logo_base64_establecimiento()
+    if b64:
+        return b64
+
+    # fallback final: URL absoluta (por si acaso)
+    return cargar_logo_url_establecimiento()
 
 # ============================================
 #  🔥 Función: cargar logo como Base64
@@ -175,7 +217,7 @@ def enviar_confirmacion_correo(usuario, token):
         "titulo_correo": "Registro de datos",
         "nombre_completo": obtener_nombre_completo(usuario),
         "enlace": enlace,
-        "logo_base64": cargar_logo_base64(),
+        "logo_src": obtener_logo_src(),
     }
 
     enviar_correo_template(
@@ -195,7 +237,7 @@ def enviar_reset_password_correo(user, token):
         "titulo_correo": "Restablecer contraseña",
         "nombre_completo": obtener_nombre_completo(user),
         "enlace": enlace,
-        "logo_base64": cargar_logo_base64(),
+        "logo_src": obtener_logo_src(),
     }
 
     enviar_correo_template(
