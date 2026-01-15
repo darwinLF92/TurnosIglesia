@@ -121,15 +121,13 @@ footer {
         {% endfor %}
     </div>
 
-    <!-- Aquí se insertarán publicaciones dinámicamente -->
 </div>
 
 
-
-<!-- Modal likes -->
-<div class="modal fade" id="likesModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
+<div class="modal fade modal-bottomsheet" id="likesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content shadow-lg rounded-3 border-0">
+
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title fw-semibold">
           <i class="fas fa-thumbs-up text-primary me-2"></i>
@@ -137,31 +135,44 @@ footer {
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body pt-2" id="likesModalBody" style="max-height:350px; overflow-y:auto;"></div>
-      <div class="modal-footer border-0">
-        <button class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
+
+      <div class="modal-body pt-2" id="likesModalBody"
+           style="max-height:350px; overflow-y:auto;">
       </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-clear-blue w-100" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- Modal: lista completa de comentarios -->
-<div class="modal fade" id="commentsModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title mb-0">
-          <i class="fas fa-comments me-2"></i>Todos los comentarios
+<div class="modal fade modal-bottomsheet" id="commentsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg rounded-3 border-0">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title mb-0 fw-semibold">
+          <i class="fas fa-comments me-2"></i>
+          Todos los comentarios
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body" id="commentsModalBody" style="max-height:75vh; overflow-y:auto;"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
+
+      <div class="modal-body" id="commentsModalBody"
+           style="max-height:75vh; overflow-y:auto;">
       </div>
+
+      <div class="modal-footer border-0">
+<button class="btn btn-clear-blue w-100" data-bs-dismiss="modal">Cerrar</button>
+
+      </div>
+
     </div>
   </div>
 </div>
+
 
 <!-- Modal editar publicación -->
 <div class="modal fade" id="modalEditarPost" tabindex="-1">
@@ -660,20 +671,107 @@ window.addEventListener("resize", function () {
 
 </style>
 <style>
-/* Evita saltos de línea en títulos de modales */
+
 .modal-title {
-    white-space: nowrap;        /* ❗ No permite que el texto se parta */
-    overflow: hidden;           /* Oculta exceso si fuera necesario */
-    text-overflow: ellipsis;    /* (...) si llega a desbordarse */
+    white-space: nowrap;        
+    overflow: hidden;           
+    text-overflow: ellipsis;    
 }
 
-/* Ajustar tamaño de texto solo en móvil */
+
 @media (max-width: 576px) {
     .modal-title {
         font-size: 15px !important;
     }
 }
 </style>
+
+<style>
+
+@media (max-width: 768px) {
+
+
+  .modal-bottomsheet .modal-dialog.modal-dialog-centered {
+    align-items: flex-end !important;   
+    min-height: 100% !important;       
+  }
+
+
+  .modal-bottomsheet .modal-dialog {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+ 
+  .modal-bottomsheet .modal-content {
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.25) !important;
+    border: none !important;
+  }
+
+  .modal-bottomsheet .modal-body {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .modal-bottomsheet .modal-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 15px !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .modal-bottomsheet .modal-body {
+    scrollbar-width: thin;             
+    scrollbar-color: #a1a1a1 #e5e5e5;    
+  }
+
+  .modal-bottomsheet .modal-body::-webkit-scrollbar {
+    width: 6px;                         
+  }
+
+  .modal-bottomsheet .modal-body::-webkit-scrollbar-track {
+    background: #e5e5e5;                
+    border-radius: 8px;
+  }
+
+  .modal-bottomsheet .modal-body::-webkit-scrollbar-thumb {
+    background-color: #a1a1a1;            
+    border-radius: 8px;
+  }
+
+  .modal-bottomsheet .modal-body::-webkit-scrollbar-thumb:hover {
+    background-color: #7f7f7f;
+  }
+}
+
+.btn-clear-blue {
+    background: transparent !important;
+    border: 1px solid #0d6efd !important;  /* azul Bootstrap */
+    color: #0d6efd !important;
+    border-radius: 25px !important;        /* bien redondo */
+    font-weight: 600;
+    padding: 8px 14px;
+}
+
+.btn-clear-blue:hover {
+    background: rgba(13, 110, 253, 0.08) !important; /* azul muy suave al pasar mouse */
+}
+
+</style>
+
 
 
 {% endblock %}
