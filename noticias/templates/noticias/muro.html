@@ -157,7 +157,7 @@ footer {
       </div>
       <div class="modal-body" id="commentsModalBody" style="max-height:75vh; overflow-y:auto;"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -566,19 +566,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 function initPostTooltips(rootElement) {
-    // rootElement: contenedor donde se insertó el HTML de posts
+    const container = (rootElement || document);
+
+    // 👇 Detectar móvil / touch o pantalla pequeña
+    const isMobile =
+        window.matchMedia("(max-width: 767.98px)").matches ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0;
+
     const tooltipTriggerList = [].slice.call(
-        (rootElement || document).querySelectorAll('[data-bs-toggle="tooltip"]')
+        container.querySelectorAll('[data-bs-toggle="tooltip"]')
     );
 
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-        // Evitar inicializar dos veces el mismo elemento
-        if (!tooltipTriggerEl._tooltipInstance) {
-            tooltipTriggerEl._tooltipInstance = new bootstrap.Tooltip(tooltipTriggerEl);
+    tooltipTriggerList.forEach(function (el) {
+        // Si es móvil: desactivar / no crear tooltip
+        if (isMobile) {
+            if (el._tooltipInstance) {
+                el._tooltipInstance.dispose();
+                el._tooltipInstance = null;
+            }
+            return; // no inicializar tooltip
+        }
+
+        // Si NO es móvil: inicializar una sola vez
+        if (!el._tooltipInstance) {
+            el._tooltipInstance = new bootstrap.Tooltip(el);
         }
     });
 }
+
+// Opcional: si cambias el tamaño de la ventana (ej: modo responsive del navegador)
+window.addEventListener("resize", function () {
+    initPostTooltips(document);
+});
 </script>
+
 <style>
 /* Alinear texto de TODOS los tooltips a la izquierda */
 .tooltip-inner {
@@ -636,6 +658,21 @@ function initPostTooltips(rootElement) {
   line-height: 1;
 }
 
+</style>
+<style>
+/* Evita saltos de línea en títulos de modales */
+.modal-title {
+    white-space: nowrap;        /* ❗ No permite que el texto se parta */
+    overflow: hidden;           /* Oculta exceso si fuera necesario */
+    text-overflow: ellipsis;    /* (...) si llega a desbordarse */
+}
+
+/* Ajustar tamaño de texto solo en móvil */
+@media (max-width: 576px) {
+    .modal-title {
+        font-size: 15px !important;
+    }
+}
 </style>
 
 

@@ -109,7 +109,6 @@ def toggle_like(request, post_id):
     return redirect('noticias:muro')
 
 
-@login_required
 def lista_likes(request, post_id):
     """Devuelve en JSON los usuarios que dieron like a un post."""
     post = get_object_or_404(Post, pk=post_id, activo=True)
@@ -124,7 +123,7 @@ def lista_likes(request, post_id):
 
     return JsonResponse({"likes": likes})
 
-@login_required
+
 def lista_comentarios(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
