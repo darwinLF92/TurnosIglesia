@@ -222,14 +222,14 @@ def exportar_reporte_turnos_excel(request):
 
     ws["A1"].font = ws["A2"].font = bold_font
 
-    # Un pequeño título encima (opcional)
+    # Un pequeño título encima
     ws.insert_rows(1)
     ws["A1"] = "REPORTE DE TURNOS"
-    ws.merge_cells("A1:J1")
+    ws.merge_cells("A1:K1")  # ahora son 11 columnas
     ws["A1"].font = title_font
     ws["A1"].alignment = center
 
-    # La fila de encabezados quedará en la fila 5
+    # Fila de encabezados en la fila 5
     ws.append([])  # fila 3 vacía
     ws.append([])  # fila 4 vacía
 
@@ -241,6 +241,7 @@ def exportar_reporte_turnos_excel(request):
         "Reservado para",
         "Referencia",
         "Marcha Fúnebre",
+        "Capacidad",       # ← NUEVA COLUMNA
         "Inscritos",
         "Entregados",
         "Costo del turno",
@@ -248,7 +249,7 @@ def exportar_reporte_turnos_excel(request):
     header_row = ws.max_row
 
     # Aplicar estilo al encabezado
-    for col in range(1, 11):
+    for col in range(1, 12):  # ahora son 11 columnas
         cell = ws.cell(row=header_row, column=col)
         cell.fill = header_fill
         cell.font = header_font
@@ -277,7 +278,6 @@ def exportar_reporte_turnos_excel(request):
         costo_turno = turno.valor
         total_costo += turno.valor * inscritos
 
-
         ws.append([
             turno.numero_turno,
             turno.get_tipo_turno_display(),
@@ -286,32 +286,33 @@ def exportar_reporte_turnos_excel(request):
             reservado_para,
             turno.referencia or "",
             turno.marcha_funebre or "",
+            turno.capacidad,          # ← NUEVA COLUMNA
             inscritos,
             entregados,
             float(costo_turno),
         ])
 
-        # Borde a la fila recién agregada
+        # Bordes
         current_row = ws.max_row
-        for col in range(1, 11):
+        for col in range(1, 12):
             cell = ws.cell(row=current_row, column=col)
             cell.border = thin_border
 
     # === Fila de TOTAL ===
     total_row = ws.max_row + 2
-    ws.cell(row=total_row, column=9, value="TOTAL:")
-    ws.cell(row=total_row, column=9).font = bold_font
-    ws.cell(row=total_row, column=10, value=float(total_costo))
+    ws.cell(row=total_row, column=10, value="TOTAL:")
     ws.cell(row=total_row, column=10).font = bold_font
-    ws.cell(row=total_row, column=10).border = thin_border
+    ws.cell(row=total_row, column=11, value=float(total_costo))
+    ws.cell(row=total_row, column=11).font = bold_font
+    ws.cell(row=total_row, column=11).border = thin_border
 
-    # === Formato moneda para la columna de costo ===
+    # === Formato moneda ===
     for row in range(header_row + 1, ws.max_row + 1):
-        cell = ws.cell(row=row, column=10)
+        cell = ws.cell(row=row, column=11)
         cell.number_format = '"Q"#,##0.00'
 
-    # === Ajustar ancho de columnas automáticamente ===
-    for col in range(1, 11):
+    # === Ajustar ancho de columnas ===
+    for col in range(1, 12):
         max_length = 0
         col_letter = get_column_letter(col)
         for row in range(1, ws.max_row + 1):
