@@ -42,9 +42,12 @@ def home_view(request):
         .first()
     )
 
+    establecimiento = Establecimiento.objects.first()  # 👈 obtener logo
+
     return render(request, 'aplicacion/home.html', {
         'imagenes_presentacion': imagenes,
         'procesion_destacada': procesion_destacada,  # 👈 CLAVE
+        'logo_establecimiento': establecimiento.logo.url if establecimiento and establecimiento.logo else None,
     })
 
 def login_view(request):

@@ -21,13 +21,20 @@
     ">
 
       <!-- LOGO SUPERIOR -->
-    {% if logo_src %}
-    <img
-      src="{{ logo_src }}"
-      alt="Logo Hermandad"
-      style="max-width:180px; margin-bottom:20px;"
-    />
-    {% endif %}
+        {% if logo_src %}
+        <img
+          src="{{ logo_src }}"
+          alt="Logo Hermandad"
+          style="
+            width: 160px;        /* tamaño fijo del logo */
+            max-width: 60%;      /* por si la pantalla es muy pequeña */
+            height: auto;
+            display: block;
+            margin: 0 auto 20px; /* centrado + espacio abajo */
+          "
+        />
+        {% endif %}
+
 
       <!-- TÍTULO -->
       <h2 style="color: #222222; text-align: center; margin-top: 0;">
