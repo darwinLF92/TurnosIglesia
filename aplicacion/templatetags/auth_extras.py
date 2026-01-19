@@ -67,3 +67,34 @@ def timesince_es(value):
 
     years = days // 365
     return f"{years} año{'s' if years != 1 else ''}"
+
+
+MESES_ES = {
+    1: "enero",
+    2: "febrero",
+    3: "marzo",
+    4: "abril",
+    5: "mayo",
+    6: "junio",
+    7: "julio",
+    8: "agosto",
+    9: "septiembre",
+    10: "octubre",
+    11: "noviembre",
+    12: "diciembre",
+}
+
+
+@register.filter
+def fecha_es(value):
+    """
+    Formato:
+    - 24 de marzo de 2026
+    """
+    if not value:
+        return ""
+
+    try:
+        return f"{value.day:02d} de {MESES_ES[value.month]} de {value.year}"
+    except Exception:
+        return str(value)

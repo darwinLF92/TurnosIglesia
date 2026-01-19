@@ -25,7 +25,7 @@ from .models import MediaAlbum, Foto, Video
 from .forms import MediaAlbumForm, FotoBulkUploadForm, VideoForm, FotoForm, VideoForm2
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from procesiones.models import Procesion
+from procesiones.models import Procesion, PostInformacion
 
 def is_admin(user):
     return user.is_authenticated and (
@@ -34,6 +34,9 @@ def is_admin(user):
 
 
 def home_view(request):
+
+    posts_info = PostInformacion.objects.filter(estado="activo", relevante=True).order_by("orden", "-fecha", "-id")
+
     imagenes = ImagenPresentacion.objects.filter(activo=True).order_by('-fecha_creacion')
 
     procesion_destacada = (
@@ -48,6 +51,7 @@ def home_view(request):
         'imagenes_presentacion': imagenes,
         'procesion_destacada': procesion_destacada,  # 👈 CLAVE
         'logo_establecimiento': establecimiento.logo.url if establecimiento and establecimiento.logo else None,
+        'posts_info': posts_info,
     })
 
 def login_view(request):

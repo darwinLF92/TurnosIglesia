@@ -17,6 +17,10 @@ urlpatterns = [
         views.marcar_procesion_relevante,
         name='marcar_procesion_relevante'
     ),
+    path("posts-informacion/", views.PostInformacionListView.as_view(), name="post_info_lista"),
+    path("posts-informacion/nuevo/", views.PostInformacionCreateView.as_view(), name="post_info_crear"),
+    path("posts-informacion/<int:pk>/editar/", views.PostInformacionUpdateView.as_view(), name="post_info_editar"),
+    path("posts-informacion/<int:pk>/eliminar/", views.PostInformacionDeleteView.as_view(), name="post_info_eliminar"),
 
 ]
 

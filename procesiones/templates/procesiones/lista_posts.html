@@ -1,0 +1,180 @@
+{% extends "aplicacion/base.html" %}
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+        <h3 class="mb-1">Posts de información</h3>
+        <p class="text-muted mb-0">Administra las publicaciones que se muestran en el home.</p>
+    </div>
+
+    {% if perms.establecimiento.crear_publicacion %}
+        <a href="{% url 'procesiones:post_info_crear' %}" class="btn btn-primary">
+        Nueva publicación
+        </a>
+    {% endif %}
+    </div>
+
+
+  <!-- Filtros -->
+  <form method="get" class="card p-3 mb-3">
+    <div class="row g-2">
+      <div class="col-12 col-md-4">
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por nombre...">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select name="estado" class="form-select">
+          <option value="">Estado (todos)</option>
+          <option value="activo" {% if estado == "activo" %}selected{% endif %}>Activo</option>
+          <option value="inactivo" {% if estado == "inactivo" %}selected{% endif %}>Inactivo</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select name="relevante" class="form-select">
+          <option value="">Relevante (todos)</option>
+          <option value="1" {% if relevante == "1" %}selected{% endif %}>Sí</option>
+          <option value="0" {% if relevante == "0" %}selected{% endif %}>No</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Desktop table -->
+      <div class="table-responsive d-none d-md-block">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Relevante</th>
+              <th>Orden</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in posts %}
+              <tr>
+                <td class="fw-semibold">{{ p.nombre_procesion }}</td>
+                <td>{{ p.fecha|date:"d-m-Y" }}</td>
+                <td>
+                  {% if p.estado == "activo" %}
+                    <span class="badge bg-success">Activo</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if p.relevante %}
+                    <span class="badge bg-primary">Sí</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark">No</span>
+                  {% endif %}
+                </td>
+                <td>{{ p.orden }}</td>
+                <td class="text-end">
+                  {% if perms.establecimiento.editar_publicacion %}
+                    <a class="btn btn-sm btn-outline-primary"
+                       href="{% url 'procesiones:post_info_editar' p.id %}">Editar</a>
+                  {% endif %}
+                  {% if perms.establecimiento.eliminar_publicacion %}
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="{% url 'procesiones:post_info_eliminar' p.id %}">Eliminar</a>
+                  {% endif %}
+                  {% if not perms.establecimiento.editar_publicacion and not perms.establecimiento.eliminar_publicacion %}
+                    <span class="text-muted small">Sin permisos</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">No hay posts.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile cards -->
+      <div class="d-md-none">
+        <div class="row g-2">
+          {% for p in posts %}
+            <div class="col-12">
+              <div class="border rounded p-3">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <div class="fw-bold">{{ p.nombre_procesion }}</div>
+                    <div class="small text-muted">{{ p.fecha|date:"d-m-Y" }}</div>
+                  </div>
+                  <div class="text-end">
+                    {% if p.relevante %}<span class="badge bg-primary">Relevante</span>{% endif %}
+                    {% if p.estado == "activo" %}
+                      <span class="badge bg-success">Activo</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if p.descripcion %}
+                  <div class="small mt-2">{{ p.descripcion|truncatechars:120 }}</div>
+                {% endif %}
+
+                <div class="d-flex gap-2 mt-3">
+                  {% if perms.establecimiento.editar_publicacion %}
+                    <a class="btn btn-sm btn-outline-primary w-100"
+                       href="{% url 'procesiones:post_info_editar' p.id %}">Editar</a>
+                  {% endif %}
+                  {% if perms.establecimiento.eliminar_publicacion %}
+                    <a class="btn btn-sm btn-outline-danger w-100"
+                       href="{% url 'procesiones:post_info_eliminar' p.id %}">Eliminar</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12 text-center text-muted py-4">No hay posts.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      {% if is_paginated %}
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&estado={{ estado }}&relevante={{ relevante }}">Anterior</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+
+            <li class="page-item disabled">
+              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&estado={{ estado }}&relevante={{ relevante }}">Siguiente</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

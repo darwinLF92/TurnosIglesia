@@ -1,7 +1,7 @@
 # views.py
 
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 from django.urls import reverse_lazy
 from .models import Procesion
 from .forms import ProcesionForm
@@ -21,7 +21,8 @@ import openpyxl
 from django.views.decorators.http import require_POST
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
-
+from .models import PostInformacion
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 
 @method_decorator(login_required, name='dispatch')
@@ -353,3 +354,96 @@ def marcar_procesion_relevante(request):
         'es_relevante': procesion.es_relevante,
         'procesion_id': procesion.id
     })
+
+
+
+class PostInformacionListView(LoginRequiredMixin, ListView):
+    model = PostInformacion
+    template_name = "procesiones/lista_posts.html"
+    context_object_name = "posts"
+    paginate_by = 12
+
+    def get_queryset(self):
+        qs = super().get_queryset().order_by("orden", "-fecha", "-id")
+
+        q = (self.request.GET.get("q") or "").strip()
+        estado = (self.request.GET.get("estado") or "").strip()
+        relevante = (self.request.GET.get("relevante") or "").strip()
+
+        if q:
+            qs = qs.filter(nombre_procesion__icontains=q)
+
+        if estado in ["activo", "inactivo"]:
+            qs = qs.filter(estado=estado)
+
+        if relevante in ["1", "0"]:
+            qs = qs.filter(relevante=(relevante == "1"))
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = (self.request.GET.get("q") or "").strip()
+        ctx["estado"] = (self.request.GET.get("estado") or "").strip()
+        ctx["relevante"] = (self.request.GET.get("relevante") or "").strip()
+        return ctx
+
+
+class PostInformacionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = PostInformacion
+    template_name = "procesiones/crear_post.html"
+    fields = ["nombre_procesion", "descripcion", "fecha_descriptiva", "fecha", "estado", "relevante", "orden"]
+
+
+    permission_required = "establecimiento.crear_publicacion"
+    raise_exception = False
+
+    def handle_no_permission(self):
+        messages.error(self.request, "No tienes permiso para crear publicaciones.")
+        return super().handle_no_permission()
+
+    def form_valid(self, form):
+        messages.success(self.request, "Publicación creada correctamente.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("procesiones:post_info_lista")
+
+class PostInformacionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = PostInformacion
+    template_name = "procesiones/editar_post.html"
+    fields = ["nombre_procesion", "descripcion", "fecha_descriptiva", "fecha", "estado", "relevante", "orden"]
+
+
+    # ✅ tu permiso personalizado
+    permission_required = "establecimiento.editar_publicacion"
+    raise_exception = False  # muestra 403 si no tiene permiso
+
+    def handle_no_permission(self):
+        messages.error(self.request, "No tienes permiso para editar publicaciones.")
+        return super().handle_no_permission()
+
+    def form_valid(self, form):
+        messages.success(self.request, "Post de información actualizado correctamente.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("procesiones:post_info_lista")
+
+
+class PostInformacionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = PostInformacion
+    template_name = "procesiones/eliminar_post.html"
+    success_url = reverse_lazy("procesiones:post_info_lista")
+
+    # ✅ tu permiso personalizado
+    permission_required = "establecimiento.eliminar_publicacion"
+    raise_exception = False
+
+    def handle_no_permission(self):
+        messages.error(self.request, "No tienes permiso para eliminar publicaciones.")
+        return super().handle_no_permission()
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Post de información eliminado correctamente.")
+        return super().delete(request, *args, **kwargs)

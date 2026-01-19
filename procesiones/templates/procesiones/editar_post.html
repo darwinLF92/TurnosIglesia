@@ -1,0 +1,85 @@
+{% extends "aplicacion/base.html" %}
+{% block content %}
+
+<div class="container py-4" style="max-width: 900px;">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="mb-0">Editar publicación</h3>
+      <small class="text-muted">Modifica el texto que se mostrará en el home.</small>
+    </div>
+    <a href="{% url 'procesiones:post_info_lista' %}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Nombre Procesión</label>
+            {{ form.nombre_procesion }}
+            {% for e in form.nombre_procesion.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Descripción</label>
+            {{ form.descripcion }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Fecha descriptiva (opcional)</label>
+            {{ form.fecha_descriptiva }}
+            <div class="form-text">Ej: Quinto Sábado de Cuaresma</div>
+            </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Fecha</label>
+            {{ form.fecha }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Estado</label>
+            {{ form.estado }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Orden</label>
+            {{ form.orden }}
+          </div>
+
+          <div class="col-12">
+            <div class="form-check">
+              {{ form.relevante }}
+              <label class="form-check-label" for="{{ form.relevante.id_for_label }}">
+                Marcar como relevante (se muestra en el home)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button class="btn btn-primary" type="submit">Guardar</button>
+
+          {% if perms.establecimiento.eliminar_publicacion %}
+            <a class="btn btn-outline-danger" href="{% url 'procesiones:post_info_eliminar' object.id %}">Eliminar</a>
+          {% endif %}
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll("input, select, textarea").forEach(el=>{
+    if (!el.classList.contains("form-check-input")) el.classList.add("form-control");
+  });
+  document.querySelectorAll("select").forEach(el=>el.classList.add("form-select"));
+  const chk = document.getElementById("{{ form.relevante.id_for_label }}");
+  if (chk) chk.classList.add("form-check-input");
+</script>
+
+{% endblock %}

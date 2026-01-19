@@ -176,6 +176,7 @@
               {% if perms.establecimiento.acceso_turnos %}
               <li><a class="dropdown-item" href="{% url 'turnos:lista_turnos' %}">Gestión de turnos</a></li>
               {% endif %}
+              <li><a class="dropdown-item" href="{% url 'procesiones:post_info_lista' %}">Post Procesiones</a></li>
             </ul>
           </li>
           {% endif %}
