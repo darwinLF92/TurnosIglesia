@@ -574,7 +574,7 @@ if (btnReply) {
     return;
   }
 
-
+  // 9) Eliminar publicación
 // 9) Eliminar publicación (con SweetAlert)
 const eliminarBtn = e.target.closest(".btn-eliminar-post");
 if (eliminarBtn) {
