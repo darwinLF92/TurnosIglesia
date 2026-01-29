@@ -465,6 +465,45 @@
     let modoRepetir = 0; // 0 = off, 1 = repeat one, 2 = repeat all
     let modoAleatorio = false;
 
+    function setupMediaSession({ titulo, descripcion, imagen }) {
+    if (!("mediaSession" in navigator)) return;
+
+    // Metadata: lo que se ve en bloqueo / notificación
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: titulo || "Marcha fúnebre",
+        artist: descripcion || " ",
+        album: "Marchas Fúnebres",
+        artwork: [
+        { src: imagen, sizes: "512x512", type: "image/png" },
+        { src: imagen, sizes: "256x256", type: "image/png" },
+        { src: imagen, sizes: "128x128", type: "image/png" }
+        ]
+    });
+
+    const player = document.getElementById("audioPlayer");
+    if (!player) return;
+
+    // Acciones (Android suele mostrar prev/next; iOS Safari a veces NO)
+    try {
+        navigator.mediaSession.setActionHandler("play", () => player.play());
+        navigator.mediaSession.setActionHandler("pause", () => player.pause());
+
+        navigator.mediaSession.setActionHandler("previoustrack", () => retrocederMarcha());
+        navigator.mediaSession.setActionHandler("nexttrack", () => siguienteMarcha());
+
+        // Opcionales (algunos Android muestran saltos)
+        navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+        const s = details?.seekOffset ?? 10;
+        player.currentTime = Math.max(0, player.currentTime - s);
+        });
+        navigator.mediaSession.setActionHandler("seekforward", (details) => {
+        const s = details?.seekOffset ?? 10;
+        player.currentTime = Math.min(player.duration || player.currentTime + s, player.currentTime + s);
+        });
+    } catch (e) {
+        // algunos navegadores lanzan error si no soportan esa action
+    }
+    }
 
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -482,44 +521,46 @@
         player.load();
         player.play();
 
+        setupMediaSession({ titulo, descripcion, imagen });
+
         player.onended = () => {
-    if (modoRepetir === 2) {
-        // Repetir pista actual
-        player.currentTime = 0;
-        player.play();
-    } else if (modoRepetir === 1 && modoAleatorio) {
-        // Repetir lista en modo aleatorio
-        let siguiente;
-        do {
-            siguiente = Math.floor(Math.random() * marchasLista.length);
-        } while (siguiente === currentMarchaIndex && marchasLista.length > 1);
-        reproducirDesdeElemento(marchasLista[siguiente]);
-    } else if (modoRepetir === 1 && !modoAleatorio) {
-        // Repetir lista en orden
-        if (currentMarchaIndex < marchasLista.length - 1) {
-            reproducirDesdeElemento(marchasLista[currentMarchaIndex + 1]);
-        } else {
-            reproducirDesdeElemento(marchasLista[0]); // volver al inicio
-        }
-    } else if (modoRepetir === 0 && modoAleatorio) {
-        // Aleatorio sin repetir lista (se detiene al llegar al final)
-        if (currentMarchaIndex < marchasLista.length - 1) {
+        if (modoRepetir === 2) {
+            // Repetir pista actual
+            player.currentTime = 0;
+            player.play();
+        } else if (modoRepetir === 1 && modoAleatorio) {
+            // Repetir lista en modo aleatorio
             let siguiente;
             do {
                 siguiente = Math.floor(Math.random() * marchasLista.length);
             } while (siguiente === currentMarchaIndex && marchasLista.length > 1);
             reproducirDesdeElemento(marchasLista[siguiente]);
+        } else if (modoRepetir === 1 && !modoAleatorio) {
+            // Repetir lista en orden
+            if (currentMarchaIndex < marchasLista.length - 1) {
+                reproducirDesdeElemento(marchasLista[currentMarchaIndex + 1]);
+            } else {
+                reproducirDesdeElemento(marchasLista[0]); // volver al inicio
+            }
+        } else if (modoRepetir === 0 && modoAleatorio) {
+            // Aleatorio sin repetir lista (se detiene al llegar al final)
+            if (currentMarchaIndex < marchasLista.length - 1) {
+                let siguiente;
+                do {
+                    siguiente = Math.floor(Math.random() * marchasLista.length);
+                } while (siguiente === currentMarchaIndex && marchasLista.length > 1);
+                reproducirDesdeElemento(marchasLista[siguiente]);
+            }
+            // Si ya no hay más, no hace nada (detiene)
+        } else if (modoRepetir === 0 && !modoAleatorio) {
+            // Reproducción normal
+            if (currentMarchaIndex < marchasLista.length - 1) {
+                reproducirDesdeElemento(marchasLista[currentMarchaIndex + 1]);
+            }
         }
-        // Si ya no hay más, no hace nada (detiene)
-    } else if (modoRepetir === 0 && !modoAleatorio) {
-        // Reproducción normal
-        if (currentMarchaIndex < marchasLista.length - 1) {
-            reproducirDesdeElemento(marchasLista[currentMarchaIndex + 1]);
-        }
-    }
-    console.log("Reproduciendo:", audioUrl);
+        console.log("Reproduciendo:", audioUrl);
 
-};
+        };
 
         document.getElementById('tituloMarcha').innerText = titulo;
         document.getElementById('descripcionMarcha').innerText = descripcion;
@@ -714,6 +755,22 @@ btnMin?.addEventListener('click', () => {
     btnMin.setAttribute('aria-label','Minimizar reproductor');
   }
 });
+
+(function attachPositionState(){
+  const player = document.getElementById("audioPlayer");
+  if (!player || !("mediaSession" in navigator)) return;
+
+  player.addEventListener("timeupdate", () => {
+    if (!player.duration) return;
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: player.duration,
+        playbackRate: player.playbackRate,
+        position: player.currentTime
+      });
+    } catch (e) {}
+  });
+})();
 
 
 </script>
