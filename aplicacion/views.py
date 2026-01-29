@@ -331,23 +331,29 @@ def aumentar_favorito(request, marcha_id):
     return JsonResponse({'favoritos': marcha.favoritos})
 
 
-@login_required
 def toggle_favorito(request, marcha_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"ok": False, "auth_required": True}, status=401)
+
     marcha = get_object_or_404(MarchaFunebre, id=marcha_id)
     favorito, creado = Favorito.objects.get_or_create(usuario=request.user, marcha=marcha)
 
     if not creado:
         favorito.delete()
-        estado = 'eliminado'
+        estado = "eliminado"
     else:
-        estado = 'agregado'
+        estado = "agregado"
 
-    return JsonResponse({'estado': estado})
+    return JsonResponse({"ok": True, "estado": estado})
 
-@login_required
+
 def es_favorita(request, marcha_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"ok": False, "auth_required": True}, status=401)
+
     es_fav = Favorito.objects.filter(usuario=request.user, marcha_id=marcha_id).exists()
-    return JsonResponse({'favorita': es_fav})
+    return JsonResponse({"ok": True, "favorita": es_fav})
+
 
 @login_required(login_url='aplicacion:login')
 @user_passes_test(is_admin, login_url='aplicacion:login')

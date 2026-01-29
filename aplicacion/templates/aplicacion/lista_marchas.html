@@ -24,7 +24,7 @@
         object-fit: cover;
         border-radius: 5px;
     }
-
+    
     .list-group-item:hover {
         background-color: #f4f4f4;
     }
@@ -176,6 +176,70 @@
     background-color: #999;
 }
 
+/* ✅ Tablet / escritorio pequeño (mouse encogido) */
+@media (min-width: 768px) and (max-width: 991.98px){
+
+  /* 1) Definimos una altura “bonita” compartida */
+  .marchas-scroll-container{
+    height: 560px;          /* ajusta a tu gusto */
+    max-height: 560px;
+  }
+
+  /* 2) Reproductor: mismo alto que la lista + más angosto */
+  .audio-card{
+    height: 560px;          /* misma altura que .marchas-scroll-container */
+    max-height: 560px;
+    width: 100%;
+    max-width: 520px;       /* 👈 lo hace más angosto */
+    margin: 0 auto;         /* centra el reproductor en su columna */
+    overflow: hidden;       /* evita que se “salga” */
+  }
+
+  /* 3) Para que NO se desborde: hacemos scroll interno en el contenido */
+  .audio-wrapper{
+    width: 100%;
+    overflow: auto;         /* scroll si el contenido es más alto */
+    max-height: 100%;
+  }
+
+  /* 4) Mantener tu layout bonito */
+  .audio-card{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .portadaMarcha{
+    max-width: 220px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .controles-extra{
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+.titulo-favorito{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Botón favorito junto al título */
+.titulo-favorito .favorite-btn{
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Hover elegante */
+.titulo-favorito .favorite-btn:hover i{
+    color: #ff4d4d;
+}
 
 </style>
 
@@ -269,8 +333,18 @@
                 <img id="portadaMarcha" src="" class="portadaMarcha">
                 
                 <div class="audio-wrapper">
-                    <h4 id="tituloMarcha" class="mb-2"></h4>
-                    <p id="descripcionMarcha" class="text-muted"></p>
+               <div class="titulo-favorito">
+                    <h4 id="tituloMarcha" class="mb-0"></h4>
+
+                    <button class="favorite-btn ms-2"
+                            id="favoritoBtnReproductor"
+                            title="Favorito">
+                        <i id="iconoFavorito" class="fa fa-heart"></i>
+                    </button>
+                </div>
+
+                <p id="descripcionMarcha" class="text-muted mt-1"></p>
+
 
                     <audio id="audioPlayer" controls style="width: 100%;">
                         <source id="audioSource" src="" type="audio/mpeg">
@@ -297,11 +371,6 @@
                         </button>
                     </div>
 
-                    <div class="mt-3 d-flex justify-content-between">
-                        <button class="favorite-btn" id="favoritoBtnReproductor" title="Favorito">
-                            <i id="iconoFavorito" class="fa fa-heart"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -310,6 +379,11 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const USER_AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
+</script>
+
 <script>
     $(document).ready(function () {
 
@@ -455,16 +529,25 @@
         window.marchaActualId = marchaId;
 
         // Marcar favorita en reproductor
+        // Marcar favorita en reproductor (SOLO si está logueado)
+        const icono = document.getElementById('iconoFavorito');
+
+        if (!USER_AUTH) {
+        // invitado: no consultes al backend, solo deja el corazón "apagado"
+        icono?.classList.remove('text-danger');
+        } else {
         fetch(`/marchas/es-favorita/${marchaId}/`)
             .then(res => res.json())
             .then(data => {
-                const icono = document.getElementById('iconoFavorito');
-                if (data.favorita) {
-                    icono.classList.add('text-danger');
-                } else {
-                    icono.classList.remove('text-danger');
-                }
+            if (data.favorita) icono.classList.add('text-danger');
+            else icono.classList.remove('text-danger');
+            })
+            .catch(() => {
+            // si falla, no rompemos reproducción
+            icono?.classList.remove('text-danger');
             });
+        }
+
 
         marchasLista.forEach(item => item.classList.remove('active-marcha'));
         const marchaActiva = document.getElementById(`marcha_${marchaId}`);
@@ -512,6 +595,13 @@ function reproducirDesdeElemento(elemento) {
 
 
     document.getElementById('favoritoBtnReproductor').addEventListener('click', () => {
+
+        
+        if (!USER_AUTH) {
+            Swal.fire("Inicia sesión", "Debes iniciar sesión para guardar favoritas.", "info");
+            return;
+        }
+
         const marchaId = window.marchaActualId;
         if (!marchaId) return;
 
@@ -532,6 +622,12 @@ function reproducirDesdeElemento(elemento) {
     });
 
     function toggleFavoritoLista(marchaId) {
+        
+        if (!USER_AUTH) {
+            Swal.fire("Inicia sesión", "Debes iniciar sesión para guardar favoritas.", "info");
+            return;
+        }
+
         fetch(`/marchas/favorito/toggle/${marchaId}/`)
             .then(response => response.json())
             .then(data => {
@@ -623,7 +719,7 @@ btnMin?.addEventListener('click', () => {
 </script>
 
 <style>
-    /* ===== Reproductor flotante SOLO en móvil ===== */
+
 @media (max-width: 768px) {
 
   /* Estado flotante */
@@ -636,14 +732,14 @@ btnMin?.addEventListener('click', () => {
     margin: 0;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -8px 28px rgba(0,0,0,.25);
-    padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); /* respeta notch/iOS */
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     background: rgba(255,255,255,.98);
     backdrop-filter: saturate(120%) blur(6px);
     border: 1px solid #e5e5e5;
-    display: none;          /* por defecto oculto hasta que reproduzcas */
+    display: none;
   }
 
-  /* Compactar layout en móvil */
+  /* Portada */
   .audio-card .portadaMarcha {
     width: 56px;
     height: 56px;
@@ -651,88 +747,94 @@ btnMin?.addEventListener('click', () => {
     object-fit: cover;
   }
 
+  /* 👇 Ajuste fino del grid */
   .audio-card .audio-wrapper {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto auto;
     column-gap: 10px;
-    row-gap: 6px;
+    row-gap: 2px;          /* 🔹 antes 4px → más compacto */
     align-items: center;
     width: 100%;
   }
 
+  /* Título */
   #tituloMarcha { 
     font-size: .95rem; 
-    margin: 0;
+    margin: 0 !important; /* 🔹 elimina márgenes ocultos */
     grid-column: 1 / 2;
-  }
-  #descripcionMarcha { 
-    font-size: .8rem; 
-    color:white; 
-    margin: 0;
-    grid-column: 1 / 2;
+    line-height: 1.05;    /* 🔹 compacta altura */
   }
 
-  /* Barra de audio a lo ancho */
+  /* Descripción */
+  #descripcionMarcha { 
+    font-size: .9rem; 
+    color: white;
+    margin: 0 !important;
+    margin-top: -2px !important; /* 🔹 acerca visualmente al título */
+    grid-column: 1 / 2;
+    line-height: 1.1;            /* 🔹 uniforme */
+  }
+
+  /* Audio */
   #audioPlayer {
     width: 100%;
     height: 32px;
     grid-column: 1 / 3;
   }
 
-  /* Controles extra en una línea compacta */
+  /* Controles */
   .controles-extra {
     margin-top: 0;
     justify-content: flex-start;
     gap: 8px;
     grid-column: 1 / 2;
   }
+
   .controles-extra button {
     padding: 6px 10px;
     font-size: .85rem;
   }
 
-  /* Botón favorito y compartir a la derecha */
+  /* Favorito */
   #favoritoBtnReproductor, #compartirBtn {
     grid-column: 2 / 3;
     justify-self: end;
   }
-  
-  /* Handler (barra) para arrastrar/entender que es flotante */
+
+  /* Barra flotante */
   .audio-card::before{
     content:"";
     position:absolute;
     top:6px; left:50%;
     transform:translateX(-50%);
     width:44px; height:4px;
-    background:#d7d7d7; border-radius:999px;
+    background:#d7d7d7;
+    border-radius:999px;
   }
 
-  /* Cuando el reproductor esté visible, da espacio al contenido */
   body.player-open,
   html.player-open {
-    /* altura aproximada del player flotante */
-    padding-bottom: 120px;           /* fallback general */
-    padding-bottom: calc(120px + env(safe-area-inset-bottom)); /* iOS */
+    padding-bottom: 120px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
   }
 }
 
-/* Desktop: conserva el aspecto original */
+/* Desktop intacto */
 @media (min-width: 769px) {
   .audio-card {
     position: static;
     box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     border-radius: 12px;
     padding: 20px;
-    display: none; /* se muestra cuando reproduces */
+    display: none;
   }
 }
 
-/* Botón minimizar – área clickeable y estilo limpio */
 /* Botón minimizar */
 .btn-minimizar{
   position:absolute; 
-  right:10px;        /* ahora queda al lado izquierdo del player */
+  right:10px;
   top:8px; 
   border:none; 
   background:transparent; 
@@ -744,9 +846,9 @@ btnMin?.addEventListener('click', () => {
 }
 .btn-minimizar:hover{ opacity:1; }
 
+/* Minimizado (sin tocar layout) */
 @media (max-width:768px){
 
-  /* Player flotante móvil (como ya lo tienes) */
   .audio-card{
     position:fixed;
     left:0; right:0; bottom:0;
@@ -760,38 +862,25 @@ btnMin?.addEventListener('click', () => {
     transition: transform .25s ease;
   }
 
-  /* ===== Estado MINIMIZADO A LA IZQUIERDA =====
-     movemos todo el player fuera de la pantalla hacia la izquierda,
-     dejando visible ~44px como lengüeta para reabrir. */
   .audio-card.minimized-left{
     transform: translateX(calc(-100% + 44px));
-    left:0; right:auto;       /* anclado al lado izquierdo */
-    border-radius:16px;       /* bordes uniformes cuando está lateral */
+    left:0; right:auto;
+    border-radius:16px;
   }
 
-  /* lengüeta visible (barra superior ya existente) */
-  .audio-card::before{
-    content:"";
-    position:absolute;
-    top:10px; right:10px;     /* sigue mostrando la “barrita” arriba */
-    width:44px; height:4px;
-    background:#d7d7d7; border-radius:999px;
-  }
-
-  /* Cuando el player está abierto ocupaba ~120px de alto.
-     En modo minimizado, reducimos el padding-bottom del body
-     para no desperdiciar espacio en la página. */
   html.player-open,
   body.player-open{
     padding-bottom:120px;
     padding-bottom:calc(120px + env(safe-area-inset-bottom));
   }
+
   html.player-open-compact,
   body.player-open-compact{
-    padding-bottom:56px;  /* solo deja un pequeño margen útil */
+    padding-bottom:56px;
     padding-bottom:calc(56px + env(safe-area-inset-bottom));
   }
 }
 
 </style>
+
 {% endblock %}
