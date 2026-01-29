@@ -273,19 +273,30 @@ def lista_marchas(request):
     query = request.GET.get('q', '')
     filtro = request.GET.get('filtro', 'todas')
 
+    # Base (con búsqueda)
+    marchas_base = MarchaFunebre.objects.all()
     if query:
-        marchas = MarchaFunebre.objects.filter(titulo__icontains=query)
-    else:
-        marchas = MarchaFunebre.objects.all()
+        marchas_base = marchas_base.filter(titulo__icontains=query)
+
+    # ✅ Total de "Todas" (respetando búsqueda)
+    total_todas = marchas_base.count()
 
     favoritas_usuario = []
-    if request.user.is_authenticated:
-        favoritas_usuario = Favorito.objects.filter(usuario=request.user).values_list('marcha_id', flat=True)
+    total_favoritas = 0
 
+    if request.user.is_authenticated:
+        favoritas_usuario = Favorito.objects.filter(
+            usuario=request.user
+        ).values_list('marcha_id', flat=True)
+
+        # ✅ Total de "Favoritas" (respetando búsqueda también)
+        total_favoritas = marchas_base.filter(id__in=favoritas_usuario).count()
+
+    # Aplicar filtro para listar
+    marchas = marchas_base
     if filtro == 'favoritas':
         marchas = marchas.filter(id__in=favoritas_usuario)
 
-    # ✅ Ordenar siempre por título (nombre)
     marchas = marchas.order_by('titulo')
 
     return render(request, 'aplicacion/lista_marchas.html', {
@@ -293,7 +304,10 @@ def lista_marchas(request):
         'query': query,
         'filtro': filtro,
         'favoritas_usuario': favoritas_usuario,
+        'total_todas': total_todas,
+        'total_favoritas': total_favoritas,
     })
+
 
 
 @login_required(login_url='aplicacion:login')

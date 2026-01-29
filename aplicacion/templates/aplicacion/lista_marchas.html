@@ -199,8 +199,19 @@
 
 
     <div class="filtro-tabs">
-        <a href="?filtro=todas" class="{% if filtro == 'todas' %}active{% endif %}">Todas</a>
-        <a href="?filtro=favoritas" class="{% if filtro == 'favoritas' %}active{% endif %}">Favoritas</a>
+    <a href="?filtro=todas{% if query %}&q={{ query|urlencode }}{% endif %}"
+        class="{% if filtro == 'todas' %}active{% endif %}">
+          🎵 Todas
+        <span class="tab-count">{{ total_todas }}</span>
+    </a>
+
+    <a href="?filtro=favoritas{% if query %}&q={{ query|urlencode }}{% endif %}"
+        class="{% if filtro == 'favoritas' %}active{% endif %}">
+         ❤️  Favoritas
+        {% if user.is_authenticated %}
+        <span class="tab-count">{{ total_favoritas }}</span>
+        {% endif %}
+    </a>
     </div>
 
     <div class="row">
