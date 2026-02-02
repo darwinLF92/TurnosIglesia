@@ -1,0 +1,402 @@
+
+    .page-title {
+        font-weight: 600;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .list-group-item {
+        transition: background-color 0.3s ease;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+    }
+
+    .list-group-item img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f4f4f4;
+    }
+
+    .audio-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        border: 1px solid #ddd;
+        animation: fadeIn 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .audio-card h4 {
+        font-weight: 600;
+    }
+
+    .favorite-btn {
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        color: #555;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .favorite-btn:hover i {
+        color: #ff4500;
+    }
+
+    .search-bar {
+        margin-bottom: 20px;
+    }
+
+    .portadaMarcha {
+        max-width: 180px;
+        border-radius: 10px;
+    }
+
+    .audio-wrapper {
+        flex: 1;
+    }
+
+    .controles-extra {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .controles-extra button {
+        background-color: #f1f1f1;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .controles-extra button:hover {
+        background-color: #ddd;
+    }
+
+    .list-group-item.active-marcha {
+        background-color: #e0e0e0 !important;
+        font-weight: bold;
+    }
+
+    .filtro-tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ccc;
+    }
+
+    .filtro-tabs a {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        font-weight: 600;
+        color: #333;
+        text-decoration: none;
+        border: 1px solid #ccc;
+        border-bottom: none;
+        background-color: #f7f7f7;
+        transition: background-color 0.3s;
+    }
+
+    .filtro-tabs a.active {
+        background-color: #222;
+        color: white;
+        border-color: #222;
+    }
+
+    .filtro-tabs a:hover {
+        background-color: #eaeaea;
+    }
+    .fa-inactive {
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+.repeat-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 50%;
+    display: none;
+}
+
+.marchas-scroll-container {
+    max-height: 550px;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+    scrollbar-width: thin;
+    scrollbar-color: #bbb #f0f0f0;
+}
+
+/* Estilo scrollbar para navegadores basados en WebKit */
+.marchas-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.marchas-scroll-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.marchas-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #bbb;
+    border-radius: 10px;
+    border: 2px solid #f0f0f0;
+}
+
+.marchas-scroll-container::-webkit-scrollbar-thumb:hover {
+    background-color: #999;
+}
+
+/* ✅ Tablet / escritorio pequeño (mouse encogido) */
+@media (min-width: 768px) and (max-width: 991.98px){
+
+  /* 1) Definimos una altura “bonita” compartida */
+  .marchas-scroll-container{
+    height: 560px;          /* ajusta a tu gusto */
+    max-height: 560px;
+  }
+
+  /* 2) Reproductor: mismo alto que la lista + más angosto */
+  .audio-card{
+    height: 560px;          /* misma altura que .marchas-scroll-container */
+    max-height: 560px;
+    width: 100%;
+    max-width: 520px;       /* 👈 lo hace más angosto */
+    margin: 0 auto;         /* centra el reproductor en su columna */
+    overflow: hidden;       /* evita que se “salga” */
+  }
+
+  /* 3) Para que NO se desborde: hacemos scroll interno en el contenido */
+  .audio-wrapper{
+    width: 100%;
+    overflow: auto;         /* scroll si el contenido es más alto */
+    max-height: 100%;
+  }
+
+  /* 4) Mantener tu layout bonito */
+  .audio-card{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .portadaMarcha{
+    max-width: 220px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .controles-extra{
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+.titulo-favorito{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Botón favorito junto al título */
+.titulo-favorito .favorite-btn{
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Hover elegante */
+.titulo-favorito .favorite-btn:hover i{
+    color: #ff4d4d;
+}
+
+
+
+@media (max-width: 768px) {
+
+  /* Estado flotante */
+  .audio-card {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 28px rgba(0,0,0,.25);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,.98);
+    backdrop-filter: saturate(120%) blur(6px);
+    border: 1px solid #e5e5e5;
+    display: none;
+  }
+
+  /* Portada */
+  .audio-card .portadaMarcha {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  /* 👇 Ajuste fino del grid */
+  .audio-card .audio-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    column-gap: 10px;
+    row-gap: 2px;          /* 🔹 antes 4px → más compacto */
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Título */
+  #tituloMarcha { 
+    font-size: .95rem; 
+    margin: 0 !important; /* 🔹 elimina márgenes ocultos */
+    grid-column: 1 / 2;
+    line-height: 1.05;    /* 🔹 compacta altura */
+  }
+
+  /* Descripción */
+  #descripcionMarcha { 
+    font-size: .9rem; 
+    color: white;
+    margin: 0 !important;
+    margin-top: -2px !important; /* 🔹 acerca visualmente al título */
+    grid-column: 1 / 2;
+    line-height: 1.1;            /* 🔹 uniforme */
+  }
+
+  /* Audio */
+  #audioPlayer {
+    width: 100%;
+    height: 32px;
+    grid-column: 1 / 3;
+  }
+
+  /* Controles */
+  .controles-extra {
+    margin-top: 0;
+    justify-content: flex-start;
+    gap: 8px;
+    grid-column: 1 / 2;
+  }
+
+  .controles-extra button {
+    padding: 6px 10px;
+    font-size: .85rem;
+  }
+
+  /* Favorito */
+  #favoritoBtnReproductor, #compartirBtn {
+    grid-column: 2 / 3;
+    justify-self: end;
+  }
+
+  /* Barra flotante */
+  .audio-card::before{
+    content:"";
+    position:absolute;
+    top:6px; left:50%;
+    transform:translateX(-50%);
+    width:44px; height:4px;
+    background:#d7d7d7;
+    border-radius:999px;
+  }
+
+  body.player-open,
+  html.player-open {
+    padding-bottom: 120px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Desktop intacto */
+@media (min-width: 769px) {
+  .audio-card {
+    position: static;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+  }
+}
+
+/* Botón minimizar */
+.btn-minimizar{
+  position:absolute; 
+  right:10px;
+  top:8px; 
+  border:none; 
+  background:transparent; 
+  font-size:18px; 
+  line-height:1;
+  padding:6px 8px;
+  color:#ffffff;
+  opacity:.9;
+}
+.btn-minimizar:hover{ opacity:1; }
+
+/* Minimizado (sin tocar layout) */
+@media (max-width:768px){
+
+  .audio-card{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    z-index:9999;
+    border-radius:16px 16px 0 0;
+    background:rgba(24, 23, 23, 0.438);
+    box-shadow:0 -8px 28px rgba(0,0,0,.25);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    border:1px solid #e5e5e5;
+    color: aliceblue;
+    transition: transform .25s ease;
+  }
+
+  .audio-card.minimized-left{
+    transform: translateX(calc(-100% + 44px));
+    left:0; right:auto;
+    border-radius:16px;
+  }
+
+  html.player-open,
+  body.player-open{
+    padding-bottom:120px;
+    padding-bottom:calc(120px + env(safe-area-inset-bottom));
+  }
+
+  html.player-open-compact,
+  body.player-open-compact{
+    padding-bottom:56px;
+    padding-bottom:calc(56px + env(safe-area-inset-bottom));
+  }
+}
+
