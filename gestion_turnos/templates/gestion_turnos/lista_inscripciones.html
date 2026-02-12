@@ -496,6 +496,20 @@ document.addEventListener('DOMContentLoaded', function () {
     actualizarReporteInscripciones(procesion, fechainicio, fechafin, turno);
 });
 
+function formatearFecha(fechaISO) {
+    if (!fechaISO) return '';
+
+    const fecha = new Date(fechaISO);
+
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+
+    const horas = String(fecha.getHours()).padStart(2, '0');
+    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+
+    return `${dia}-${mes}-${anio} ${horas}:${minutos}`;
+}
 
     function actualizarReporteInscripciones(procesion, fechainicio, fechafin, turno = '') {
     const turnoParam = turno ? `&turno=${turno}` : '';
@@ -543,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 html += `<tr>
                     <td>${d.turno__numero_turno}</td>
                     <td>${d.devoto__nombre}</td>
-                    <td>${d.fecha_inscripcion}</td>
+                    <td>${formatearFecha(d.fecha_inscripcion)}</td>
                     <td>${d.entregado ? 'Sí' : 'No'}</td>
                     <td>${parseFloat(d.monto_pagado).toFixed(2)}</td>
                     <td>${parseFloat(d.cambio).toFixed(2)}</td>
