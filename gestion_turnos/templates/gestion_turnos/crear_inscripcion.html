@@ -359,7 +359,9 @@
                                 option.text =
                                     "Turno " + item.numero_turno +
                                     (item.referencia ? " - " + item.referencia : "") +
-                                    " - Q" + item.valor;
+                                    " - Q" + 
+                                    item.valor + 
+                                    (item.tipo_turno ? " - " + item.tipo_turno : "");
 
                                 if (!item.habilitado) {
                                     option.disabled = true;
@@ -368,7 +370,8 @@
                                     option.text += " (Reservado)";
                                 } else if (item.reservado) {
                                     option.text += " (Reservado)";
-                                }
+                                } + (item.tipo_turno ? " - " + item.tipo_turno : "") + " - "
+                                
 
                             turnoSelect.appendChild(option);
                         });

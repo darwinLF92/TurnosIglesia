@@ -275,6 +275,7 @@ def load_turnos(request):
             # 👇 DEBUG (quita luego)
             "debug_perm": can_turno_reservado,
             "debug_reservado": es_reservado,
+            "tipo_turno": (turno.tipo_turno),
         })
 
     return JsonResponse(data, safe=False)
