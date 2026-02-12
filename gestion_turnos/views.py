@@ -567,11 +567,19 @@ def reporte_inscripciones(request):
         fecha_fin = None
 
     # Obtener años únicos de procesiones
-    anios = Procesion.objects.annotate(anio=ExtractYear('fecha')) \
-        .values_list('anio', flat=True).distinct().order_by('-anio')
+    anios = (Procesion.objects
+        .filter(activo=True)
+        .annotate(anio=ExtractYear('fecha'))
+        .values_list('anio', flat=True)
+        .distinct()
+        .order_by('-anio')
+    )
 
     # Inscripciones activas
-    inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
+    inscripciones = RegistroInscripcion.objects.filter(
+    inscrito=True,
+    turno__procesion__activo=True
+    )
 
     if fecha_inicio:
         inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio)
@@ -645,23 +653,26 @@ def reporte_inscripciones(request):
 
 
 def obtener_anios_procesiones(request):
-    """
-    Devuelve una lista de años únicos de las procesiones.
-    """
-    anios = Procesion.objects.annotate(anio=ExtractYear('fecha')) \
-        .values_list('anio', flat=True).distinct().order_by('-anio')
+    anios = (Procesion.objects
+        .filter(activo=True)
+        .annotate(anio=ExtractYear('fecha'))
+        .values_list('anio', flat=True)
+        .distinct()
+        .order_by('-anio')
+    )
     return JsonResponse(list(anios), safe=False)
 
 def obtener_procesiones_por_anio(request):
-    """
-    Devuelve las procesiones correspondientes a un año dado.
-    """
     anio = request.GET.get('anio')
 
     if not anio or not anio.isdigit():
         return JsonResponse({'error': 'Año inválido.'}, status=400)
 
-    procesiones = Procesion.objects.filter(fecha__year=anio).values('id', 'nombre')
+    procesiones = (Procesion.objects
+        .filter(fecha__year=int(anio), activo=True)
+        .values('id', 'nombre')
+        .order_by('nombre')
+    )
     return JsonResponse(list(procesiones), safe=False)
 
 
@@ -674,7 +685,7 @@ def obtener_turnos_por_procesion(request):
     if not procesion_id or not procesion_id.isdigit():
         return JsonResponse({'error': 'ID de procesión inválido.'}, status=400)
 
-    turnos = Turno.objects.filter(procesion_id=procesion_id).values('id', 'numero_turno')
+    turnos = Turno.objects.filter(procesion_id=int(procesion_id), activo=True).values('id', 'numero_turno')
     return JsonResponse(list(turnos), safe=False)
 
 @login_required
@@ -695,8 +706,10 @@ def exportar_inscripciones_pdf(request):
     except ValueError:
         fecha_fin = None
 
-    inscripciones = RegistroInscripcion.objects.filter(inscrito=True)
-    
+    inscripciones = RegistroInscripcion.objects.filter(
+        inscrito=True,
+        turno__procesion__activo=True
+    )
 
     if fecha_inicio:
         inscripciones = inscripciones.filter(fecha_inscripcion__date__gte=fecha_inicio)
@@ -708,27 +721,33 @@ def exportar_inscripciones_pdf(request):
         inscripciones = inscripciones.filter(turno_id=filtro_turno)
 
     devotos = inscripciones.order_by('turno__numero_turno', 'devoto__nombre')
-    
-     # Contar inscritos como en reporte_turnos
-    cantidad_inscritos = 0
-    if filtro_turno:
-        cantidad_inscritos = RegistroInscripcion.objects.filter(turno_id=filtro_turno).count()
-    elif filtro_procesion:
-        turnos = Turno.objects.filter(procesion_id=filtro_procesion)
-        cantidad_inscritos = RegistroInscripcion.objects.filter(turno__in=turnos).count()
 
-    # Obtener nombre de la procesión
-    procesion_nombre = ''
+    # Contar inscritos
+    if filtro_turno:
+        cantidad_inscritos = RegistroInscripcion.objects.filter(
+            turno_id=filtro_turno,
+            inscrito=True,
+            turno__procesion__activo=True
+        ).count()
+    elif filtro_procesion:
+        turnos = Turno.objects.filter(procesion_id=filtro_procesion, activo=True)  # si Turno tiene activo
+        cantidad_inscritos = RegistroInscripcion.objects.filter(
+            turno__in=turnos,
+            inscrito=True
+        ).count()
+    else:
+        cantidad_inscritos = devotos.count()
+
+    # Nombre de procesión
+    procesion_nombre = 'CONSULTA GENERAL'
     if filtro_procesion:
-        from procesiones.models import Procesion
-        procesion = Procesion.objects.filter(id=filtro_procesion).first()
+        procesion = Procesion.objects.filter(id=filtro_procesion, activo=True).first()
         if procesion:
             procesion_nombre = procesion.nombre
 
-    # Obtener número del turno si se consultó
-    numero_turno = ''
+    # Número de turno
+    numero_turno = 'CONSULTA GENERAL'
     if filtro_turno:
-        from gestion_turnos.models import Turno
         turno = Turno.objects.filter(id=filtro_turno).first()
         if turno:
             numero_turno = str(turno.numero_turno)
@@ -736,9 +755,9 @@ def exportar_inscripciones_pdf(request):
     context = {
         'fecha_hoy': fecha_hoy,
         'inscripciones': devotos,
-         'cantidad_inscritos': cantidad_inscritos,
-        'procesion_nombre': procesion_nombre or 'CONSULTA GENERAL',
-        'numero_turno': numero_turno or 'CONSULTA GENERAL',
+        'cantidad_inscritos': cantidad_inscritos,
+        'procesion_nombre': procesion_nombre,
+        'numero_turno': numero_turno,
     }
 
     html = render_to_string('gestion_turnos/reporte_inscripciones_pdf.html', context)
