@@ -80,18 +80,16 @@
                                 </span>
                             </td>
                           
-{% if es_admin %}
-<td data-label="Relevante" class="text-center">
-    <div class="form-check d-flex justify-content-center">
-        <input class="form-check-input procesion-relevante-switch"
-               type="checkbox"
-               data-id="{{ procesion.id }}"
-               {% if procesion.es_relevante %}checked{% endif %}>
-    </div>
-</td>
-{% endif %}
-
-                        
+                            {% if es_admin %}
+                            <td data-label="Relevante" class="text-center">
+                                <div class="form-check d-flex justify-content-center">
+                                    <input class="form-check-input procesion-relevante-switch"
+                                        type="checkbox"
+                                        data-id="{{ procesion.id }}"
+                                        {% if procesion.es_relevante %}checked{% endif %}>
+                                </div>
+                            </td>
+                            {% endif %}
 
                             <td data-label="Acción">
                                 <div class="d-flex justify-content-md-center justify-content-end gap-3 action-column cell-value">
@@ -100,7 +98,7 @@
                                         <i class="fas fa-pen-to-square"></i>
                                     </a>
                                     {% endif %}
-                                     {% if perms.establecimiento.inactivar_registro %}
+                                     {% if perms.establecimiento.eliminar_registro %}
                                     <a href="#" class="eliminar-btn icon-action-link text-danger" title="Eliminar" data-procesionid="{{ procesion.id }}">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>

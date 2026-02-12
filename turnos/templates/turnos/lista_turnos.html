@@ -232,7 +232,7 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         {% endif %}
-                        {% if perms.establecimiento.inactivar_registro %}
+                        {% if perms.establecimiento.eliminar_registro %}
                         <a href="#" class="eliminar-btn" data-turnoid="{{ turno.id }}"
                            onclick="event.stopPropagation();">
                             <i class="fas fa-trash-alt"></i>
