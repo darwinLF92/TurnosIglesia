@@ -118,8 +118,13 @@ def reporte_turnos(request):
 
     data = []
     for turno in turnos:
-        inscritos = RegistroInscripcion.objects.filter(turno=turno).count()
-        entregados = RegistroInscripcion.objects.filter(turno=turno, entregado=True).count()
+        inscripciones_activas = RegistroInscripcion.objects.filter(
+            turno=turno,
+            inscrito=True
+        )
+        inscritos = inscripciones_activas.count()
+        entregados = inscripciones_activas.filter(entregado=True).count()
+
         data.append({
             'numero_turno': turno.numero_turno,
             'referencia': turno.referencia,
@@ -157,8 +162,13 @@ def exportar_reporte_turnos_pdf(request):
 
     datos = []
     for turno in turnos:
-        inscritos = RegistroInscripcion.objects.filter(turno=turno).count()
-        entregados = RegistroInscripcion.objects.filter(turno=turno, entregado=True).count()
+        inscripciones_activas = RegistroInscripcion.objects.filter(
+            turno=turno,
+            inscrito=True
+        )
+        inscritos = inscripciones_activas.count()
+        entregados = inscripciones_activas.filter(entregado=True).count()
+
         datos.append({
             'numero_turno': turno.numero_turno,
             'referencia': turno.referencia,
@@ -181,7 +191,7 @@ def exportar_reporte_turnos_pdf(request):
 
     return response
 
-def exportar_reporte_turnos_excel(request): 
+def exportar_reporte_turnos_excel(request):
     anio = request.GET.get('anio')
     procesion_id = request.GET.get('procesion_id')
     turno_id = request.GET.get('turno_id')
@@ -202,11 +212,10 @@ def exportar_reporte_turnos_excel(request):
     ws = wb.active
     ws.title = "Reporte Turnos"
 
-    # === Estilos básicos ===
     bold_font = Font(bold=True)
     title_font = Font(bold=True, size=14)
-    header_fill = PatternFill("solid", fgColor="1F4E78")  # azul oscuro
-    header_font = Font(bold=True, color="FFFFFF")         # blanco
+    header_fill = PatternFill("solid", fgColor="1F4E78")
+    header_font = Font(bold=True, color="FFFFFF")
     center = Alignment(horizontal="center", vertical="center")
     thin_border = Border(
         left=Side(style="thin"),
@@ -215,7 +224,6 @@ def exportar_reporte_turnos_excel(request):
         bottom=Side(style="thin"),
     )
 
-    # === Encabezado de la procesión ===
     ws["A1"] = "Nombre Procesión:"
     ws["B1"] = procesion.nombre
     ws["A2"] = "Fecha Procesión:"
@@ -223,16 +231,14 @@ def exportar_reporte_turnos_excel(request):
 
     ws["A1"].font = ws["A2"].font = bold_font
 
-    # Un pequeño título encima
     ws.insert_rows(1)
     ws["A1"] = "REPORTE DE TURNOS"
-    ws.merge_cells("A1:K1")  # ahora son 11 columnas
+    ws.merge_cells("A1:K1")
     ws["A1"].font = title_font
     ws["A1"].alignment = center
 
-    # Fila de encabezados en la fila 5
-    ws.append([])  # fila 3 vacía
-    ws.append([])  # fila 4 vacía
+    ws.append([])
+    ws.append([])
 
     ws.append([
         "Turno No.",
@@ -242,15 +248,14 @@ def exportar_reporte_turnos_excel(request):
         "Reservado para",
         "Referencia",
         "Marcha Fúnebre",
-        "Capacidad",       # ← NUEVA COLUMNA
+        "Capacidad",
         "Inscritos",
         "Entregados",
         "Costo del turno",
     ])
     header_row = ws.max_row
 
-    # Aplicar estilo al encabezado
-    for col in range(1, 12):  # ahora son 11 columnas
+    for col in range(1, 12):
         cell = ws.cell(row=header_row, column=col)
         cell.fill = header_fill
         cell.font = header_font
@@ -259,12 +264,14 @@ def exportar_reporte_turnos_excel(request):
 
     total_costo = 0
 
-    # === Filas de datos ===
     for turno in turnos:
-        inscritos = RegistroInscripcion.objects.filter(turno=turno).count()
-        entregados = RegistroInscripcion.objects.filter(turno=turno, entregado=True).count()
+        inscripciones_activas = RegistroInscripcion.objects.filter(
+            turno=turno,
+            inscrito=True
+        )
+        inscritos = inscripciones_activas.count()
+        entregados = inscripciones_activas.filter(entregado=True).count()
 
-        # Reservado / Reservado para
         if turno.reservado_hermandad:
             reservado_str = "Sí"
             nombre_limpio = (turno.nombre_hermandad_visitante or "").strip()
@@ -287,19 +294,17 @@ def exportar_reporte_turnos_excel(request):
             reservado_para,
             turno.referencia or "",
             turno.marcha_funebre or "",
-            turno.capacidad,          # ← NUEVA COLUMNA
+            turno.capacidad,
             inscritos,
             entregados,
             float(costo_turno),
         ])
 
-        # Bordes
         current_row = ws.max_row
         for col in range(1, 12):
             cell = ws.cell(row=current_row, column=col)
             cell.border = thin_border
 
-    # === Fila de TOTAL ===
     total_row = ws.max_row + 2
     ws.cell(row=total_row, column=10, value="TOTAL:")
     ws.cell(row=total_row, column=10).font = bold_font
@@ -307,12 +312,10 @@ def exportar_reporte_turnos_excel(request):
     ws.cell(row=total_row, column=11).font = bold_font
     ws.cell(row=total_row, column=11).border = thin_border
 
-    # === Formato moneda ===
     for row in range(header_row + 1, ws.max_row + 1):
         cell = ws.cell(row=row, column=11)
         cell.number_format = '"Q"#,##0.00'
 
-    # === Ajustar ancho de columnas ===
     for col in range(1, 12):
         max_length = 0
         col_letter = get_column_letter(col)
